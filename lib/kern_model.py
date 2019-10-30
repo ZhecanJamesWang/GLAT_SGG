@@ -351,13 +351,10 @@ class KERN(nn.Module):
             
         """
 
-
         result = self.detector(x, im_sizes, image_offset, gt_boxes, gt_classes, gt_rels, proposals,
                                train_anchor_inds, return_fmap=True)
         if result.is_none():
             return ValueError("heck")
-
-        pdb.set_trace()
 
         im_inds = result.im_inds - image_offset
         boxes = result.rm_box_priors
@@ -374,6 +371,7 @@ class KERN(nn.Module):
         rois = torch.cat((im_inds[:, None].float(), boxes), 1)   # [num_boxes, 5(img_ind, x1,x2,y1,y2)]
 
         result.obj_fmap = self.obj_feature_map(result.fmap.detach(), rois)  # [num_boxes, feature_dimension]
+
 
         if self.use_ggnn_obj:          
                 result.rm_obj_dists = self.ggnn_obj_reason(im_inds, 
@@ -399,7 +397,6 @@ class KERN(nn.Module):
                 obj_labels=result.rm_obj_labels if self.training or self.mode == 'predcls' else None,
                 boxes_per_cls=result.boxes_all)
 
-        pdb.set_trace()
 
         if self.training:
             return result

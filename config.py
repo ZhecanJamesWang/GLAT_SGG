@@ -6,20 +6,20 @@ from argparse import ArgumentParser
 import numpy as np
 
 ROOT_PATH = os.path.dirname(os.path.realpath(__file__))
-DATA_PATH = os.path.join(ROOT_PATH, 'data')
+DATA_PATH = "/kiwi-data/projects/commonsense/shared/alireza_repo/metadata/VG/stanford/"
 
 def path(fn):
     return os.path.join(DATA_PATH, fn)
 
 def stanford_path(fn):
     # return os.path.join(DATA_PATH, 'stanford_filtered', fn)
-    return os.path.join('/kiwi-data/projects/commonsense/shared/alireza_repo/metadata/VG/stanford', fn)
+    return os.path.join(DATA_PATH, fn)
 
 # =============================================================================
 # Update these with where your data is stored ~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # VG_IMAGES = '/home/yuweihao/data/visual-genome/VGdata'
-VG_IMAGES = '/kiwi-data/projects/commonsense/shared/alireza_repo/data/VG/images'
+VG_IMAGES = "/kiwi-data/projects/commonsense/shared/alireza_repo/data/VG/images/"
 RCNN_CHECKPOINT_FN = path('faster_rcnn_500k.h5')
 
 IM_DATA_FN = stanford_path('image_data.json')

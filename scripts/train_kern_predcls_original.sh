@@ -7,6 +7,7 @@ python models/train_rels.py -m predcls -p 100 -clip 5 \
 -adam \
 -b 2 \
 -lr 1e-5 \
+-use_ggnn_rel \
 -ggnn_rel_time_step_num 3 \
 -ggnn_rel_hidden_dim 512 \
 -ggnn_rel_output_dim 512 \

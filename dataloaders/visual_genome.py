@@ -59,6 +59,8 @@ class VG(Dataset):
             filter_non_overlap=self.filter_non_overlap and self.is_train,
         )
 
+        # pdb.set_trace()
+
         self.filenames = load_image_filenames(image_file)
         self.filenames = [self.filenames[i] for i in np.where(self.split_mask)[0]]
 
@@ -186,6 +188,7 @@ class VG(Dataset):
             gt_rels = [(k[0], k[1], np.random.choice(v)) for k,v in all_rel_sets.items()]
             gt_rels = np.array(gt_rels)
 
+
         entry = {
             'img': self.transform_pipeline(image_unpadded),
             'img_size': im_size,
@@ -308,6 +311,7 @@ def load_graphs(graphs_file, mode='train', num_im=-1, num_val_im=0, filter_empty
 
     # Get box information
     all_labels = roi_h5['labels'][:, 0]
+
     all_boxes = roi_h5['boxes_{}'.format(BOX_SCALE)][:]  # will index later
     assert np.all(all_boxes[:, :2] >= 0)  # sanity check
     assert np.all(all_boxes[:, 2:] > 0)  # no empty box
@@ -315,6 +319,7 @@ def load_graphs(graphs_file, mode='train', num_im=-1, num_val_im=0, filter_empty
     # convert from xc, yc, w, h to x1, y1, x2, y2
     all_boxes[:, :2] = all_boxes[:, :2] - all_boxes[:, 2:] / 2
     all_boxes[:, 2:] = all_boxes[:, :2] + all_boxes[:, 2:]
+
 
     im_to_first_box = roi_h5['img_to_first_box'][split_mask]
     im_to_last_box = roi_h5['img_to_last_box'][split_mask]

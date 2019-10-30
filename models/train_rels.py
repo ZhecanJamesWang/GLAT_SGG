@@ -20,6 +20,9 @@ from torch.optim.lr_scheduler import ReduceLROnPlateau
 # import KERN model
 from lib.kern_model import KERN
 
+import pdb
+
+# os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
 conf = ModelConfig()
 
@@ -38,6 +41,7 @@ train, val, _ = VG.splits(num_val_im=conf.val_size, filter_duplicate_rels=True,
                           filter_non_overlap=conf.mode == 'sgdet')
 
 ind_to_predicates = train.ind_to_predicates # ind_to_predicates[0] means no relationship
+ind_to_classes = train.ind_to_classes
 
 train_loader, val_loader = VGDataLoader.splits(train, val, mode='rel',
                                                batch_size=conf.batch_size,
@@ -80,6 +84,7 @@ def get_optim(lr):
 
 
 ckpt = torch.load(conf.ckpt)
+
 if conf.ckpt.split('-')[-2].split('/')[-1] == 'vgrel':
     print("Loading EVERYTHING")
     start_epoch = ckpt['epoch']
@@ -146,6 +151,7 @@ def train_batch(b, verbose=False):
     losses = {}
     if conf.use_ggnn_obj: # if not use ggnn obj, we just use scores of faster rcnn as their scores, there is no need to train
         losses['class_loss'] = F.cross_entropy(result.rm_obj_dists, result.rm_obj_labels)
+    # pdb.set_trace()
     losses['rel_loss'] = F.cross_entropy(result.rel_dists, result.rel_labels[:, -1])
     loss = sum(losses.values())
 
@@ -161,6 +167,7 @@ def train_batch(b, verbose=False):
 
 
 def val_epoch():
+
     detector.eval()
     evaluator_list = [] # for calculating recall of each relationship except no relationship
     evaluator_multiple_preds_list = []
@@ -182,50 +189,91 @@ def val_epoch():
 
     return recall, recall_mp, mean_recall, mean_recall_mp
 
+def glat_postprocess(gt_entry, pred_entry):
+    pdb.set_trace()
+
+    # predicate_list = []
+    for i in range(len(gt_entry['gt_relations'])):
+        subj_idx = gt_entry['gt_relations'][i][0]
+        subj_class_idx = gt_entry['gt_classes'][subj_idx]
+
+        obj_idx = gt_entry['gt_relations'][i][1]
+        obj_class_idx = gt_entry['gt_classes'][obj_idx]
+
+        predicate_idx = gt_entry['gt_relations'][i][2]
+        predicate = ind_to_predicates[predicate_idx]
+
+        subj = ind_to_classes[subj_class_idx]
+        obj = ind_to_classes[obj_class_idx]
+
+        print(subj)
+        print(predicate)
+        print(obj)
+
+        # predicate_list.append(predicate)
+
+
+    # gt_entry['gt_relations'][0][2]
+    # ind_to_predicates
+
+    # node = entity + predicate
+    # relationship
+
+
+    return gt_entry, pred_entry
 
 def val_batch(batch_num, b, evaluator, evaluator_multiple_preds, evaluator_list, evaluator_multiple_preds_list):
     det_res = detector[b]
+
+    # pdb.set_trace()
+
     if conf.num_gpus == 1:
         det_res = [det_res]
 
     for i, (boxes_i, objs_i, obj_scores_i, rels_i, pred_scores_i) in enumerate(det_res):
+        # pdb.set_trace()
+
         gt_entry = {
-            'gt_classes': val.gt_classes[batch_num + i].copy(),
-            'gt_relations': val.relationships[batch_num + i].copy(),
-            'gt_boxes': val.gt_boxes[batch_num + i].copy(),
+            'gt_classes': val.gt_classes[batch_num + i].copy(), #(23,) (16,)
+            'gt_relations': val.relationships[batch_num + i].copy(), #(29, 3) (6, 3)
+            'gt_boxes': val.gt_boxes[batch_num + i].copy(), #(23, 4) (16, 4)
         }
+
         assert np.all(objs_i[rels_i[:, 0]] > 0) and np.all(objs_i[rels_i[:, 1]] > 0)
 
         pred_entry = {
-            'pred_boxes': boxes_i * BOX_SCALE/IM_SCALE,
-            'pred_classes': objs_i,
-            'pred_rel_inds': rels_i,
-            'obj_scores': obj_scores_i,
-            'rel_scores': pred_scores_i,  # hack for now.
+            'pred_boxes': boxes_i * BOX_SCALE/IM_SCALE, #(23, 4) (16, 4)
+            'pred_classes': objs_i, #(23,) (16,)
+            'pred_rel_inds': rels_i, #(506, 2) (240, 2)
+            'obj_scores': obj_scores_i, #(23,) (16,)
+            'rel_scores': pred_scores_i,  # hack for now. (506, 51) (240, 51)
         }
 
-        eval_entry(conf.mode, gt_entry, pred_entry, evaluator, evaluator_multiple_preds, 
+        gt_entry, pred_entry = glat_postprocess(gt_entry, pred_entry)
+
+        eval_entry(conf.mode, gt_entry, pred_entry, evaluator, evaluator_multiple_preds,
                    evaluator_list, evaluator_multiple_preds_list)
 
 print("Training starts now!")
 optimizer = get_optim(conf.lr * conf.num_gpus * conf.batch_size)
 
 for epoch in range(start_epoch + 1, start_epoch + 1 + conf.num_epochs):
-    rez = train_epoch(epoch)
-    print("overall{:2d}: ({:.3f})\n{}".format(epoch, rez.mean(1)['total'], rez.mean(1)), flush=True)
-
-    if use_tb:
-        writer.add_scalar('loss/rel_loss', rez.mean(1)['rel_loss'], epoch)
-        if conf.use_ggnn_obj:
-            writer.add_scalar('loss/class_loss', rez.mean(1)['class_loss'], epoch)
-        writer.add_scalar('loss/total', rez.mean(1)['total'], epoch)
-
-    if conf.save_dir is not None:
-        torch.save({
-            'epoch': epoch,
-            'state_dict': detector.state_dict(), #{k:v for k,v in detector.state_dict().items() if not k.startswith('detector.')},
-            # 'optimizer': optimizer.state_dict(),
-        }, os.path.join(conf.save_dir, '{}-{}.tar'.format('vgrel', epoch)))
+    print("start training epoch: ", epoch)
+    # rez = train_epoch(epoch)
+    # print("overall{:2d}: ({:.3f})\n{}".format(epoch, rez.mean(1)['total'], rez.mean(1)), flush=True)
+    #
+    # if use_tb:
+    #     writer.add_scalar('loss/rel_loss', rez.mean(1)['rel_loss'], epoch)
+    #     if conf.use_ggnn_obj:
+    #         writer.add_scalar('loss/class_loss', rez.mean(1)['class_loss'], epoch)
+    #     writer.add_scalar('loss/total', rez.mean(1)['total'], epoch)
+    #
+    # if conf.save_dir is not None:
+    #     torch.save({
+    #         'epoch': epoch,
+    #         'state_dict': detector.state_dict(), #{k:v for k,v in detector.state_dict().items() if not k.startswith('detector.')},
+    #         # 'optimizer': optimizer.state_dict(),
+    #     }, os.path.join(conf.save_dir, '{}-{}.tar'.format('vgrel', epoch)))
 
     recall, recall_mp, mean_recall, mean_recall_mp = val_epoch()
     if use_tb:
