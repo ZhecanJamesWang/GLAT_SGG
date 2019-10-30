@@ -21,6 +21,7 @@ from lib.pytorch_misc import transpose_packed_sequence_inds, to_onehot, arange, 
 from lib.surgery import filter_dets
 from lib.fpn.roi_align.functions.roi_align import RoIAlignFunction
 from lib.ggnn import GGNNObj, GGNNRel
+import pdb
 
 
 MODES = ('sgdet', 'sgcls', 'predcls')
@@ -350,9 +351,6 @@ class KERN(nn.Module):
             
         """
 
-        # return filter_dets(bboxes, result.obj_scores, result.obj_preds, rel_inds[:, 1:], rel_rep)
-        #
-
         result = self.detector(x, im_sizes, image_offset, gt_boxes, gt_classes, gt_rels, proposals,
                                train_anchor_inds, return_fmap=True)
         if result.is_none():
@@ -369,10 +367,11 @@ class KERN(nn.Module):
                                                 num_sample_per_gt=1)
 
 
-        rel_inds = self.get_rel_inds(result.rel_labels, im_inds, boxes)
-        rois = torch.cat((im_inds[:, None].float(), boxes), 1)
+        rel_inds = self.get_rel_inds(result.rel_labels, im_inds, boxes)   # [num_relations(num_boxes^2-num_boxes), 3(imh_ind,sub,obj)]
+        rois = torch.cat((im_inds[:, None].float(), boxes), 1)   # [num_boxes, 5(img_ind, x1,x2,y1,y2)]
 
-        result.obj_fmap = self.obj_feature_map(result.fmap.detach(), rois)
+        result.obj_fmap = self.obj_feature_map(result.fmap.detach(), rois)  # [num_boxes, feature_dimension]
+
 
         if self.use_ggnn_obj:          
                 result.rm_obj_dists = self.ggnn_obj_reason(im_inds, 

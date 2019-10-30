@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 python models/eval_rels.py -m predcls -p 100 -clip 5 \
--ckpt checkpoints/kern_predcls/kern_sgcls_predcls.tar \
+-ckpt checkpoints/kern_sgcls_predcls.tar \
 -test \
 -b 1 \
 -use_ggnn_rel \

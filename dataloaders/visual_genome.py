@@ -13,12 +13,14 @@ from torch.utils.data import Dataset
 from torchvision.transforms import Resize, Compose, ToTensor, Normalize
 from dataloaders.blob import Blob
 from lib.fpn.box_intersections_cpu.bbox import bbox_overlaps
-from config import VG_IMAGES, IM_DATA_FN, VG_SGG_FN, VG_SGG_DICT_FN, BOX_SCALE, IM_SCALE, PROPOSAL_FN
+from config import ModelConfig, VG_IMAGES, IM_DATA_FN, VG_SGG_FN, VG_SGG_DICT_FN, BOX_SCALE, IM_SCALE, PROPOSAL_FN
 from dataloaders.image_transforms import SquarePad, Grayscale, Brightness, Sharpness, Contrast, \
     RandomOrder, Hue, random_crop
 from collections import defaultdict
 from pycocotools.coco import COCO
 import pdb
+from tqdm import tqdm
+import pickle
 
 class VG(Dataset):
     def __init__(self, mode, roidb_file=VG_SGG_FN, dict_file=VG_SGG_DICT_FN,
@@ -186,7 +188,6 @@ class VG(Dataset):
             gt_rels = [(k[0], k[1], np.random.choice(v)) for k,v in all_rel_sets.items()]
             gt_rels = np.array(gt_rels)
 
-        # pdb.set_trace()
 
         entry = {
             'img': self.transform_pipeline(image_unpadded),
@@ -311,8 +312,6 @@ def load_graphs(graphs_file, mode='train', num_im=-1, num_val_im=0, filter_empty
     # Get box information
     all_labels = roi_h5['labels'][:, 0]
 
-    # pdb.set_trace()
-
     all_boxes = roi_h5['boxes_{}'.format(BOX_SCALE)][:]  # will index later
     assert np.all(all_boxes[:, :2] >= 0)  # sanity check
     assert np.all(all_boxes[:, 2:] > 0)  # no empty box
@@ -321,7 +320,6 @@ def load_graphs(graphs_file, mode='train', num_im=-1, num_val_im=0, filter_empty
     all_boxes[:, :2] = all_boxes[:, :2] - all_boxes[:, 2:] / 2
     all_boxes[:, 2:] = all_boxes[:, :2] + all_boxes[:, 2:]
 
-    # pdb.set_trace()
 
     im_to_first_box = roi_h5['img_to_first_box'][split_mask]
     im_to_last_box = roi_h5['img_to_last_box'][split_mask]
@@ -331,9 +329,6 @@ def load_graphs(graphs_file, mode='train', num_im=-1, num_val_im=0, filter_empty
     # load relation labels
     _relations = roi_h5['relationships'][:]
     _relation_predicates = roi_h5['predicates'][:, 0]
-
-    # pdb.set_trace()
-
     assert (im_to_first_rel.shape[0] == im_to_last_rel.shape[0])
     assert (_relations.shape[0] == _relation_predicates.shape[0])  # sanity check
 
@@ -342,27 +337,15 @@ def load_graphs(graphs_file, mode='train', num_im=-1, num_val_im=0, filter_empty
     gt_classes = []
     relationships = []
     for i in range(len(image_index)):
-
         boxes_i = all_boxes[im_to_first_box[i]:im_to_last_box[i] + 1, :]
-
-        # pdb.set_trace()
-
         gt_classes_i = all_labels[im_to_first_box[i]:im_to_last_box[i] + 1]
-
-        # pdb.set_trace()
 
         if im_to_first_rel[i] >= 0:
             predicates = _relation_predicates[im_to_first_rel[i]:im_to_last_rel[i] + 1]
             obj_idx = _relations[im_to_first_rel[i]:im_to_last_rel[i] + 1] - im_to_first_box[i]
             assert np.all(obj_idx >= 0)
             assert np.all(obj_idx < boxes_i.shape[0])
-            # print("obj_idx.shape: ", obj_idx.shape)
-            # print("predicates.shape: ", predicates.shape)
-
-            # print("(obj_idx, predicates): ", (obj_idx, predicates))
             rels = np.column_stack((obj_idx, predicates))
-            # print("inner rels.shape: ", rels.shape)
-
         else:
             assert not filter_empty_rels
             rels = np.zeros((0, 3), dtype=np.int32)
@@ -381,9 +364,6 @@ def load_graphs(graphs_file, mode='train', num_im=-1, num_val_im=0, filter_empty
 
         boxes.append(boxes_i)
         gt_classes.append(gt_classes_i)
-
-        # print("outside rels.shape: ", rels.shape)
-
         relationships.append(rels)
 
     return split_mask, boxes, gt_classes, relationships
@@ -449,3 +429,91 @@ class VGDataLoader(torch.utils.data.DataLoader):
             **kwargs,
         )
         return train_load, val_load
+
+def build_graph_structure(entries, index2name_object, index2name_predicate):
+    # index2name_object[0] = index2name_object[0]+'object'
+    # index2name_predicate[0] = index2name_predicate[0]+'predicate'
+    # node_class_num = len(index2name_object)
+    # predicate_class_num = len(index2name_predicate)
+    # index2name = index2name_object + index2name_predicate + ['<MASK>']
+    # type_list = [2] *  + [1] * predicate_class_num + [0]
+    total_data = {}
+    total_data['adj'] = []
+    total_data['node_name'] = []
+    total_data['node_class'] = []
+    total_data['img_id'] = []
+    total_data['node_type'] = []
+    for i, entry in enumerate(entries):
+        total_node_num = len(entry['gt_classes']) + entry['gt_relations'].shape[0]
+        nodes_class = [] + list(entry['gt_classes'])
+        nodes_name = [] + [index2name_object[i] for i in list(entry['gt_classes'])]
+        nodes_type = [] + len(entry['gt_classes']) * [1]   # entity:1 predicate:0
+        adj = np.zeros(shape=(total_node_num, total_node_num))
+        entity_num = len(list(entry['gt_classes']))
+        for j, relation in enumerate(entry['gt_relations'].tolist()):
+            nodes_class.append(relation[-1])
+            nodes_name.append(index2name_predicate[relation[-1]])
+            nodes_type.append(0)
+            adj[relation[0]][entity_num+j] = 1
+            adj[entity_num+j][relation[1]] = 2
+        total_data['adj'].append(adj)
+        total_data['node_name'].append(np.asarray(nodes_name))
+        total_data['node_class'].append(np.asarray(nodes_class))
+        total_data['img_id'].append(entry['fn'])
+        total_data['node_type'].append(np.asarray(nodes_type))
+        # pdb.set_trace()
+
+    return total_data
+
+
+if __name__=='__main__':
+    conf = ModelConfig()
+    train, val, test = VG.splits(num_val_im=conf.val_size, filter_duplicate_rels=True,
+                              use_proposals=conf.use_proposals,
+                              filter_non_overlap=conf.mode == 'sgdet')
+    train_entities_list = []
+    train_num = 'whole'
+    val_num = 'whole'
+    test_num = 'whole'
+
+    if train_num == 'whole':
+        train_num = len(train)
+        val_num = len(val)
+        test_num = len(test)
+
+    for i in tqdm(range(train_num)):
+        train_entities_list.append(train.__getitem__(i))
+
+    val_entities_list = []
+    for i in tqdm(range(val_num)):
+        val_entities_list.append(val.__getitem__(i))
+
+    test_entities_list = []
+    for i in tqdm(range(test_num)):
+        test_entities_list.append(test.__getitem__(i))
+
+    train_data = build_graph_structure(train_entities_list, train.ind_to_classes, train.ind_to_predicates)
+    val_data = build_graph_structure(val_entities_list, val.ind_to_classes, val.ind_to_predicates)
+    test_data = build_graph_structure(test_entities_list, test.ind_to_classes, test.ind_to_predicates)
+
+    save_root = '/home/haoxuan/code/KERN/data/'
+
+    filename = os.path.join(save_root, 'train_VG_kern_{}.pkl'.format('_'.join([str(train_num), str(val_num), str(test_num)])))
+    with open(filename, 'wb') as f:
+        pickle.dump(train_data, f)
+
+    filename = os.path.join(save_root, 'eval_VG_kern_{}.pkl'.format('_'.join([str(train_num), str(val_num), str(test_num)])))
+    with open(filename, 'wb') as f:
+        pickle.dump(val_data, f)
+
+    filename = os.path.join(save_root, 'test_VG_kern_{}.pkl'.format('_'.join([str(train_num), str(val_num), str(test_num)])))
+    with open(filename, 'wb') as f:
+        pickle.dump(test_data, f)
+
+    filename = os.path.join(save_root, 'ind_to_classes_{}.pkl'.format('_'.join([str(train_num), str(val_num), str(test_num)])))
+    with open(filename, 'wb') as f:
+        pickle.dump(train.ind_to_classes, f)
+
+    filename = os.path.join(save_root, 'ind_to_predicates_{}.pkl'.format('_'.join([str(train_num), str(val_num), str(test_num)])))
+    with open(filename, 'wb') as f:
+        pickle.dump(train.ind_to_predicates, f)

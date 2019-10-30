@@ -6,14 +6,15 @@ from argparse import ArgumentParser
 import numpy as np
 
 ROOT_PATH = os.path.dirname(os.path.realpath(__file__))
-# DATA_PATH = os.path.join(ROOT_PATH, 'data')
 DATA_PATH = "/kiwi-data/projects/commonsense/shared/alireza_repo/metadata/VG/stanford/"
+
 def path(fn):
     return os.path.join(DATA_PATH, fn)
 
 def stanford_path(fn):
     # return os.path.join(DATA_PATH, 'stanford_filtered', fn)
     return os.path.join(DATA_PATH, fn)
+
 # =============================================================================
 # Update these with where your data is stored ~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -47,8 +48,7 @@ RPN_NEGATIVE_OVERLAP = 0.3
 RPN_FG_FRACTION = 0.5
 FG_FRACTION = 0.25
 # Total number of examples
-# RPN_BATCHSIZE = 256
-RPN_BATCHSIZE = 2
+RPN_BATCHSIZE = 256
 ROIS_PER_IMG = 256
 REL_FG_FRACTION = 0.25
 RELS_PER_IMG = 256
@@ -181,8 +181,7 @@ class ModelConfig(object):
 
         parser.add_argument('-lr', dest='lr', help='learning rate', type=float, default=1e-3)
 
-        # parser.add_argument('-b', dest='batch_size', help='batch size per GPU',type=int, default=2)
-        parser.add_argument('-b', dest='batch_size', help='batch size per GPU',type=int, default=1)
+        parser.add_argument('-b', dest='batch_size', help='batch size per GPU',type=int, default=2)
         parser.add_argument('-val_size', dest='val_size', help='val size to use (if 0 we wont use val)', type=int, default=5000)
 
         parser.add_argument('-l2', dest='l2', help='weight decay of SGD', type=float, default=1e-4)

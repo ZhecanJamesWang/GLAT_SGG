@@ -57,8 +57,6 @@ def filter_dets(boxes, obj_scores, obj_classes, rel_inds, pred_scores):
     objs_np = obj_classes.data.cpu().numpy()
     boxes_out = boxes.data.cpu().numpy()
 
-    # pdb.set_trace()
-
     return boxes_out, objs_np, obj_scores_np, rels, pred_scores_sorted
 
 # def _get_similar_boxes(boxes, obj_classes_topk, nms_thresh=0.3):

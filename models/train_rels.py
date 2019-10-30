@@ -19,9 +19,10 @@ from torch.optim.lr_scheduler import ReduceLROnPlateau
 
 # import KERN model
 from lib.kern_model import KERN
+
 import pdb
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+# os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
 conf = ModelConfig()
 
@@ -147,13 +148,10 @@ def train_batch(b, verbose=False):
     """
     result = detector[b]
 
-
     losses = {}
     if conf.use_ggnn_obj: # if not use ggnn obj, we just use scores of faster rcnn as their scores, there is no need to train
         losses['class_loss'] = F.cross_entropy(result.rm_obj_dists, result.rm_obj_labels)
-
     # pdb.set_trace()
-
     losses['rel_loss'] = F.cross_entropy(result.rel_dists, result.rel_labels[:, -1])
     loss = sum(losses.values())
 
@@ -170,29 +168,16 @@ def train_batch(b, verbose=False):
 
 def val_epoch():
 
-    print("8888888888888888888888888888888")
-
     detector.eval()
     evaluator_list = [] # for calculating recall of each relationship except no relationship
     evaluator_multiple_preds_list = []
     for index, name in enumerate(ind_to_predicates):
-        # print("vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv")
-        # print("name: ", name)
-
-        # pdb.set_trace()
-
         if index == 0:
             continue
-
-
         evaluator_list.append((index, name, BasicSceneGraphEvaluator.all_modes()))
         evaluator_multiple_preds_list.append((index, name, BasicSceneGraphEvaluator.all_modes(multiple_preds=True)))
-
-        # pdb.set_trace()
-
     evaluator = BasicSceneGraphEvaluator.all_modes() # for calculating recall
     evaluator_multiple_preds = BasicSceneGraphEvaluator.all_modes(multiple_preds=True)
-
     for val_b, batch in enumerate(val_loader):
         val_batch(conf.num_gpus * val_b, batch, evaluator, evaluator_multiple_preds, evaluator_list, evaluator_multiple_preds_list)
 
@@ -246,7 +231,6 @@ def val_batch(batch_num, b, evaluator, evaluator_multiple_preds, evaluator_list,
         det_res = [det_res]
 
     for i, (boxes_i, objs_i, obj_scores_i, rels_i, pred_scores_i) in enumerate(det_res):
-
         # pdb.set_trace()
 
         gt_entry = {
@@ -267,7 +251,7 @@ def val_batch(batch_num, b, evaluator, evaluator_multiple_preds, evaluator_list,
 
         gt_entry, pred_entry = glat_postprocess(gt_entry, pred_entry)
 
-        eval_entry(conf.mode, gt_entry, pred_entry, evaluator, evaluator_multiple_preds, 
+        eval_entry(conf.mode, gt_entry, pred_entry, evaluator, evaluator_multiple_preds,
                    evaluator_list, evaluator_multiple_preds_list)
 
 print("Training starts now!")
@@ -291,7 +275,6 @@ for epoch in range(start_epoch + 1, start_epoch + 1 + conf.num_epochs):
     #         # 'optimizer': optimizer.state_dict(),
     #     }, os.path.join(conf.save_dir, '{}-{}.tar'.format('vgrel', epoch)))
 
-    print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
     recall, recall_mp, mean_recall, mean_recall_mp = val_epoch()
     if use_tb:
         for key, value in recall.items():
