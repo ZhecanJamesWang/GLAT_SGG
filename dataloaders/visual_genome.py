@@ -472,11 +472,11 @@ if __name__=='__main__':
                               use_proposals=conf.use_proposals,
                               filter_non_overlap=conf.mode == 'sgdet')
     train_entities_list = []
-    train_num = 'whole'
-    val_num = 'whole'
-    test_num = 'whole'
+    train_num = 20000
+    val_num = 1000
+    test_num = 5000
 
-    if train_num == 'whole':
+    if train_num == 'full':
         train_num = len(train)
         val_num = len(val)
         test_num = len(test)
