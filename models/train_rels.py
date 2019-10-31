@@ -2,7 +2,7 @@
 Training script for scene graph detection. Integrated with Rowan's faster rcnn setup
 """
 
-from dataloaders.visual_genome import VGDataLoader, VG
+from dataloaders.visual_genome import VGDataLoader, VG, build_graph_structure, uild_graph_structure_reverse
 import numpy as np
 from torch import optim
 import torch
@@ -19,6 +19,7 @@ from torch.optim.lr_scheduler import ReduceLROnPlateau
 
 # import KERN model
 from lib.kern_model import KERN
+from models.models_kern import GLATNET
 
 import pdb
 
@@ -57,6 +58,16 @@ detector = KERN(classes=train.ind_to_classes, rel_classes=train.ind_to_predicate
                 use_ggnn_rel=conf.use_ggnn_rel, ggnn_rel_time_step_num=conf.ggnn_rel_time_step_num,
                 ggnn_rel_hidden_dim=conf.ggnn_rel_hidden_dim, ggnn_rel_output_dim=conf.ggnn_rel_output_dim,
                 use_rel_knowledge=conf.use_rel_knowledge, rel_knowledge=conf.rel_knowledge)
+
+model = GLATNET(vocab_num=[51, 152],
+                feat_dim=300,
+                nhid_glat_g=300,
+                nhid_glat_l=300,
+                nout=300,
+                dropout=0.1,
+                nheads=8,
+                blank=151,
+                types=[2]*6)
 
 # Freeze the detector
 for n, param in detector.detector.named_parameters():
@@ -108,6 +119,9 @@ else:
 
 detector.cuda()
 
+ckpt_glat = torch.load('/home/haoxuan/code/GBERT/models/2019-10-31-03-13_2_2_2_2_2_2_concat_no_init_mask/best_test_node_mask_predicate_acc')
+model.load_state_dict(ckpt_glat['model'])
+model.cuda()
 
 def train_epoch(epoch_num):
     detector.train()
@@ -189,38 +203,45 @@ def val_epoch():
 
     return recall, recall_mp, mean_recall, mean_recall_mp
 
+def glat_wrapper(total_data):
+    # Batch size assumed to be 1
+    input_class = total_data['node_class'][0].unsqueeze(0)
+    adj = total_data['adj'][0].unsqueeze(0)
+    node_type = total_data['node_type'][0].unsqueeze(0)
+    adj_con = torch.clamp(adj, 0, 1)
+    pred_label, pred_connect = model(input_class, adj_con, node_type)
+    pred_label_predicate = pred_label[0]  # flatten predicate (B*N, 51)
+    pred_label_entities = pred_label[1]  # flatten entities
+    return pred_label_predicate, pred_label_entities
+
 def glat_postprocess(gt_entry, pred_entry):
-    pdb.set_trace()
+    total_data = build_graph_structure(pred_entry, ind_to_classes, ind_to_predicates)
+    total_data_refined = glat_wrapper(total_data)
+    pred_entry_refined = build_graph_structure_reverse(total_data_refined, pred_entry)
 
-    # predicate_list = []
-    for i in range(len(gt_entry['gt_relations'])):
-        subj_idx = gt_entry['gt_relations'][i][0]
-        subj_class_idx = gt_entry['gt_classes'][subj_idx]
+    #
+    # # predicate_list = []
+    # for i in range(len(gt_entry['gt_relations'])):
+    #     subj_idx = gt_entry['gt_relations'][i][0]
+    #     subj_class_idx = gt_entry['gt_classes'][subj_idx]
+    #
+    #     obj_idx = gt_entry['gt_relations'][i][1]
+    #     obj_class_idx = gt_entry['gt_classes'][obj_idx]
+    #
+    #     predicate_idx = gt_entry['gt_relations'][i][2]
+    #     predicate = ind_to_predicates[predicate_idx]
+    #
+    #     subj = ind_to_classes[subj_class_idx]
+    #     obj = ind_to_classes[obj_class_idx]
+    #
+    #     print(subj)
+    #     print(predicate)
+    #     print(obj)
+    #
+    #     # predicate_list.append(predicate)
 
-        obj_idx = gt_entry['gt_relations'][i][1]
-        obj_class_idx = gt_entry['gt_classes'][obj_idx]
+    return gt_entry, pred_entry_refined
 
-        predicate_idx = gt_entry['gt_relations'][i][2]
-        predicate = ind_to_predicates[predicate_idx]
-
-        subj = ind_to_classes[subj_class_idx]
-        obj = ind_to_classes[obj_class_idx]
-
-        print(subj)
-        print(predicate)
-        print(obj)
-
-        # predicate_list.append(predicate)
-
-
-    # gt_entry['gt_relations'][0][2]
-    # ind_to_predicates
-
-    # node = entity + predicate
-    # relationship
-
-
-    return gt_entry, pred_entry
 
 def val_batch(batch_num, b, evaluator, evaluator_multiple_preds, evaluator_list, evaluator_multiple_preds_list):
     det_res = detector[b]
