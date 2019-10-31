@@ -2,7 +2,6 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="56dae251-5cc5-4cf3-a01d-5a0e5261a710" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/dataloaders/visual_genome.py" beforeDir="false" afterPath="$PROJECT_DIR$/dataloaders/visual_genome.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/models/train_rels.py" beforeDir="false" afterPath="$PROJECT_DIR$/models/train_rels.py" afterDir="false" />
     </list>
@@ -16,36 +15,61 @@
     <session id="-747324333">
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
-          <entry key="py" value="697" />
+          <entry key="py" value="1107" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
-          <entry key="Python" value="697" />
+          <entry key="Python" value="1107" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.open">
         <counts>
-          <entry key="py" value="1" />
+          <entry key="py" value="2" />
+          <entry key="sh" value="1" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.open">
         <counts>
-          <entry key="Python" value="1" />
+          <entry key="PLAIN_TEXT" value="1" />
+          <entry key="Python" value="2" />
         </counts>
       </usages-collector>
     </session>
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/scripts/eval_kern_predcls.sh">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="165">
+              <caret line="11" column="32" lean-forward="true" selection-start-line="11" selection-start-column="32" selection-end-line="11" selection-end-column="32" />
+            </state>
+          </provider>
+        </entry>
+      </file>
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/models/train_rels.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="287">
-              <caret line="229" lean-forward="true" selection-start-line="229" selection-end-line="229" />
+            <state relative-caret-position="353">
+              <caret line="207" column="16" lean-forward="true" selection-start-line="207" selection-start-column="16" selection-end-line="207" selection-end-column="16" />
               <folding>
                 <element signature="e#94#201#0" expanded="true" />
-                <marker date="1572542867251" expanded="true" signature="8679:8691" ph="..." />
+                <marker date="1572555839080" expanded="true" signature="8649:9157" ph="..." />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/dataloaders/visual_genome.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="362">
+              <caret line="442" column="27" selection-start-line="442" selection-start-column="27" selection-end-line="442" selection-end-column="27" />
+              <folding>
+                <element signature="e#71#82#0" expanded="true" />
+                <marker date="1572555837645" expanded="true" signature="18422:18427" ph="..." />
+                <marker date="1572555837645" expanded="true" signature="18422:20284" ph="..." />
               </folding>
             </state>
           </provider>
@@ -78,8 +102,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/lib/evaluation/sg_eval.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="275">
-              <caret line="350" column="10" selection-start-line="350" selection-start-column="10" selection-end-line="350" selection-end-column="10" />
+            <state relative-caret-position="1053">
+              <caret line="355" lean-forward="true" selection-start-line="355" selection-end-line="355" />
             </state>
           </provider>
         </entry>
@@ -113,7 +137,14 @@
       <find>VG_SGG_DICT_FN</find>
       <find>train_batch</find>
       <find>total_data['node_type']</find>
+      <find>def build_graph_structure</find>
+      <find>if_training</find>
+      <find>if_train</find>
+      <find>if_tra</find>
+      <find>entry['gt_relations']</find>
+      <find>def build_graph_structure_reverse</find>
       <find>val_batch</find>
+      <find>entries</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -153,6 +184,21 @@
               <item name="KERN" type="b2602c69:ProjectViewProjectNode" />
               <item name="KERN" type="462c0819:PsiDirectoryNode" />
             </path>
+            <path>
+              <item name="KERN" type="b2602c69:ProjectViewProjectNode" />
+              <item name="KERN" type="462c0819:PsiDirectoryNode" />
+              <item name="dataloaders" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="KERN" type="b2602c69:ProjectViewProjectNode" />
+              <item name="KERN" type="462c0819:PsiDirectoryNode" />
+              <item name="lib" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="KERN" type="b2602c69:ProjectViewProjectNode" />
+              <item name="KERN" type="462c0819:PsiDirectoryNode" />
+              <item name="scripts" type="462c0819:PsiDirectoryNode" />
+            </path>
           </expand>
           <select />
         </subPane>
@@ -189,10 +235,10 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="0" y="0" width="1600" height="900" extended-state="6" />
+    <frame x="0" y="0" width="1440" height="900" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.13735558" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.15307583" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
@@ -300,13 +346,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/scripts/eval_kern_predcls.sh">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="105">
-          <caret line="7" column="26" lean-forward="true" selection-start-line="7" selection-start-column="26" selection-end-line="7" selection-end-column="26" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/scripts/train_kern_sgcls.sh">
       <provider selected="true" editor-type-id="text-editor">
         <state>
@@ -355,13 +394,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/lib/evaluation/sg_eval.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="275">
-          <caret line="350" column="10" selection-start-line="350" selection-start-column="10" selection-end-line="350" selection-end-column="10" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file:///Library/Frameworks/Python.framework/Versions/3.6/lib/python3.6/pdb.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="243">
@@ -383,24 +415,39 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/scripts/eval_kern_predcls.sh">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="165">
+          <caret line="11" column="32" lean-forward="true" selection-start-line="11" selection-start-column="32" selection-end-line="11" selection-end-column="32" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/evaluation/sg_eval.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1053">
+          <caret line="355" lean-forward="true" selection-start-line="355" selection-end-line="355" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/dataloaders/visual_genome.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="515">
-          <caret line="505" column="6" lean-forward="true" selection-start-line="505" selection-start-column="6" selection-end-line="505" selection-end-column="6" />
+        <state relative-caret-position="362">
+          <caret line="442" column="27" selection-start-line="442" selection-start-column="27" selection-end-line="442" selection-end-column="27" />
           <folding>
             <element signature="e#71#82#0" expanded="true" />
-            <marker date="1572542411614" expanded="true" signature="18199:19572" ph="..." />
+            <marker date="1572555837645" expanded="true" signature="18422:18427" ph="..." />
+            <marker date="1572555837645" expanded="true" signature="18422:20284" ph="..." />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/models/train_rels.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="287">
-          <caret line="229" lean-forward="true" selection-start-line="229" selection-end-line="229" />
+        <state relative-caret-position="353">
+          <caret line="207" column="16" lean-forward="true" selection-start-line="207" selection-start-column="16" selection-end-line="207" selection-end-column="16" />
           <folding>
             <element signature="e#94#201#0" expanded="true" />
-            <marker date="1572542867251" expanded="true" signature="8679:8691" ph="..." />
+            <marker date="1572555839080" expanded="true" signature="8649:9157" ph="..." />
           </folding>
         </state>
       </provider>

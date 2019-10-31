@@ -431,7 +431,7 @@ class VGDataLoader(torch.utils.data.DataLoader):
         return train_load, val_load
 
 
-def build_graph_structure(entries, index2name_object, index2name_predicate):
+def build_graph_structure(entries, index2name_object, index2name_predicate, if_predicting=False):
     # index2name_object[0] = index2name_object[0]+'object'
     # index2name_predicate[0] = index2name_predicate[0]+'predicate'
     # node_class_num = len(index2name_object)
@@ -445,14 +445,21 @@ def build_graph_structure(entries, index2name_object, index2name_predicate):
     total_data['img_id'] = []
     total_data['node_type'] = []
 
+    if if_predicting:
+        return_classes = entry['pred_classes']
+        return_relations = entry['pred_relations']
+    else:
+        return_classes = entry['gt_classes']
+        return_relations = entry['gt_relations']
+
     for i, entry in enumerate(entries):
-        total_node_num = len(entry['gt_classes']) + entry['gt_relations'].shape[0]
-        nodes_class = [] + list(entry['gt_classes'])
-        nodes_name = [] + [index2name_object[i] for i in list(entry['gt_classes'])]
-        nodes_type = [] + len(entry['gt_classes']) * [1]   # entity:1 predicate:0
+        total_node_num = len(return_classes) + return_relations.shape[0]
+        nodes_class = [] + list(return_classes)
+        nodes_name = [] + [index2name_object[i] for i in list(return_classes)]
+        nodes_type = [] + len(return_classes) * [1]   # entity:1 predicate:0
         adj = np.zeros(shape=(total_node_num, total_node_num))
-        entity_num = len(list(entry['gt_classes']))
-        for j, relation in enumerate(entry['gt_relations'].tolist()):
+        entity_num = len(list(return_classes))
+        for j, relation in enumerate(return_relations.tolist()):
             nodes_class.append(relation[-1])
             nodes_name.append(index2name_predicate[relation[-1]])
             nodes_type.append(0)
@@ -468,46 +475,58 @@ def build_graph_structure(entries, index2name_object, index2name_predicate):
     return total_data
 
 
-def build_graph_structure_reverse(total_data, entries):
-    total_data['adj']
-    total_data['node_name']
-    total_data['node_class']
-    total_data['img_id']
-    total_data['node_type']
-    new_entries = {}
-    new_entries['gt_relations'] = []
-    new_entries['gt_classes'] = []
-    new_entries['gt_boxes'] = []
+# def build_graph_structure_reverse(entries, pred_label_predicate):
+    # total_data['adj']
+    # total_data['node_name']
+    # total_data['node_class']
+    # total_data['img_id']
+    # total_data['node_type']
+    # new_entries = {}
+    # new_entries['gt_relations'] = []
+    # new_entries['gt_classes'] = []
+    # new_entries['gt_boxes'] = []
+    #
+    # for i, entry in enumerate(entries):
+    #     node_type = total_data['node_type'][i]
+    #     node_class = total_data['node_class'][i]
+    #     adj = total_data['adj'][i]
+    #
+    #     gt_boxes = entry['gt_boxes']
+    #
+    #     new_gt_relations = node_class[node_type == 0]
+    #     new_gt_classes = node_class[node_type == 1]
+    #
+    #     new_entries['gt_classes'].append(new_gt_classes)
+    #     new_entries['gt_classes'].append(gt_boxes)
+    #
+    #     return_gt_relations = []
+    #
+    #     for i in range(len(new_gt_relations)):
+    #         new_relation = new_gt_relations[i]
+    #         new_entity = new_gt_classes[i]
+    #
+    #         relation = pred_label_predicate[i]
+    #
+    #         new_relation = np.asarray([new_entity[relation[0]], new_entity[relation[1]], new_relation])
+    #         return_gt_relations.append(new_relation)
+    #
+    #     new_entries['gt_relations'].append(return_gt_relations)
+    #
+    # new_entries['gt_relations'] = np.asarray(new_entries['gt_relations'])
+    # new_entries['gt_classes'] = np.asarray(new_entries['gt_classes'])
+    # new_entries['gt_boxes'] = np.asarray(new_entries['gt_boxes'])
 
-    for i, entry in enumerate(entries):
-        node_type = total_data['node_type'][i]
-        node_class = total_data['node_class'][i]
-        adj = total_data['adj'][i]
+    # pred_entry = {
+    #     'pred_boxes': boxes_i * BOX_SCALE / IM_SCALE,  # (23, 4) (16, 4)
+    #     'pred_classes': objs_i,  # (23,) (16,)
+    #     'pred_rel_inds': rels_i,  # (506, 2) (240, 2)
+    #     'obj_scores': obj_scores_i,  # (23,) (16,)
+    #     'rel_scores': pred_scores_i,  # hack for now. (506, 51) (240, 51)
+    # }
 
-        gt_boxes = entry['gt_boxes']
+    # entries['rel_scores'] = pred_label_predicate
 
-        new_gt_relations = node_class[node_type == 0]
-        new_gt_classes = node_class[node_type == 1]
-
-        new_entries['gt_classes'].append(new_gt_classes)
-        new_entries['gt_classes'].append(gt_boxes)
-
-        return_gt_relations = []
-
-        for i in range(len(new_gt_relations)):
-            new_relation = new_gt_relations[i]
-            new_entity = new_gt_classes[i]
-            relation = entry['gt_relations'].tolist()[i]
-            new_relation = np.asarray([new_entity[relation[0]], new_entity[relation[1]], new_relation])
-            return_gt_relations.append(new_relation)
-
-        new_entries['gt_relations'].append(return_gt_relations)
-
-    new_entries['gt_relations'] = np.asarray(new_entries['gt_relations'])
-    new_entries['gt_classes'] = np.asarray(new_entries['gt_classes'])
-    new_entries['gt_boxes'] = np.asarray(new_entries['gt_boxes'])
-
-    return new_entries
+    # return entries
 
 
 if __name__=='__main__':

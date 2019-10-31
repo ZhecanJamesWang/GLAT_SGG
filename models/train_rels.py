@@ -191,13 +191,35 @@ def val_epoch():
 
 
 def glat_wrapper(total_data):
-    pass
+   # Batch size assumed to be 1
+   input_class = total_data['node_class'][0].unsqueeze(0)
+   adj = total_data['adj'][0].unsqueeze(0)
+   node_type = total_data['node_type'][0].unsqueeze(0)
+   adj_con = torch.clamp(adj, 0, 1)
+   pred_label, pred_connect = model(input_class, adj_con, node_type)
+   pred_label_predicate = pred_label[0]  # flatten predicate (B*N, 51)
+   pred_label_entities = pred_label[1]  # flatten entities
+   return pred_label_predicate, pred_label_entities
 
 
-def glat_postprocess(gt_entry, pred_entry):
-    total_data = build_graph_structure(pred_entry, ind_to_classes, ind_to_predicates)
-    total_data_refined = glat_wrapper(total_data)
-    pred_entry_refined = build_graph_structure_reverse(total_data_refined, pred_entry)
+def glat_postprocess(gt_entry, pred_entry, if_predicting=False):
+    # pred_entry = {
+    #     'pred_boxes': boxes_i * BOX_SCALE / IM_SCALE,  # (23, 4) (16, 4)
+    #     'pred_classes': objs_i,  # (23,) (16,)
+    #     'pred_rel_inds': rels_i,  # (506, 2) (240, 2)
+    #     'obj_scores': obj_scores_i,  # (23,) (16,)
+    #     'rel_scores': pred_scores_i,  # hack for now. (506, 51) (240, 51)
+    # }
+
+    _, pred_entrys['rel_classes'] = pred_entrys['rel_scores'][:, 1:].max(1)
+    pred_entrys['pred_relations'] = torch.cat((pred_entrys['pred_rel_inds'], pred_entrys['rel_classes']), 1)
+
+    total_data = build_graph_structure(pred_entry, ind_to_classes, ind_to_predicates, if_predicting=if_training)
+    pred_label_predicate, pred_label_entities = glat_wrapper(total_data)
+    pred_entry['rel_scores'] = pred_label_predicate
+
+    # pred_entry_refined = build_graph_structure_reverse(total_data_refined, pred_entry, pred_label_predicate,
+    #                                                    if_predicting=if_training)
 
     #
     # # predicate_list = []
@@ -232,7 +254,6 @@ def val_batch(batch_num, b, evaluator, evaluator_multiple_preds, evaluator_list,
         det_res = [det_res]
 
     for i, (boxes_i, objs_i, obj_scores_i, rels_i, pred_scores_i) in enumerate(det_res):
-        # pdb.set_trace()
 
         gt_entry = {
             'gt_classes': val.gt_classes[batch_num + i].copy(), #(23,) (16,)
@@ -250,7 +271,7 @@ def val_batch(batch_num, b, evaluator, evaluator_multiple_preds, evaluator_list,
             'rel_scores': pred_scores_i,  # hack for now. (506, 51) (240, 51)
         }
 
-        gt_entry, pred_entry = glat_postprocess(gt_entry, pred_entry)
+        gt_entry, pred_entry = glat_postprocess(gt_entry, pred_entry, if_predicting=True)
 
         eval_entry(conf.mode, gt_entry, pred_entry, evaluator, evaluator_multiple_preds,
                    evaluator_list, evaluator_multiple_preds_list)
