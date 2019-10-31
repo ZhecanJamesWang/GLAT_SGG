@@ -2,7 +2,7 @@
 Training script for scene graph detection. Integrated with Rowan's faster rcnn setup
 """
 
-from dataloaders.visual_genome import VGDataLoader, VG
+from dataloaders.visual_genome import VGDataLoader, VG, build_graph_structure, uild_graph_structure_reverse
 import numpy as np
 from torch import optim
 import torch
@@ -189,38 +189,39 @@ def val_epoch():
 
     return recall, recall_mp, mean_recall, mean_recall_mp
 
+
+def glat_wrapper(total_data):
+    pass
+
+
 def glat_postprocess(gt_entry, pred_entry):
-    pdb.set_trace()
+    total_data = build_graph_structure(pred_entry, ind_to_classes, ind_to_predicates)
+    total_data_refined = glat_wrapper(total_data)
+    pred_entry_refined = build_graph_structure_reverse(total_data_refined, pred_entry)
 
-    # predicate_list = []
-    for i in range(len(gt_entry['gt_relations'])):
-        subj_idx = gt_entry['gt_relations'][i][0]
-        subj_class_idx = gt_entry['gt_classes'][subj_idx]
+    #
+    # # predicate_list = []
+    # for i in range(len(gt_entry['gt_relations'])):
+    #     subj_idx = gt_entry['gt_relations'][i][0]
+    #     subj_class_idx = gt_entry['gt_classes'][subj_idx]
+    #
+    #     obj_idx = gt_entry['gt_relations'][i][1]
+    #     obj_class_idx = gt_entry['gt_classes'][obj_idx]
+    #
+    #     predicate_idx = gt_entry['gt_relations'][i][2]
+    #     predicate = ind_to_predicates[predicate_idx]
+    #
+    #     subj = ind_to_classes[subj_class_idx]
+    #     obj = ind_to_classes[obj_class_idx]
+    #
+    #     print(subj)
+    #     print(predicate)
+    #     print(obj)
+    #
+    #     # predicate_list.append(predicate)
 
-        obj_idx = gt_entry['gt_relations'][i][1]
-        obj_class_idx = gt_entry['gt_classes'][obj_idx]
+    return gt_entry, pred_entry_refined
 
-        predicate_idx = gt_entry['gt_relations'][i][2]
-        predicate = ind_to_predicates[predicate_idx]
-
-        subj = ind_to_classes[subj_class_idx]
-        obj = ind_to_classes[obj_class_idx]
-
-        print(subj)
-        print(predicate)
-        print(obj)
-
-        # predicate_list.append(predicate)
-
-
-    # gt_entry['gt_relations'][0][2]
-    # ind_to_predicates
-
-    # node = entity + predicate
-    # relationship
-
-
-    return gt_entry, pred_entry
 
 def val_batch(batch_num, b, evaluator, evaluator_multiple_preds, evaluator_list, evaluator_multiple_preds_list):
     det_res = detector[b]
