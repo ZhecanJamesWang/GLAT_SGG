@@ -2,7 +2,7 @@
 Training script for scene graph detection. Integrated with Rowan's faster rcnn setup
 """
 
-from dataloaders.visual_genome import VGDataLoader, VG, build_graph_structure, uild_graph_structure_reverse
+from dataloaders.visual_genome import VGDataLoader, VG, build_graph_structure
 import numpy as np
 from torch import optim
 import torch
@@ -19,8 +19,11 @@ from torch.optim.lr_scheduler import ReduceLROnPlateau
 
 # import KERN model
 from lib.kern_model import KERN
+from lib.models_kern import GLATNET
+# import models.models_kern.GLATNET as GLATNET
 
 import pdb
+from torch.autograd import Variable
 
 # os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
@@ -57,6 +60,16 @@ detector = KERN(classes=train.ind_to_classes, rel_classes=train.ind_to_predicate
                 use_ggnn_rel=conf.use_ggnn_rel, ggnn_rel_time_step_num=conf.ggnn_rel_time_step_num,
                 ggnn_rel_hidden_dim=conf.ggnn_rel_hidden_dim, ggnn_rel_output_dim=conf.ggnn_rel_output_dim,
                 use_rel_knowledge=conf.use_rel_knowledge, rel_knowledge=conf.rel_knowledge)
+
+model = GLATNET(vocab_num=[51, 152],
+                feat_dim=300,
+                nhid_glat_g=300,
+                nhid_glat_l=300,
+                nout=300,
+                dropout=0.1,
+                nheads=8,
+                blank=151,
+                types=[2]*6)
 
 # Freeze the detector
 for n, param in detector.detector.named_parameters():
@@ -108,6 +121,9 @@ else:
 
 detector.cuda()
 
+# ckpt_glat = torch.load('/home/haoxuan/code/GBERT/models/2019-10-31-03-13_2_2_2_2_2_2_concat_no_init_mask/best_test_node_mask_predicate_acc')
+# model.load_state_dict(ckpt_glat['model'])
+model.cuda()
 
 def train_epoch(epoch_num):
     detector.train()
@@ -189,17 +205,23 @@ def val_epoch():
 
     return recall, recall_mp, mean_recall, mean_recall_mp
 
-
 def glat_wrapper(total_data):
    # Batch size assumed to be 1
-   input_class = total_data['node_class'][0].unsqueeze(0)
-   adj = total_data['adj'][0].unsqueeze(0)
-   node_type = total_data['node_type'][0].unsqueeze(0)
-   adj_con = torch.clamp(adj, 0, 1)
+   input_class = total_data['node_class'][0]
+   adj = total_data['adj'][0]
+   node_type = total_data['node_type'][0]
+
+   input_class = Variable(torch.from_numpy(input_class).long().cuda().unsqueeze(0))
+   node_type = torch.from_numpy(node_type).long().cuda().unsqueeze(0)
+   # node_type = torch.from_numpy(node_type).long().unsqueeze(0)
+   adj_con = Variable(torch.from_numpy(adj).long().cuda().unsqueeze(0))
+   adj_con = torch.clamp(adj_con, 0, 1)
+
    pred_label, pred_connect = model(input_class, adj_con, node_type)
    pred_label_predicate = pred_label[0]  # flatten predicate (B*N, 51)
    pred_label_entities = pred_label[1]  # flatten entities
-   return pred_label_predicate, pred_label_entities
+   # pdb.set_trace()
+   return pred_label_predicate.data.cpu().numpy(), pred_label_entities.data.cpu().numpy()
 
 
 def glat_postprocess(gt_entry, pred_entry, if_predicting=False):
@@ -211,17 +233,33 @@ def glat_postprocess(gt_entry, pred_entry, if_predicting=False):
     #     'rel_scores': pred_scores_i,  # hack for now. (506, 51) (240, 51)
     # }
 
-    _, pred_entrys['rel_classes'] = pred_entrys['rel_scores'][:, 1:].max(1)
-    pred_entrys['pred_relations'] = torch.cat((pred_entrys['pred_rel_inds'], pred_entrys['rel_classes']), 1)
+    # pdb.set_trace()
+    pred_entry['rel_classes'] = np.expand_dims(np.argmax(pred_entry['rel_scores'][:, 1:], axis=1), axis=1)
+    # pdb.set_trace()
 
-    total_data = build_graph_structure(pred_entry, ind_to_classes, ind_to_predicates, if_predicting=if_training)
+    pred_entry['pred_relations'] = np.concatenate((pred_entry['pred_rel_inds'], pred_entry['rel_classes']), axis=1)
+
+    total_data = build_graph_structure(pred_entry, ind_to_classes, ind_to_predicates, if_predicting=if_predicting)
+
     pred_label_predicate, pred_label_entities = glat_wrapper(total_data)
     pred_entry['rel_scores'] = pred_label_predicate
 
-    # pred_entry_refined = build_graph_structure_reverse(total_data_refined, pred_entry, pred_label_predicate,
-    #                                                    if_predicting=if_training)
+    # =====================================
+    if if_predicting:
+        obj_scores0 = pred_entry['obj_scores'][pred_entry['pred_rel_inds'][:, 0]]
+        obj_scores1 = pred_entry['obj_scores'][pred_entry['pred_rel_inds'][:, 1]]
 
-    #
+        pred_scores_max = np.max(pred_entry['rel_scores'][:, 1:], axis=1)
+        # pred_classes_argmax = np.argmax(pred_entry['rel_scores'][:, 1:], axis=1)
+        # pred_classes_argmax = pred_classes_argmax + 1
+
+        rel_scores_argmaxed = pred_scores_max * obj_scores0 * obj_scores1
+        # pdb.set_trace()
+        rel_scores_idx = np.argsort(rel_scores_argmaxed, axis=0)[::-1]
+
+        pred_entry['rel_scores'] = pred_entry['rel_scores'][rel_scores_idx]
+    # =====================================
+
     # # predicate_list = []
     # for i in range(len(gt_entry['gt_relations'])):
     #     subj_idx = gt_entry['gt_relations'][i][0]
@@ -242,7 +280,7 @@ def glat_postprocess(gt_entry, pred_entry, if_predicting=False):
     #
     #     # predicate_list.append(predicate)
 
-    return gt_entry, pred_entry_refined
+    return gt_entry, pred_entry
 
 
 def val_batch(batch_num, b, evaluator, evaluator_multiple_preds, evaluator_list, evaluator_multiple_preds_list):
@@ -289,7 +327,6 @@ for epoch in range(start_epoch + 1, start_epoch + 1 + conf.num_epochs):
     #     if conf.use_ggnn_obj:
     #         writer.add_scalar('loss/class_loss', rez.mean(1)['class_loss'], epoch)
     #     writer.add_scalar('loss/total', rez.mean(1)['total'], epoch)
-    #
     # if conf.save_dir is not None:
     #     torch.save({
     #         'epoch': epoch,

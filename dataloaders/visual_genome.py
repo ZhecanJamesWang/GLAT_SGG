@@ -445,6 +445,8 @@ def build_graph_structure(entries, index2name_object, index2name_predicate, if_p
     total_data['img_id'] = []
     total_data['node_type'] = []
 
+    # for i, entry in enumerate(entries):
+    entry = entries
     if if_predicting:
         return_classes = entry['pred_classes']
         return_relations = entry['pred_relations']
@@ -452,24 +454,23 @@ def build_graph_structure(entries, index2name_object, index2name_predicate, if_p
         return_classes = entry['gt_classes']
         return_relations = entry['gt_relations']
 
-    for i, entry in enumerate(entries):
-        total_node_num = len(return_classes) + return_relations.shape[0]
-        nodes_class = [] + list(return_classes)
-        nodes_name = [] + [index2name_object[i] for i in list(return_classes)]
-        nodes_type = [] + len(return_classes) * [1]   # entity:1 predicate:0
-        adj = np.zeros(shape=(total_node_num, total_node_num))
-        entity_num = len(list(return_classes))
-        for j, relation in enumerate(return_relations.tolist()):
-            nodes_class.append(relation[-1])
-            nodes_name.append(index2name_predicate[relation[-1]])
-            nodes_type.append(0)
-            adj[relation[0]][entity_num+j] = 1
-            adj[entity_num+j][relation[1]] = 2
-        total_data['adj'].append(adj)
-        total_data['node_name'].append(np.asarray(nodes_name))
-        total_data['node_class'].append(np.asarray(nodes_class))
-        total_data['img_id'].append(entry['image_id'])
-        total_data['node_type'].append(np.asarray(nodes_type))
+    total_node_num = len(return_classes) + return_relations.shape[0]
+    nodes_class = [] + list(return_classes)
+    nodes_name = [] + [index2name_object[i] for i in list(return_classes)]
+    nodes_type = [] + len(return_classes) * [1]   # entity:1 predicate:0
+    adj = np.zeros(shape=(total_node_num, total_node_num))
+    entity_num = len(list(return_classes))
+    for j, relation in enumerate(return_relations.tolist()):
+        nodes_class.append(relation[-1])
+        nodes_name.append(index2name_predicate[relation[-1]])
+        nodes_type.append(0)
+        adj[relation[0]][entity_num+j] = 1
+        adj[entity_num+j][relation[1]] = 2
+    total_data['adj'].append(adj)
+    total_data['node_name'].append(np.asarray(nodes_name))
+    total_data['node_class'].append(np.asarray(nodes_class))
+    # total_data['img_id'].append(entry['image_id'])
+    total_data['node_type'].append(np.asarray(nodes_type))
         # pdb.set_trace()
 
     return total_data
@@ -535,11 +536,11 @@ if __name__=='__main__':
                               use_proposals=conf.use_proposals,
                               filter_non_overlap=conf.mode == 'sgdet')
     train_entities_list = []
-    train_num = 'whole'
-    val_num = 'whole'
-    test_num = 'whole'
+    train_num = 20000
+    val_num = 1000
+    test_num = 5000
 
-    if train_num == 'whole':
+    if train_num == 'full':
         train_num = len(train)
         val_num = len(val)
         test_num = len(test)
