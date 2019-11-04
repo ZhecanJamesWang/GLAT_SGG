@@ -21,6 +21,7 @@ from pycocotools.coco import COCO
 import pdb
 from tqdm import tqdm
 import pickle
+from torch.autograd import Variable
 
 class VG(Dataset):
     def __init__(self, mode, roidb_file=VG_SGG_FN, dict_file=VG_SGG_DICT_FN,
@@ -430,47 +431,84 @@ class VGDataLoader(torch.utils.data.DataLoader):
         )
         return train_load, val_load
 
-
 def build_graph_structure(entries, index2name_object, index2name_predicate, if_predicting=False):
-    # index2name_object[0] = index2name_object[0]+'object'
-    # index2name_predicate[0] = index2name_predicate[0]+'predicate'
-    # node_class_num = len(index2name_object)
-    # predicate_class_num = len(index2name_predicate)
-    # index2name = index2name_object + index2name_predicate + ['<MASK>']
-    # type_list = [2] *  + [1] * predicate_class_num + [0]
+    # Input: pred_relations(Tensor) pred_classes(Variable)
+    # Output: adj(Tensor) node_class(Variable) nodes_type(Tensor)
     total_data = {}
     total_data['adj'] = []
-    total_data['node_name'] = []
+    # total_data['node_name'] = []
     total_data['node_class'] = []
-    total_data['img_id'] = []
+    # total_data['img_id'] = []
     total_data['node_type'] = []
 
-    # for i, entry in enumerate(entries):
-    entry = entries
-    if if_predicting:
-        return_classes = entry['pred_classes']
-        return_relations = entry['pred_relations']
-    else:
-        return_classes = entry['gt_classes']
-        return_relations = entry['gt_relations']
+    entries_minibatch = {}
+    entries_minibatch['pred_relations'] = []
+    entries_minibatch['pred_classes'] = []
 
-    total_node_num = len(return_classes) + return_relations.shape[0]
-    nodes_class = [] + list(return_classes)
-    nodes_name = [] + [index2name_object[i] for i in list(return_classes)]
-    nodes_type = [] + len(return_classes) * [1]   # entity:1 predicate:0
-    adj = np.zeros(shape=(total_node_num, total_node_num))
-    entity_num = len(list(return_classes))
-    for j, relation in enumerate(return_relations.tolist()):
-        nodes_class.append(relation[-1])
-        nodes_name.append(index2name_predicate[relation[-1]])
-        nodes_type.append(0)
-        adj[relation[0]][entity_num+j] = 1
-        adj[entity_num+j][relation[1]] = 2
-    total_data['adj'].append(adj)
-    total_data['node_name'].append(np.asarray(nodes_name))
-    total_data['node_class'].append(np.asarray(nodes_class))
-    # total_data['img_id'].append(entry['image_id'])
-    total_data['node_type'].append(np.asarray(nodes_type))
+    if entries['pred_relations'].size(1) == 4:
+        for i in range(entries['pred_relations'][:, 0].max()+1):
+            rel_idx_cur_img = (entries['pred_relations'][:, 0] == i).view(-1, 1).expand(-1, 4)
+            entries_minibatch['pred_relations'].append(entries['pred_relations'][rel_idx_cur_img].view(-1, 4)[:, 1:])
+            entity_idx_cur_img = entries_minibatch['pred_relations'][i][:, 0]
+            entries_minibatch['pred_classes'].append(entries['pred_classes'][entity_idx_cur_img.min():entity_idx_cur_img.max()+1])
+            # pdb.set_trace()
+            entries_minibatch['pred_relations'][i][:, :2] = entries_minibatch['pred_relations'][i][:, :2] - entries_minibatch['pred_relations'][i][:, :2].min()
+    else:
+        entries_minibatch['pred_relations'].append(entries['pred_relations'])
+        entries_minibatch['pred_classes'].append(entries['pred_classes'])
+
+    for i in range(len(entries_minibatch['pred_classes'])):
+        # if if_predicting:
+        #     return_classes = entry['pred_classes']
+        #     return_relations = entry['pred_relations']
+        # else:
+        #     return_classes = entry['gt_classes']
+        #     return_relations = entry['gt_relations']
+        return_classes = entries_minibatch['pred_classes'][i]
+        return_relations = entries_minibatch['pred_relations'][i]
+        entity_num = return_classes.size(0)
+        total_node_num = entity_num + return_relations.size(0)
+        # pdb.set_trace()
+        nodes_class = torch.cat((return_classes, Variable(return_relations[:, -1])), dim=0)
+        # pdb.set_trace()
+        nodes_type = torch.ones_like(return_classes).data
+        nodes_type = torch.cat((nodes_type, torch.zeros_like(return_relations[:,0])), dim=0)
+        adj = torch.zeros(total_node_num, total_node_num).type_as(return_relations)
+        # pdb.set_trace()
+        # print('position', i)
+        # print('------adj size', adj.size(), '------relation size',return_relations.size(), )
+        # nodes_name = [] + [index2name_object[i] for i in return_classes.tolist()]
+        for j, relation in enumerate(return_relations.tolist()):
+            # nodes_name.append(index2name_predicate[relation[-1]])
+            try:
+                adj[relation[0]][entity_num+j] = 1
+            except Exception as e:
+                print(e)
+                pdb.set_trace()
+            # print('position', )
+            adj[entity_num+j][relation[1]] = 2
+        total_data['adj'].append(adj)
+        # total_data['node_name'].append(nodes_name)
+        total_data['node_class'].append(nodes_class)
+        total_data['node_type'].append(nodes_type)
+
+        # total_node_num = len(return_classes) + return_relations.shape[0]
+        # nodes_class = [] + list(return_classes)
+        # nodes_name = [] + [index2name_object[i] for i in list(return_classes)]
+        # nodes_type = [] + len(return_classes) * [1]   # entity:1 predicate:0
+        # adj = torch.zeros(total_node_num, total_node_num)
+        # entity_num = len(list(return_classes))
+        # for j, relation in enumerate(return_relations.tolist()):
+        #     nodes_class.append(relation[-1])
+        #     nodes_name.append(index2name_predicate[relation[-1]])
+        #     nodes_type.append(0)
+        #     adj[relation[0]][entity_num+j] = 1
+        #     adj[entity_num+j][relation[1]] = 2
+        # total_data['adj'].append(adj)
+        # total_data['node_name'].append(np.asarray(nodes_name))
+        # total_data['node_class'].append(np.asarray(nodes_class))
+        # # total_data['img_id'].append(entry['image_id'])
+        # total_data['node_type'].append(np.asarray(nodes_type))
         # pdb.set_trace()
 
     return total_data

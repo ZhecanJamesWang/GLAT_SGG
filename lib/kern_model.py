@@ -397,6 +397,8 @@ class KERN(nn.Module):
                 obj_labels=result.rm_obj_labels if self.training or self.mode == 'predcls' else None,
                 boxes_per_cls=result.boxes_all)
 
+        result.rel_inds = rel_inds
+        # pdb.set_trace()
 
         if self.training:
             return result

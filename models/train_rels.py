@@ -61,18 +61,22 @@ detector = KERN(classes=train.ind_to_classes, rel_classes=train.ind_to_predicate
                 ggnn_rel_hidden_dim=conf.ggnn_rel_hidden_dim, ggnn_rel_output_dim=conf.ggnn_rel_output_dim,
                 use_rel_knowledge=conf.use_rel_knowledge, rel_knowledge=conf.rel_knowledge)
 
-model = GLATNET(vocab_num=[51, 152],
+model = GLATNET(vocab_num=[52, 153],
                 feat_dim=300,
                 nhid_glat_g=300,
                 nhid_glat_l=300,
                 nout=300,
                 dropout=0.1,
                 nheads=8,
-                blank=151,
+                blank=152,
                 types=[2]*6)
 
 # Freeze the detector
-for n, param in detector.detector.named_parameters():
+# for n, param in detector.detector.named_parameters():
+#     param.requires_grad = False
+
+# Freeze all the kern model detector
+for n, param in detector.named_parameters():
     param.requires_grad = False
 
 print(print_para(detector), flush=True)
@@ -81,11 +85,10 @@ print(print_para(detector), flush=True)
 def get_optim(lr):
     # Lower the learning rate on the VGG fully connected layers by 1/10th. It's a hack, but it helps
     # stabilize the models.
-    fc_params = [p for n,p in detector.named_parameters() if n.startswith('roi_fmap') and p.requires_grad]
-    non_fc_params = [p for n,p in detector.named_parameters() if not n.startswith('roi_fmap') and p.requires_grad]
-    params = [{'params': fc_params, 'lr': lr / 10.0}, {'params': non_fc_params}]
-    # params = [p for n,p in detector.named_parameters() if p.requires_grad]
-
+    # fc_params = [p for n,p in detector.named_parameters() if n.startswith('roi_fmap') and p.requires_grad]
+    # non_fc_params = [p for n,p in detector.named_parameters() if not n.startswith('roi_fmap') and p.requires_grad]
+    # params = [{'params': fc_params, 'lr': lr / 10.0}, {'params': non_fc_params}]
+    params = model.parameters()
     if conf.adam:
         optimizer = optim.Adam(params, weight_decay=conf.adamwd, lr=lr, eps=1e-3)
     else:
@@ -95,38 +98,46 @@ def get_optim(lr):
     #                               verbose=True, threshold=0.0001, threshold_mode='abs', cooldown=1)
     return optimizer #, scheduler
 
-
-ckpt = torch.load(conf.ckpt)
-
-if conf.ckpt.split('-')[-2].split('/')[-1] == 'vgrel':
-    print("Loading EVERYTHING")
-    start_epoch = ckpt['epoch']
-
-    if not optimistic_restore(detector, ckpt['state_dict']):
-        start_epoch = -1
-        # optimistic_restore(detector.detector, torch.load('checkpoints/vgdet/vg-28.tar')['state_dict'])
-else:
-    start_epoch = -1
-    optimistic_restore(detector.detector, ckpt['state_dict'])
-
-    detector.roi_fmap[1][0].weight.data.copy_(ckpt['state_dict']['roi_fmap.0.weight'])
-    detector.roi_fmap[1][3].weight.data.copy_(ckpt['state_dict']['roi_fmap.3.weight'])
-    detector.roi_fmap[1][0].bias.data.copy_(ckpt['state_dict']['roi_fmap.0.bias'])
-    detector.roi_fmap[1][3].bias.data.copy_(ckpt['state_dict']['roi_fmap.3.bias'])
-
-    detector.roi_fmap_obj[0].weight.data.copy_(ckpt['state_dict']['roi_fmap.0.weight'])
-    detector.roi_fmap_obj[3].weight.data.copy_(ckpt['state_dict']['roi_fmap.3.weight'])
-    detector.roi_fmap_obj[0].bias.data.copy_(ckpt['state_dict']['roi_fmap.0.bias'])
-    detector.roi_fmap_obj[3].bias.data.copy_(ckpt['state_dict']['roi_fmap.3.bias'])
-
 detector.cuda()
+ckpt = torch.load(conf.ckpt)
+print("Loading EVERYTHING")
+optimistic_restore(detector, ckpt['state_dict'])
+start_epoch = -1
+
+# if conf.ckpt.split('-')[-2].split('/')[-1] == 'vgrel':
+#     print("Loading EVERYTHING")
+#     start_epoch = ckpt['epoch']
+#
+#     if not optimistic_restore(detector, ckpt['state_dict']):
+#         start_epoch = -1
+#         # optimistic_restore(detector.detector, torch.load('checkpoints/vgdet/vg-28.tar')['state_dict'])
+# else:
+#     start_epoch = -1
+#     optimistic_restore(detector.detector, ckpt['state_dict'])
+#
+#     detector.roi_fmap[1][0].weight.data.copy_(ckpt['state_dict']['roi_fmap.0.weight'])
+#     detector.roi_fmap[1][3].weight.data.copy_(ckpt['state_dict']['roi_fmap.3.weight'])
+#     detector.roi_fmap[1][0].bias.data.copy_(ckpt['state_dict']['roi_fmap.0.bias'])
+#     detector.roi_fmap[1][3].bias.data.copy_(ckpt['state_dict']['roi_fmap.3.bias'])
+#
+#     detector.roi_fmap_obj[0].weight.data.copy_(ckpt['state_dict']['roi_fmap.0.weight'])
+#     detector.roi_fmap_obj[3].weight.data.copy_(ckpt['state_dict']['roi_fmap.3.weight'])
+#     detector.roi_fmap_obj[0].bias.data.copy_(ckpt['state_dict']['roi_fmap.0.bias'])
+#     detector.roi_fmap_obj[3].bias.data.copy_(ckpt['state_dict']['roi_fmap.3.bias'])
+
 
 # ckpt_glat = torch.load('/home/haoxuan/code/GBERT/models/2019-10-31-03-13_2_2_2_2_2_2_concat_no_init_mask/best_test_node_mask_predicate_acc')
+ckpt_glat = torch.load('/home/tangtangwzc/Common_sense/models/2019-11-03-17-51_2_2_2_2_2_2_concat_no_init_mask/best_test_node_mask_predicate_acc.pth')
+optimistic_restore(model, ckpt_glat['model'])
+print('finish pretrained loading')
 # model.load_state_dict(ckpt_glat['model'])
 model.cuda()
 
 def train_epoch(epoch_num):
     detector.train()
+    for n, param in detector.named_parameters():
+        param.requires_grad = False
+    model.train()
     tr = []
     start = time.time()
     for b, batch in enumerate(train_loader):
@@ -163,6 +174,20 @@ def train_batch(b, verbose=False):
     :return:
     """
     result = detector[b]
+    # result.rm_obj_dists(num_entities, 151)  result.obj_preds(num_entities)  result.rm_obj_labels(num_entities)
+    # result.rel_dists(num_predicates, 51)  result.rel_labels(num_predicates)
+    # result.rel_inds(num_predicates, 4)
+    # pdb.set_trace()
+
+    pred_entry = {
+        'pred_classes': result.obj_preds,   # (num_entities) Tensor Variable
+        'pred_rel_inds': result.rel_inds,  # (num_predicates, 3) Tensor Variable
+        'rel_scores': result.rel_dists,   # (num_predicates, 51) Tensor Variable
+    }
+    pred_entry = glat_postprocess(pred_entry, if_predicting=False)
+    result.obj_preds = pred_entry['pred_classes']
+    result.rel_inds = pred_entry['pred_rel_inds']
+    result.rel_dists = pred_entry['rel_scores']
 
     losses = {}
     if conf.use_ggnn_obj: # if not use ggnn obj, we just use scores of faster rcnn as their scores, there is no need to train
@@ -185,6 +210,7 @@ def train_batch(b, verbose=False):
 def val_epoch():
 
     detector.eval()
+    model.eval()
     evaluator_list = [] # for calculating recall of each relationship except no relationship
     evaluator_multiple_preds_list = []
     for index, name in enumerate(ind_to_predicates):
@@ -205,26 +231,82 @@ def val_epoch():
 
     return recall, recall_mp, mean_recall, mean_recall_mp
 
+
+def my_collate(total_data):
+    blank_idx = 152
+    max_length = 0
+    sample_num = len(total_data['node_class'])
+    for i in range(sample_num):
+        max_length = max(max_length, total_data['node_class'][i].size(0))
+
+    input_classes = []
+    adjs = []
+    node_types = []
+    for i in range(sample_num):
+        input_class = total_data['node_class'][i]
+        adj = total_data['adj'][i]
+        node_type = total_data['node_type'][i]
+        pad_input_class = tensor2variable(blank_idx * torch.ones(max_length - input_class.size(0)).long().cuda())
+        input_classes.append(torch.cat((input_class, pad_input_class), 0).unsqueeze(0))
+        # input_classes.append(torch.cat((input_class, blank_idx*torch.ones(max_length-input_class.size(0)).long().cuda()), 0).unsqueeze(0))
+        new_adj = torch.cat((adj, torch.zeros(max_length-adj.size(0), adj.size(1)).long().cuda()), 0)
+        if max_length != new_adj.size(1):
+            new_adj = torch.cat((new_adj, torch.zeros(new_adj.size(0), max_length-new_adj.size(1)).long().cuda()), 1)
+        adjs.append(new_adj.unsqueeze(0))
+        # pdb.set_trace()
+        node_types.append(torch.cat((node_type, 2 * torch.ones(max_length-node_type.size(0)).long().cuda()), 0).unsqueeze(0))
+
+    input_classes = torch.cat(input_classes, 0)
+    adjs = torch.cat(adjs, 0)
+    adjs_lbl = adjs
+    adjs_con = torch.clamp(adjs, 0, 1)
+    node_types = torch.cat(node_types, 0)
+
+    return input_classes, adjs_con, adjs_lbl, node_types
+
+
 def glat_wrapper(total_data):
-   # Batch size assumed to be 1
-   input_class = total_data['node_class'][0]
-   adj = total_data['adj'][0]
-   node_type = total_data['node_type'][0]
-
-   input_class = Variable(torch.from_numpy(input_class).long().cuda().unsqueeze(0))
-   node_type = torch.from_numpy(node_type).long().cuda().unsqueeze(0)
-   # node_type = torch.from_numpy(node_type).long().unsqueeze(0)
-   adj_con = Variable(torch.from_numpy(adj).long().cuda().unsqueeze(0))
-   adj_con = torch.clamp(adj_con, 0, 1)
-
-   pred_label, pred_connect = model(input_class, adj_con, node_type)
-   pred_label_predicate = pred_label[0]  # flatten predicate (B*N, 51)
-   pred_label_entities = pred_label[1]  # flatten entities
-   # pdb.set_trace()
-   return pred_label_predicate.data.cpu().numpy(), pred_label_entities.data.cpu().numpy()
+    # Batch size assumed to be 1
+    input_class, adjs_con, adjs_lbl, node_type = my_collate(total_data)
+    if torch.is_tensor(input_class):
+        input_class = Variable(input_class)
+    if not torch.is_tensor(node_type):
+        node_type = node_type.data
+    if torch.is_tensor(adjs_con):
+        adj_con = Variable(adjs_con)
+    # pdb.set_trace()
+    pred_label, pred_connect = model(input_class, adj_con, node_type)
+    pred_label_predicate = pred_label[0]  # flatten predicate (B*N, 51)
+    pred_label_entities = pred_label[1]  # flatten entities
+    return pred_label_predicate, pred_label_entities
+    # return pred_label_predicate.data.cpu().numpy(), pred_label_entities.data.cpu().numpy()
 
 
-def glat_postprocess(gt_entry, pred_entry, if_predicting=False):
+def numpy2cuda_dict(dict):
+    for key, value in dict.items():
+        dict[key] = torch.from_numpy(value).cuda()
+    return dict
+
+def cuda2numpy_dict(dict):
+    for key, value in dict.items():
+        # pdb.set_trace()
+        if torch.is_tensor(value):
+            dict[key] = value.cpu().numpy()
+        else:
+            dict[key] = value.data.cpu().numpy()
+    return dict
+
+def tensor2variable(input):
+    if torch.is_tensor(input):
+        input = Variable(input)
+    return input
+
+def variable2tensor(input):
+    if not torch.is_tensor(input):
+        input = input.data
+    return input
+
+def glat_postprocess(pred_entry, if_predicting=False):
     # pred_entry = {
     #     'pred_boxes': boxes_i * BOX_SCALE / IM_SCALE,  # (23, 4) (16, 4)
     #     'pred_classes': objs_i,  # (23,) (16,)
@@ -232,12 +314,15 @@ def glat_postprocess(gt_entry, pred_entry, if_predicting=False):
     #     'obj_scores': obj_scores_i,  # (23,) (16,)
     #     'rel_scores': pred_scores_i,  # hack for now. (506, 51) (240, 51)
     # }
+    if if_predicting:
+        pred_entry = numpy2cuda_dict(pred_entry)
 
-    # pdb.set_trace()
-    pred_entry['rel_classes'] = np.expand_dims(np.argmax(pred_entry['rel_scores'][:, 1:], axis=1), axis=1)
-    # pdb.set_trace()
+    pred_entry['rel_scores'] = tensor2variable(pred_entry['rel_scores'])
+    pred_entry['pred_classes'] = tensor2variable(pred_entry['pred_classes'])
 
-    pred_entry['pred_relations'] = np.concatenate((pred_entry['pred_rel_inds'], pred_entry['rel_classes']), axis=1)
+    pred_entry['rel_classes'] = torch.max(pred_entry['rel_scores'][:, 1:], dim=1)[1].unsqueeze(1)
+    pred_entry['rel_classes'] = variable2tensor(pred_entry['rel_classes'])
+    pred_entry['pred_relations'] = torch.cat((pred_entry['pred_rel_inds'], pred_entry['rel_classes']), dim=1)
 
     total_data = build_graph_structure(pred_entry, ind_to_classes, ind_to_predicates, if_predicting=if_predicting)
 
@@ -246,19 +331,16 @@ def glat_postprocess(gt_entry, pred_entry, if_predicting=False):
 
     # =====================================
     if if_predicting:
+        pred_entry = cuda2numpy_dict(pred_entry)
         obj_scores0 = pred_entry['obj_scores'][pred_entry['pred_rel_inds'][:, 0]]
         obj_scores1 = pred_entry['obj_scores'][pred_entry['pred_rel_inds'][:, 1]]
 
         pred_scores_max = np.max(pred_entry['rel_scores'][:, 1:], axis=1)
-        # pred_classes_argmax = np.argmax(pred_entry['rel_scores'][:, 1:], axis=1)
-        # pred_classes_argmax = pred_classes_argmax + 1
 
         rel_scores_argmaxed = pred_scores_max * obj_scores0 * obj_scores1
-        # pdb.set_trace()
         rel_scores_idx = np.argsort(rel_scores_argmaxed, axis=0)[::-1]
 
         pred_entry['rel_scores'] = pred_entry['rel_scores'][rel_scores_idx]
-    # =====================================
 
     # # predicate_list = []
     # for i in range(len(gt_entry['gt_relations'])):
@@ -280,7 +362,7 @@ def glat_postprocess(gt_entry, pred_entry, if_predicting=False):
     #
     #     # predicate_list.append(predicate)
 
-    return gt_entry, pred_entry
+    return pred_entry
 
 
 def val_batch(batch_num, b, evaluator, evaluator_multiple_preds, evaluator_list, evaluator_multiple_preds_list):
@@ -309,13 +391,14 @@ def val_batch(batch_num, b, evaluator, evaluator_multiple_preds, evaluator_list,
             'rel_scores': pred_scores_i,  # hack for now. (506, 51) (240, 51)
         }
 
-        gt_entry, pred_entry = glat_postprocess(gt_entry, pred_entry, if_predicting=True)
+        pred_entry = glat_postprocess(pred_entry, if_predicting=True)
 
         eval_entry(conf.mode, gt_entry, pred_entry, evaluator, evaluator_multiple_preds,
                    evaluator_list, evaluator_multiple_preds_list)
 
 print("Training starts now!")
-optimizer = get_optim(conf.lr * conf.num_gpus * conf.batch_size)
+# optimizer = get_optim(conf.lr * conf.num_gpus * conf.batch_size)
+optimizer = get_optim(conf.lr)
 
 for epoch in range(start_epoch + 1, start_epoch + 1 + conf.num_epochs):
     print("start training epoch: ", epoch)
