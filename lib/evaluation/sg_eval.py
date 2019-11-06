@@ -193,8 +193,8 @@ def evaluate_recall(gt_rels, gt_boxes, gt_classes,
                  rel_scores, cls_scores)
 
     scores_overall = relation_scores.prod(1)
-    if not np.all(scores_overall[1:] <= scores_overall[:-1] + 1e-5):
-        print("Somehow the relations weren't sorted properly: \n{}".format(scores_overall))
+    # if not np.all(scores_overall[1:] <= scores_overall[:-1] + 1e-5):
+    #     print("Somehow the relations weren't sorted properly: \n{}".format(scores_overall))
         # raise ValueError("Somehow the relations werent sorted properly")
 
     # Compute recall. It's most efficient to match once and then do recall after

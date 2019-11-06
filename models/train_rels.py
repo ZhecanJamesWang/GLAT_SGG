@@ -378,7 +378,7 @@ def glat_postprocess(pred_entry, if_predicting=False):
     pred_entry['rel_scores'] = tensor2variable(pred_entry['rel_scores'])
     pred_entry['pred_classes'] = tensor2variable(pred_entry['pred_classes'])
 
-    pred_entry['rel_classes'] = torch.max(pred_entry['rel_scores'][:, 1:], dim=1)[1].unsqueeze(1)
+    pred_entry['rel_classes'] = torch.max(pred_entry['rel_scores'][:, 1:], dim=1)[1].unsqueeze(1) + 1
     pred_entry['rel_classes'] = variable2tensor(pred_entry['rel_classes'])
     pred_entry['pred_relations'] = torch.cat((pred_entry['pred_rel_inds'], pred_entry['rel_classes']), dim=1)
 
@@ -506,7 +506,7 @@ def val_batch(batch_num, b, evaluator, evaluator_multiple_preds, evaluator_list,
             pred_entry['rel_scores'] = np.concatenate((rel_scores_one_hot, pred_scores_i_a100), axis=0)
         # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-        pred_entry = rank_predicate(pred_entry)
+        # pred_entry = rank_predicate(pred_entry)
 
         eval_entry(conf.mode, gt_entry, pred_entry, evaluator, evaluator_multiple_preds,
                    evaluator_list, evaluator_multiple_preds_list)

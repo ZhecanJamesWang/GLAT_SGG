@@ -2,15 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="11066203-4164-4413-bd1b-0e742342911b" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/deployment.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config.py" beforeDir="false" afterPath="$PROJECT_DIR$/config.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/kern_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/lib/kern_model.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/surgery.py" beforeDir="false" afterPath="$PROJECT_DIR$/lib/surgery.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/models/eval_rels.py" beforeDir="false" afterPath="$PROJECT_DIR$/models/eval_rels.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/evaluation/sg_eval.py" beforeDir="false" afterPath="$PROJECT_DIR$/lib/evaluation/sg_eval.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/evaluation/sg_eval_all_rel_cates.py" beforeDir="false" afterPath="$PROJECT_DIR$/lib/evaluation/sg_eval_all_rel_cates.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/models/train_rels.py" beforeDir="false" afterPath="$PROJECT_DIR$/models/train_rels.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/eval_kern_predcls.sh" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/eval_kern_predcls.sh" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/train_kern_predcls_glat.sh" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/train_kern_predcls_glat.sh" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -19,7 +13,7 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="CoverageDataManager">
-    <SUITE FILE_PATH="coverage/KERN$train_rels_py.coverage" NAME="train_rels.py Coverage Results" MODIFIED="1572998388078" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="/home/tangtangwzc/KERN" />
+    <SUITE FILE_PATH="coverage/KERN$train_rels_py.coverage" NAME="train_rels.py Coverage Results" MODIFIED="1573017209262" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="/home/tangtangwzc/KERN" />
   </component>
   <component name="DatabaseView">
     <option name="SHOW_INTERMEDIATE" value="true" />
@@ -53,14 +47,14 @@
       </usages-collector>
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
-          <entry key="py" value="4731" />
+          <entry key="py" value="5040" />
           <entry key="sh" value="3" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
           <entry key="PLAIN_TEXT" value="3" />
-          <entry key="Python" value="4731" />
+          <entry key="Python" value="5040" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.lifecycle.project">
@@ -111,11 +105,11 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/models/train_rels.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="171">
-              <caret line="433" column="18" selection-start-line="433" selection-start-column="4" selection-end-line="433" selection-end-column="18" />
+            <state>
+              <caret line="424" lean-forward="true" selection-start-line="424" selection-end-line="424" />
               <folding>
                 <element signature="e#94#171#0" expanded="true" />
-                <marker date="1572998361769" expanded="true" signature="17726:18268" ph="..." />
+                <marker date="1573017196658" expanded="true" signature="17730:18272" ph="..." />
               </folding>
             </state>
           </provider>
@@ -124,8 +118,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/dataloaders/visual_genome.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="126">
-              <caret line="443" column="23" selection-start-line="443" selection-start-column="23" selection-end-line="443" selection-end-column="23" />
+            <state relative-caret-position="260">
+              <caret line="508" column="48" selection-start-line="508" selection-start-column="48" selection-end-line="508" selection-end-column="48" />
               <folding>
                 <element signature="e#71#82#0" expanded="true" />
               </folding>
@@ -162,7 +156,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>return_top100</find>
       <find>rels_b_100</find>
       <find>ModelConfig</find>
       <find>result.rel_dists</find>
@@ -188,10 +181,11 @@
       <find>glat_postprocess</find>
       <find>argmax</find>
       <find>val_batch</find>
-      <find>somehow</find>
       <find>rank_predicate</find>
       <find>Somehow</find>
       <find>rank_predicat</find>
+      <find>somehow</find>
+      <find>def glat_pr</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -223,10 +217,11 @@
     <detection-done>true</detection-done>
     <sorting>DEFINITION_ORDER</sorting>
   </component>
-  <component name="ProjectFrameBounds" fullScreen="true">
-    <option name="x" value="1440" />
-    <option name="width" value="1600" />
-    <option name="height" value="900" />
+  <component name="ProjectFrameBounds">
+    <option name="x" value="8" />
+    <option name="y" value="22" />
+    <option name="width" value="1661" />
+    <option name="height" value="864" />
   </component>
   <component name="ProjectView">
     <navigator proportions="" version="1">
@@ -338,15 +333,16 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="1440" y="0" width="1600" height="900" extended-state="0" />
+    <frame x="8" y="22" width="1661" height="864" extended-state="0" />
+    <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.16302952" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.15688697" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.32891566" />
       <window_info anchor="bottom" id="Run" order="2" weight="0.3987952" />
-      <window_info active="true" anchor="bottom" id="Debug" order="3" visible="true" weight="0.38915664" />
+      <window_info active="true" anchor="bottom" id="Debug" order="3" visible="true" weight="0.0" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" />
@@ -361,7 +357,7 @@
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
       <window_info anchor="right" id="Remote Host" order="3" weight="0.32991013" />
-      <window_info anchor="right" id="SciView" order="4" visible="true" weight="0.32991013" />
+      <window_info anchor="right" id="SciView" order="4" visible="true" weight="0.035206918" />
       <window_info anchor="right" id="Database" order="5" weight="0.32991013" />
     </layout>
     <layout-to-restore>
@@ -398,6 +394,13 @@
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/train_rels.py</url>
+          <line>508</line>
+          <option name="timeStamp" value="59" />
+        </line-breakpoint>
+      </breakpoints>
       <default-breakpoints>
         <breakpoint type="python-exception">
           <properties notifyOnTerminate="true" exception="BaseException">
@@ -510,47 +513,47 @@ Unexpected key g</expression-string>
     </expressions>
     <expressions id="evaluateExpression">
       <expression>
-        <expression-string>rel_scores_idx</expression-string>
+        <expression-string>pred_entry['rel_scores'][:, 1:].argmax(1)</expression-string>
         <language-id>Python</language-id>
         <evaluation-mode>EXPRESSION</evaluation-mode>
       </expression>
       <expression>
-        <expression-string>obj_scores1</expression-string>
+        <expression-string>pred_entry_init['rel_scores'][:, 1:].argmax(1)</expression-string>
         <language-id>Python</language-id>
         <evaluation-mode>EXPRESSION</evaluation-mode>
       </expression>
       <expression>
-        <expression-string>obj_scores0</expression-string>
+        <expression-string>pred_entry['rel_scores'][:, :].argmax(1)</expression-string>
         <language-id>Python</language-id>
         <evaluation-mode>EXPRESSION</evaluation-mode>
       </expression>
       <expression>
-        <expression-string>pred_scores_max</expression-string>
+        <expression-string>pred_entry['rel_scores'][:,:].argmax(1)</expression-string>
         <language-id>Python</language-id>
         <evaluation-mode>EXPRESSION</evaluation-mode>
       </expression>
       <expression>
-        <expression-string>[rel_scores_one_hot[i,:].max() for i in range(len(pred_entry['rel_scores']))]</expression-string>
+        <expression-string>pred_entry_init['rel_scores'][:,1:].argmax(1)</expression-string>
         <language-id>Python</language-id>
         <evaluation-mode>EXPRESSION</evaluation-mode>
       </expression>
       <expression>
-        <expression-string>[rel_scores_one_hot[i,:].max() for i in len(pred_entry['rel_scores'])]</expression-string>
+        <expression-string>pred_entry['rel_scores'][:,1:].argmax(1)</expression-string>
         <language-id>Python</language-id>
         <evaluation-mode>EXPRESSION</evaluation-mode>
       </expression>
       <expression>
-        <expression-string>[rel_scores_one_hot[i,:].max() for i in range(100)]</expression-string>
+        <expression-string>pred_entry['rel_scores']</expression-string>
         <language-id>Python</language-id>
         <evaluation-mode>EXPRESSION</evaluation-mode>
       </expression>
       <expression>
-        <expression-string>rels_i_a100.shape</expression-string>
+        <expression-string>pred_entry</expression-string>
         <language-id>Python</language-id>
         <evaluation-mode>EXPRESSION</evaluation-mode>
       </expression>
       <expression>
-        <expression-string>rel_scores_one_hot[8,:].max()</expression-string>
+        <expression-string>pred_entry['rel_scores'][:, :].argmax(1) + 1</expression-string>
         <language-id>Python</language-id>
         <evaluation-mode>EXPRESSION</evaluation-mode>
       </expression>
@@ -690,16 +693,6 @@ Unexpected key g</expression-string>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/dataloaders/visual_genome.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="126">
-          <caret line="443" column="23" selection-start-line="443" selection-start-column="23" selection-end-line="443" selection-end-column="23" />
-          <folding>
-            <element signature="e#71#82#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/lib/evaluation/sg_eval.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="548">
@@ -717,13 +710,23 @@ Unexpected key g</expression-string>
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/dataloaders/visual_genome.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="260">
+          <caret line="508" column="48" selection-start-line="508" selection-start-column="48" selection-end-line="508" selection-end-column="48" />
+          <folding>
+            <element signature="e#71#82#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/models/train_rels.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="171">
-          <caret line="433" column="18" selection-start-line="433" selection-start-column="4" selection-end-line="433" selection-end-column="18" />
+        <state>
+          <caret line="424" lean-forward="true" selection-start-line="424" selection-end-line="424" />
           <folding>
             <element signature="e#94#171#0" expanded="true" />
-            <marker date="1572998361769" expanded="true" signature="17726:18268" ph="..." />
+            <marker date="1573017196658" expanded="true" signature="17730:18272" ph="..." />
           </folding>
         </state>
       </provider>
