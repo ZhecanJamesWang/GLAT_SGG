@@ -12,6 +12,7 @@ import dill as pkl
 import os
 from lib.kern_model import KERN
 
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
 conf = ModelConfig()
 

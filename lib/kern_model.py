@@ -196,7 +196,8 @@ class KERN(nn.Module):
                  use_obj_knowledge=True,
                  use_rel_knowledge=True,
                  obj_knowledge='',
-                 rel_knowledge=''):
+                 rel_knowledge='',
+                 return_top100=False):
 
         """
         :param classes: Object classes
@@ -206,6 +207,9 @@ class KERN(nn.Module):
         :param require_overlap_det: Whether two objects must intersect
         """
         super(KERN, self).__init__()
+
+        self.return_top100 = return_top100
+
         self.classes = classes
         self.rel_classes = rel_classes
         self.num_gpus = num_gpus
@@ -278,7 +282,7 @@ class KERN(nn.Module):
         return len(self.classes)
 
     @property
-    def num_rels(self):
+    def num_rels(slf):
         return len(self.rel_classes)
 
     def visual_rep(self, features, rois, pair_inds):
@@ -401,7 +405,23 @@ class KERN(nn.Module):
         # pdb.set_trace()
 
         if self.training:
-            return result
+            if self.return_top100:
+                twod_inds = arange(result.obj_preds.data) * self.num_classes + result.obj_preds.data
+                result.obj_scores = F.softmax(result.rm_obj_dists, dim=1).view(-1)[twod_inds]
+
+                # Bbox regression
+                if self.mode == 'sgdet':
+                    bboxes = result.boxes_all.view(-1, 4)[twod_inds].view(result.boxes_all.size(0), 4)
+                else:
+                    # Boxes will get fixed by filter_dets function.
+                    bboxes = result.rm_box_priors
+
+                rel_rep = F.softmax(result.rel_dists, dim=1)
+
+                return result, filter_dets(bboxes, result.obj_scores,
+                                   result.obj_preds, rel_inds[:, 1:], rel_rep, self.return_top100, self.training)
+            else:
+                return result, []
 
         twod_inds = arange(result.obj_preds.data) * self.num_classes + result.obj_preds.data
         result.obj_scores = F.softmax(result.rm_obj_dists, dim=1).view(-1)[twod_inds]
@@ -416,7 +436,7 @@ class KERN(nn.Module):
         rel_rep = F.softmax(result.rel_dists, dim=1)
 
         return filter_dets(bboxes, result.obj_scores,
-                           result.obj_preds, rel_inds[:, 1:], rel_rep)
+                           result.obj_preds, rel_inds[:, 1:], rel_rep, self.return_top100, self.training)
 
     def __getitem__(self, batch):
         """ Hack to do multi-GPU training"""

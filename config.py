@@ -67,6 +67,7 @@ class ModelConfig(object):
         """
         Defaults
         """
+        self.return_top100 = True
         self.ckpt = None
         self.save_dir = None
         self.lr = None

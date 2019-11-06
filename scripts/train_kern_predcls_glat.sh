@@ -5,8 +5,8 @@ python models/train_rels.py -m predcls -p 100 -clip 5 \
 -ckpt checkpoints/kern_sgcls_predcls.tar \
 -val_size 5000 \
 -adam \
--b 2 \
--lr 1e-5 \
+-b 1 \
+-lr 1e-4 \
 -use_ggnn_rel \
 -ggnn_rel_time_step_num 3 \
 -ggnn_rel_hidden_dim 512 \

@@ -24,8 +24,9 @@ from lib.models_kern import GLATNET
 
 import pdb
 from torch.autograd import Variable
+import copy
 
-# os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
 conf = ModelConfig()
 
@@ -46,6 +47,8 @@ train, val, _ = VG.splits(num_val_im=conf.val_size, filter_duplicate_rels=True,
 ind_to_predicates = train.ind_to_predicates # ind_to_predicates[0] means no relationship
 ind_to_classes = train.ind_to_classes
 
+print("conf.batch_size: ", conf.batch_size)
+
 train_loader, val_loader = VGDataLoader.splits(train, val, mode='rel',
                                                batch_size=conf.batch_size,
                                                num_workers=conf.num_workers,
@@ -59,7 +62,7 @@ detector = KERN(classes=train.ind_to_classes, rel_classes=train.ind_to_predicate
                 use_obj_knowledge=conf.use_obj_knowledge, obj_knowledge=conf.obj_knowledge,
                 use_ggnn_rel=conf.use_ggnn_rel, ggnn_rel_time_step_num=conf.ggnn_rel_time_step_num,
                 ggnn_rel_hidden_dim=conf.ggnn_rel_hidden_dim, ggnn_rel_output_dim=conf.ggnn_rel_output_dim,
-                use_rel_knowledge=conf.use_rel_knowledge, rel_knowledge=conf.rel_knowledge)
+                use_rel_knowledge=conf.use_rel_knowledge, rel_knowledge=conf.rel_knowledge, return_top100=conf.return_top100)
 
 model = GLATNET(vocab_num=[52, 153],
                 feat_dim=300,
@@ -126,11 +129,11 @@ start_epoch = -1
 #     detector.roi_fmap_obj[3].bias.data.copy_(ckpt['state_dict']['roi_fmap.3.bias'])
 
 
-# ckpt_glat = torch.load('/home/haoxuan/code/GBERT/models/2019-10-31-03-13_2_2_2_2_2_2_concat_no_init_mask/best_test_node_mask_predicate_acc')
-ckpt_glat = torch.load('/home/tangtangwzc/Common_sense/models/2019-11-03-17-51_2_2_2_2_2_2_concat_no_init_mask/best_test_node_mask_predicate_acc.pth')
-optimistic_restore(model, ckpt_glat['model'])
-print('finish pretrained loading')
-# model.load_state_dict(ckpt_glat['model'])
+# # ckpt_glat = torch.load('/home/haoxuan/code/GBERT/models/2019-10-31-03-13_2_2_2_2_2_2_concat_no_init_mask/best_test_node_mask_predicate_acc')
+# ckpt_glat = torch.load('/home/tangtangwzc/Common_sense/models/2019-11-03-17-51_2_2_2_2_2_2_concat_no_init_mask/best_test_node_mask_predicate_acc.pth')
+# optimistic_restore(model, ckpt_glat['model'])
+# print('finish pretrained loading')
+# # model.load_state_dict(ckpt_glat['model'])
 model.cuda()
 
 def train_epoch(epoch_num):
@@ -173,21 +176,70 @@ def train_batch(b, verbose=False):
           :param gt_classes: [num_gt, 2] gt boxes where each one is (img_id, class)
     :return:
     """
-    result = detector[b]
+    result, det_res = detector[b]
     # result.rm_obj_dists(num_entities, 151)  result.obj_preds(num_entities)  result.rm_obj_labels(num_entities)
     # result.rel_dists(num_predicates, 51)  result.rel_labels(num_predicates)
     # result.rel_inds(num_predicates, 4)
     # pdb.set_trace()
 
-    pred_entry = {
-        'pred_classes': result.obj_preds,   # (num_entities) Tensor Variable
-        'pred_rel_inds': result.rel_inds,  # (num_predicates, 3) Tensor Variable
-        'rel_scores': result.rel_dists,   # (num_predicates, 51) Tensor Variable
-    }
+
+    if conf.return_top100 and len(det_res) != 0:
+
+        pred_entry = {
+            'pred_classes': result.obj_preds,  # (num_entities) Tensor Variable
+            'pred_rel_inds': det_res[3],  # (num_predicates, 3) Tensor Variable
+            'rel_scores': det_res[4],  # (num_predicates, 51) Tensor Variable
+        }
+    else:
+        pred_entry = {
+            'pred_classes': result.obj_preds,   # (num_entities) Tensor Variable
+            'pred_rel_inds': result.rel_inds,  # (num_predicates, 3) Tensor Variable
+            'rel_scores': result.rel_dists,   # (num_predicates, 51) Tensor Variable
+        }
+
     pred_entry = glat_postprocess(pred_entry, if_predicting=False)
+
+    b_100_idx = det_res[-2]
+    # a_100_idx = det_res[-1]
+    # totla_idx = b_100_idx + a_100_idx
+    # totla_idx = torch.cat((b_100_idx, a_100_idx), dim=0)
+
+    rels_b_100 = pred_entry['pred_rel_inds']
+    pred_scores_sorted_b_100 = pred_entry['rel_scores'][:, :-1]
+    # rels_a_100 = det_res[5]
+    # pred_scores_sorted_a_100 = det_res[6]
+
+    # if len(rels_a_100.size()) == 1:
+    #     rels_total = rels_b_100
+    # else:
+    #     rels_total = torch.cat((rels_b_100, rels_a_100), dim=0)
+    #
+    # if len(pred_scores_sorted_a_100.size()) == 1:
+    #     pred_scores_sorted_total = pred_scores_sorted_b_100
+    # else:
+    #     pred_scores_sorted_total = torch.cat((pred_scores_sorted_b_100, pred_scores_sorted_a_100), dim=0)
+
+    for i in range(int(b_100_idx.size()[0])):
+        idx = b_100_idx[i]
+        result.rel_dists[idx] = pred_scores_sorted_b_100[i]
+        result.rel_inds[idx][1:] = rels_b_100[i]
     result.obj_preds = pred_entry['pred_classes']
-    result.rel_inds = pred_entry['pred_rel_inds']
-    result.rel_dists = pred_entry['rel_scores']
+
+    #
+    # rels_total = sorted(set(zip(totla_idx, rels_total)))
+    # rels_total = [rels[1] for rels in rels_total]
+    #
+    # pred_scores_sorted_total = sorted(set(zip(totla_idx, pred_scores_sorted_total)))
+    # pred_scores_sorted_total = [pred_scores[1] for pred_scores in pred_scores_sorted_total]
+
+    # merge two lists
+
+    # if conf.return_top100:
+    #     result.rel_inds = rels_total
+    #     result.rel_dists = pred_scores_sorted_total
+    # else:
+    #     result.rel_inds = pred_entry['pred_rel_inds']
+    #     result.rel_dists = pred_entry['rel_scores']
 
     losses = {}
     if conf.use_ggnn_obj: # if not use ggnn obj, we just use scores of faster rcnn as their scores, there is no need to train
@@ -274,10 +326,15 @@ def glat_wrapper(total_data):
         node_type = node_type.data
     if torch.is_tensor(adjs_con):
         adj_con = Variable(adjs_con)
-    # pdb.set_trace()
-    pred_label, pred_connect = model(input_class, adj_con, node_type)
-    pred_label_predicate = pred_label[0]  # flatten predicate (B*N, 51)
-    pred_label_entities = pred_label[1]  # flatten entities
+
+    # pred_label, pred_connect = model(input_class, adj_con, node_type)
+
+    pred_label_predicate = input_class[node_type == 0]
+    pred_label_entities = input_class[node_type == 1]
+
+    # pred_label_predicate = pred_label[0]  # flatten predicate (B*N, 51)
+    # pred_label_entities = pred_label[1]  # flatten entities
+
     return pred_label_predicate, pred_label_entities
     # return pred_label_predicate.data.cpu().numpy(), pred_label_entities.data.cpu().numpy()
 
@@ -314,6 +371,7 @@ def glat_postprocess(pred_entry, if_predicting=False):
     #     'obj_scores': obj_scores_i,  # (23,) (16,)
     #     'rel_scores': pred_scores_i,  # hack for now. (506, 51) (240, 51)
     # }
+
     if if_predicting:
         pred_entry = numpy2cuda_dict(pred_entry)
 
@@ -330,17 +388,17 @@ def glat_postprocess(pred_entry, if_predicting=False):
     pred_entry['rel_scores'] = pred_label_predicate
 
     # =====================================
-    if if_predicting:
-        pred_entry = cuda2numpy_dict(pred_entry)
-        obj_scores0 = pred_entry['obj_scores'][pred_entry['pred_rel_inds'][:, 0]]
-        obj_scores1 = pred_entry['obj_scores'][pred_entry['pred_rel_inds'][:, 1]]
-
-        pred_scores_max = np.max(pred_entry['rel_scores'][:, 1:], axis=1)
-
-        rel_scores_argmaxed = pred_scores_max * obj_scores0 * obj_scores1
-        rel_scores_idx = np.argsort(rel_scores_argmaxed, axis=0)[::-1]
-
-        pred_entry['rel_scores'] = pred_entry['rel_scores'][rel_scores_idx]
+    # if if_predicting:
+    #     pred_entry = cuda2numpy_dict(pred_entry)
+    #     obj_scores0 = pred_entry['obj_scores'][pred_entry['pred_rel_inds'][:, 0]]
+    #     obj_scores1 = pred_entry['obj_scores'][pred_entry['pred_rel_inds'][:, 1]]
+    #
+    #     pred_scores_max = np.max(pred_entry['rel_scores'][:, 1:], axis=1)
+    #
+    #     rel_scores_argmaxed = pred_scores_max * obj_scores0 * obj_scores1
+    #     rel_scores_idx = np.argsort(rel_scores_argmaxed, axis=0)[::-1]
+    #
+    #     pred_entry['rel_scores'] = pred_entry['rel_scores'][rel_scores_idx]
 
     # # predicate_list = []
     # for i in range(len(gt_entry['gt_relations'])):
@@ -362,6 +420,22 @@ def glat_postprocess(pred_entry, if_predicting=False):
     #
     #     # predicate_list.append(predicate)
 
+
+    return pred_entry
+
+
+def rank_predicate(pred_entry):
+    obj_scores0 = pred_entry['obj_scores'][pred_entry['pred_rel_inds'][:, 0]]
+    obj_scores1 = pred_entry['obj_scores'][pred_entry['pred_rel_inds'][:, 1]]
+
+    pred_scores_max = np.max(pred_entry['rel_scores'][:, 1:], axis=1)
+
+    rel_scores_argmaxed = pred_scores_max * obj_scores0 * obj_scores1
+    rel_scores_idx = np.argsort(rel_scores_argmaxed, axis=0)[::-1]
+
+    pred_entry['rel_scores'] = pred_entry['rel_scores'][rel_scores_idx]
+    pred_entry['pred_rel_inds'] = pred_entry['pred_rel_inds'][rel_scores_idx]
+
     return pred_entry
 
 
@@ -373,7 +447,13 @@ def val_batch(batch_num, b, evaluator, evaluator_multiple_preds, evaluator_list,
     if conf.num_gpus == 1:
         det_res = [det_res]
 
-    for i, (boxes_i, objs_i, obj_scores_i, rels_i, pred_scores_i) in enumerate(det_res):
+    for i, det in enumerate(det_res):
+
+        if len(det) == 5 and not conf.return_top100:
+            (boxes_i, objs_i, obj_scores_i, rels_i, pred_scores_i) = det
+        else:
+            (boxes_i, objs_i, obj_scores_i, rels_i_b100, pred_scores_i_b100, rels_i_a100, pred_scores_i_a100,
+             rel_scores_idx_b100, rel_scores_idx_a100) = det
 
         gt_entry = {
             'gt_classes': val.gt_classes[batch_num + i].copy(), #(23,) (16,)
@@ -381,27 +461,62 @@ def val_batch(batch_num, b, evaluator, evaluator_multiple_preds, evaluator_list,
             'gt_boxes': val.gt_boxes[batch_num + i].copy(), #(23, 4) (16, 4)
         }
 
-        assert np.all(objs_i[rels_i[:, 0]] > 0) and np.all(objs_i[rels_i[:, 1]] > 0)
+        # val.relationships[batch_num + i]
+        # np.argmax(pred_scores_i_b100[:, 1:], axis=1)
+        # assert np.all(objs_i[rels_i[:, 0]] > 0) and np.all(objs_i[rels_i[:, 1]] > 0)
 
-        pred_entry = {
-            'pred_boxes': boxes_i * BOX_SCALE/IM_SCALE, #(23, 4) (16, 4)
-            'pred_classes': objs_i, #(23,) (16,)
-            'pred_rel_inds': rels_i, #(506, 2) (240, 2)
-            'obj_scores': obj_scores_i, #(23,) (16,)
-            'rel_scores': pred_scores_i,  # hack for now. (506, 51) (240, 51)
-        }
+        if conf.return_top100:
+            pred_entry = {
+                'pred_boxes': boxes_i * BOX_SCALE/IM_SCALE, #(23, 4) (16, 4)
+                'pred_classes': objs_i, #(23,) (16,)
+                'pred_rel_inds': rels_i_b100, #(506, 2) (240, 2)
+                'obj_scores': obj_scores_i, #(23,) (16,)
+                'rel_scores': pred_scores_i_b100,  # hack for now. (506, 51) (240, 51)
+            }
+        else:
+            pred_entry = {
+                'pred_boxes': boxes_i * BOX_SCALE/IM_SCALE, #(23, 4) (16, 4)
+                'pred_classes': objs_i, #(23,) (16,)
+                'pred_rel_inds': rels_i, #(506, 2) (240, 2)
+                'obj_scores': obj_scores_i, #(23,) (16,)
+                'rel_scores': pred_scores_i,  # hack for now. (506, 51) (240, 51)
+            }
+
+        pred_entry_init = copy.deepcopy(pred_entry)
 
         pred_entry = glat_postprocess(pred_entry, if_predicting=True)
+
+        pred_entry = cuda2numpy_dict(pred_entry)
+
+        # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+        rel_scores_one_hot = np.zeros((len(pred_entry['rel_scores']), 51))
+        rel_scores_one_hot[np.arange(len(pred_entry['rel_scores'])), pred_entry['rel_scores']] = 1
+        # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+        if len(rels_i_a100.shape) == 1:
+            # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+            # pred_entry['rel_scores'] = pred_entry['rel_scores'][:, :-1]
+            pred_entry['rel_scores'] = rel_scores_one_hot
+            # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+        else:
+
+            pred_entry['pred_rel_inds'] = np.concatenate((pred_entry['pred_rel_inds'], rels_i_a100), axis=0)
+        # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+            # pred_entry['rel_scores'] = np.concatenate((pred_entry['rel_scores'][:, :-1], pred_scores_i_a100), axis=0)
+            pred_entry['rel_scores'] = np.concatenate((rel_scores_one_hot, pred_scores_i_a100), axis=0)
+        # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+        pred_entry = rank_predicate(pred_entry)
 
         eval_entry(conf.mode, gt_entry, pred_entry, evaluator, evaluator_multiple_preds,
                    evaluator_list, evaluator_multiple_preds_list)
 
 print("Training starts now!")
-# optimizer = get_optim(conf.lr * conf.num_gpus * conf.batch_size)
+# optpred_entry['rel_scores'].shapeimizer = get_optim(conf.lr * conf.num_gpus * conf.batch_size)
 optimizer = get_optim(conf.lr)
 
 for epoch in range(start_epoch + 1, start_epoch + 1 + conf.num_epochs):
-    print("start training epoch: ", epoch)
+    # print("start training epoch: ", epoch)
     # rez = train_epoch(epoch)
     # print("overall{:2d}: ({:.3f})\n{}".format(epoch, rez.mean(1)['total'], rez.mean(1)), flush=True)
     #

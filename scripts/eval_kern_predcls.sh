@@ -2,7 +2,7 @@
 python models/eval_rels.py -m predcls -p 100 -clip 5 \
 -ckpt checkpoints/kern_sgcls_predcls.tar \
 -test \
--b 1 \
+-b 4 \
 -use_ggnn_rel \
 -ggnn_rel_time_step_num 3 \
 -ggnn_rel_hidden_dim 512 \
