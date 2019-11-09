@@ -114,6 +114,8 @@ def evaluate_from_dict(gt_entry, pred_entry, mode, result_dict, multiple_preds=F
         pred_rels = np.column_stack((pred_rel_inds, 1+rel_scores[:,1:].argmax(1)))
         predicate_scores = rel_scores[:,1:].max(1)
 
+    # // ToDo: recall eval
+
     pred_to_gt, pred_5ples, rel_scores = evaluate_recall(
                 gt_rels, gt_boxes, gt_classes,
                 pred_rels, pred_boxes, pred_classes,
@@ -126,6 +128,7 @@ def evaluate_from_dict(gt_entry, pred_entry, mode, result_dict, multiple_preds=F
 
         rec_i = float(len(match)) / float(gt_rels.shape[0])
         result_dict[mode + '_recall'][k].append(rec_i)
+
     return pred_to_gt, pred_5ples, rel_scores
 
     # print(" ".join(["R@{:2d}: {:.3f}".format(k, v[-1]) for k, v in result_dict[mode + '_recall'].items()]))

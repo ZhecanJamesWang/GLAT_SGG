@@ -440,10 +440,12 @@ def build_graph_structure(entries, index2name_object, index2name_predicate, if_p
     total_data['node_class'] = []
     # total_data['img_id'] = []
     total_data['node_type'] = []
+    total_data['node_logit'] = []
 
     entries_minibatch = {}
     entries_minibatch['pred_relations'] = []
     entries_minibatch['pred_classes'] = []
+    entries_minibatch['rel_scores'] = []
 
     if entries['pred_relations'].size(1) == 4:
         for i in range(entries['pred_relations'][:, 0].max()+1):
@@ -456,6 +458,7 @@ def build_graph_structure(entries, index2name_object, index2name_predicate, if_p
     else:
         entries_minibatch['pred_relations'].append(entries['pred_relations'])
         entries_minibatch['pred_classes'].append(entries['pred_classes'])
+        entries_minibatch['rel_scores'].append(entries['rel_scores'])
 
     for i in range(len(entries_minibatch['pred_classes'])):
         # if if_predicting:
@@ -466,10 +469,16 @@ def build_graph_structure(entries, index2name_object, index2name_predicate, if_p
         #     return_relations = entry['gt_relations']
         return_classes = entries_minibatch['pred_classes'][i]
         return_relations = entries_minibatch['pred_relations'][i]
+
+        return_rel_scores = entries_minibatch['rel_scores'][i]
+
         entity_num = return_classes.size(0)
         total_node_num = entity_num + return_relations.size(0)
         # pdb.set_trace()
         nodes_class = torch.cat((return_classes, Variable(return_relations[:, -1])), dim=0)
+
+        nodes_logit = torch.cat((Variable(torch.zeros(return_classes.size()[0], return_rel_scores.size()[1]).cuda()), return_rel_scores))
+
         # pdb.set_trace()
         nodes_type = torch.ones_like(return_classes).data
         nodes_type = torch.cat((nodes_type, torch.zeros_like(return_relations[:,0])), dim=0)
@@ -491,6 +500,8 @@ def build_graph_structure(entries, index2name_object, index2name_predicate, if_p
         # total_data['node_name'].append(nodes_name)
         total_data['node_class'].append(nodes_class)
         total_data['node_type'].append(nodes_type)
+        total_data['node_logit'].append(nodes_logit)
+
 
         # total_node_num = len(return_classes) + return_relations.shape[0]
         # nodes_class = [] + list(return_classes)

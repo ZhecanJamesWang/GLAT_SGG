@@ -25,8 +25,9 @@ from lib.models_kern import GLATNET
 import pdb
 from torch.autograd import Variable
 import copy
+import math
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 
 conf = ModelConfig()
 
@@ -129,11 +130,11 @@ start_epoch = -1
 #     detector.roi_fmap_obj[3].bias.data.copy_(ckpt['state_dict']['roi_fmap.3.bias'])
 
 
-# # ckpt_glat = torch.load('/home/haoxuan/code/GBERT/models/2019-10-31-03-13_2_2_2_2_2_2_concat_no_init_mask/best_test_node_mask_predicate_acc')
-# ckpt_glat = torch.load('/home/tangtangwzc/Common_sense/models/2019-11-03-17-51_2_2_2_2_2_2_concat_no_init_mask/best_test_node_mask_predicate_acc.pth')
-# optimistic_restore(model, ckpt_glat['model'])
-# print('finish pretrained loading')
-# # model.load_state_dict(ckpt_glat['model'])
+# ckpt_glat = torch.load('/home/haoxuan/code/GBERT/models/2019-10-31-03-13_2_2_2_2_2_2_concat_no_init_mask/best_test_node_mask_predicate_acc')
+ckpt_glat = torch.load('/home/tangtangwzc/Common_sense/models/2019-11-03-17-51_2_2_2_2_2_2_concat_no_init_mask/best_test_node_mask_predicate_acc.pth')
+optimistic_restore(model, ckpt_glat['model'])
+print('finish pretrained loading')
+# model.load_state_dict(ckpt_glat['model'])
 model.cuda()
 
 def train_epoch(epoch_num):
@@ -294,13 +295,23 @@ def my_collate(total_data):
     input_classes = []
     adjs = []
     node_types = []
+    node_logits = []
+
     for i in range(sample_num):
         input_class = total_data['node_class'][i]
         adj = total_data['adj'][i]
         node_type = total_data['node_type'][i]
+        node_logit = total_data['node_logit'][i]
+        # node_logit_pad = torch.Tensor([math.inf] * node_logit.size()[0]).unsqueeze(-1).t()
+        # node_logit = torch.cat((node_logit, Variable(node_logit_pad.t().cuda())), dim=1)
+
+        pad_node_logit = tensor2variable(torch.zeros((max_length - input_class.size(0)), node_logit.size()[1]).cuda())
+        node_logits.append(torch.cat((node_logit, pad_node_logit), 0).unsqueeze(0))
+
         pad_input_class = tensor2variable(blank_idx * torch.ones(max_length - input_class.size(0)).long().cuda())
         input_classes.append(torch.cat((input_class, pad_input_class), 0).unsqueeze(0))
         # input_classes.append(torch.cat((input_class, blank_idx*torch.ones(max_length-input_class.size(0)).long().cuda()), 0).unsqueeze(0))
+
         new_adj = torch.cat((adj, torch.zeros(max_length-adj.size(0), adj.size(1)).long().cuda()), 0)
         if max_length != new_adj.size(1):
             new_adj = torch.cat((new_adj, torch.zeros(new_adj.size(0), max_length-new_adj.size(1)).long().cuda()), 1)
@@ -309,31 +320,36 @@ def my_collate(total_data):
         node_types.append(torch.cat((node_type, 2 * torch.ones(max_length-node_type.size(0)).long().cuda()), 0).unsqueeze(0))
 
     input_classes = torch.cat(input_classes, 0)
+
+    node_logits = torch.cat(node_logits, 0)
+
     adjs = torch.cat(adjs, 0)
     adjs_lbl = adjs
     adjs_con = torch.clamp(adjs, 0, 1)
     node_types = torch.cat(node_types, 0)
 
-    return input_classes, adjs_con, adjs_lbl, node_types
+    return input_classes, adjs_con, adjs_lbl, node_types, node_logits
 
 
 def glat_wrapper(total_data):
     # Batch size assumed to be 1
-    input_class, adjs_con, adjs_lbl, node_type = my_collate(total_data)
+    input_class, adjs_con, adjs_lbl, node_type, node_logit = my_collate(total_data)
     if torch.is_tensor(input_class):
         input_class = Variable(input_class)
+    if torch.is_tensor(node_logit):
+        node_logit = Variable(node_logit)
     if not torch.is_tensor(node_type):
         node_type = node_type.data
     if torch.is_tensor(adjs_con):
         adj_con = Variable(adjs_con)
 
-    # pred_label, pred_connect = model(input_class, adj_con, node_type)
+    pred_label, pred_connect = model(input_class, adj_con, node_type, node_logit)
 
-    pred_label_predicate = input_class[node_type == 0]
-    pred_label_entities = input_class[node_type == 1]
+    # pred_label_predicate = input_class[node_type == 0]
+    # pred_label_entities = input_class[node_type == 1]
 
-    # pred_label_predicate = pred_label[0]  # flatten predicate (B*N, 51)
-    # pred_label_entities = pred_label[1]  # flatten entities
+    pred_label_predicate = pred_label[0]  # flatten predicate (B*N, 51)
+    pred_label_entities = pred_label[1]  # flatten entities
 
     return pred_label_predicate, pred_label_entities
     # return pred_label_predicate.data.cpu().numpy(), pred_label_entities.data.cpu().numpy()
@@ -482,28 +498,28 @@ def val_batch(batch_num, b, evaluator, evaluator_multiple_preds, evaluator_list,
                 'rel_scores': pred_scores_i,  # hack for now. (506, 51) (240, 51)
             }
 
-        pred_entry_init = copy.deepcopy(pred_entry)
+        # pred_entry_init = copy.deepcopy(pred_entry)
 
         pred_entry = glat_postprocess(pred_entry, if_predicting=True)
 
         pred_entry = cuda2numpy_dict(pred_entry)
-
-        # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-        rel_scores_one_hot = np.zeros((len(pred_entry['rel_scores']), 51))
-        rel_scores_one_hot[np.arange(len(pred_entry['rel_scores'])), pred_entry['rel_scores']] = 1
-        # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-
+        #
+        # # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+        # rel_scores_one_hot = np.zeros((len(pred_entry['rel_scores']), 51))
+        # rel_scores_one_hot[np.arange(len(pred_entry['rel_scores'])), pred_entry['rel_scores']] = 1
+        # # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+        #
         if len(rels_i_a100.shape) == 1:
             # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-            # pred_entry['rel_scores'] = pred_entry['rel_scores'][:, :-1]
-            pred_entry['rel_scores'] = rel_scores_one_hot
+            pred_entry['rel_scores'] = pred_entry['rel_scores'][:, :-1]
+            # pred_entry['rel_scores'] = rel_scores_one_hot
             # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
         else:
 
             pred_entry['pred_rel_inds'] = np.concatenate((pred_entry['pred_rel_inds'], rels_i_a100), axis=0)
         # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-            # pred_entry['rel_scores'] = np.concatenate((pred_entry['rel_scores'][:, :-1], pred_scores_i_a100), axis=0)
-            pred_entry['rel_scores'] = np.concatenate((rel_scores_one_hot, pred_scores_i_a100), axis=0)
+            pred_entry['rel_scores'] = np.concatenate((pred_entry['rel_scores'][:, :-1], pred_scores_i_a100), axis=0)
+            # pred_entry['rel_scores'] = np.concatenate((rel_scores_one_hot, pred_scores_i_a100), axis=0)
         # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
         # pred_entry = rank_predicate(pred_entry)
@@ -516,21 +532,21 @@ print("Training starts now!")
 optimizer = get_optim(conf.lr)
 
 for epoch in range(start_epoch + 1, start_epoch + 1 + conf.num_epochs):
-    # print("start training epoch: ", epoch)
-    # rez = train_epoch(epoch)
-    # print("overall{:2d}: ({:.3f})\n{}".format(epoch, rez.mean(1)['total'], rez.mean(1)), flush=True)
-    #
-    # if use_tb:
-    #     writer.add_scalar('loss/rel_loss', rez.mean(1)['rel_loss'], epoch)
-    #     if conf.use_ggnn_obj:
-    #         writer.add_scalar('loss/class_loss', rez.mean(1)['class_loss'], epoch)
-    #     writer.add_scalar('loss/total', rez.mean(1)['total'], epoch)
-    # if conf.save_dir is not None:
-    #     torch.save({
-    #         'epoch': epoch,
-    #         'state_dict': detector.state_dict(), #{k:v for k,v in detector.state_dict().items() if not k.startswith('detector.')},
-    #         # 'optimizer': optimizer.state_dict(),
-    #     }, os.path.join(conf.save_dir, '{}-{}.tar'.format('vgrel', epoch)))
+    print("start training epoch: ", epoch)
+    rez = train_epoch(epoch)
+    print("overall{:2d}: ({:.3f})\n{}".format(epoch, rez.mean(1)['total'], rez.mean(1)), flush=True)
+
+    if use_tb:
+        writer.add_scalar('loss/rel_loss', rez.mean(1)['rel_loss'], epoch)
+        if conf.use_ggnn_obj:
+            writer.add_scalar('loss/class_loss', rez.mean(1)['class_loss'], epoch)
+        writer.add_scalar('loss/total', rez.mean(1)['total'], epoch)
+    if conf.save_dir is not None:
+        torch.save({
+            'epoch': epoch,
+            'state_dict': detector.state_dict(), #{k:v for k,v in detector.state_dict().items() if not k.startswith('detector.')},
+            # 'optimizer': optimizer.state_dict(),
+        }, os.path.join(conf.save_dir, '{}-{}.tar'.format('vgrel', epoch)))
 
     recall, recall_mp, mean_recall, mean_recall_mp = val_epoch()
     if use_tb:
