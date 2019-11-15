@@ -105,6 +105,9 @@ class ModelConfig(object):
         self.tb_log_dir = None
         self.save_rel_recall = None
 
+        self.resume_training = None
+        self.resume_ckpt = None
+
         self.parser = self.setup_parser()
         self.args = vars(self.parser.parse_args())
 
@@ -113,6 +116,12 @@ class ModelConfig(object):
             print("{} : {}".format(x, y))
 
         self.__dict__.update(self.args)
+
+        if self.resume_training:
+            assert len(self.resume_ckpt) == 0
+            self.resume_ckpt = os.path.join(ROOT_PATH, self.resume_ckpt)
+        else:
+            self.resume_ckpt = None
 
         if len(self.ckpt) != 0:
             self.ckpt = os.path.join(ROOT_PATH, self.ckpt)
@@ -204,6 +213,9 @@ class ModelConfig(object):
         parser.add_argument('-resnet', dest='use_resnet', help='use resnet instead of VGG', action='store_true')
         parser.add_argument('-proposals', dest='use_proposals', help='Use Xu et als proposals', action='store_true')
         parser.add_argument('-pooling_dim', dest='pooling_dim', help='Dimension of pooling', type=int, default=4096)
+
+        parser.add_argument('-resume', dest='resume_training', help='Continue training', type=bool, default=False)
+        parser.add_argument('-resume_ckpt', dest='resume_ckpt', help='Resume training ckpt', type=str, default='')
 
 
         parser.add_argument('-use_ggnn_obj', dest='use_ggnn_obj', help='use GGNN_obj module', action='store_true')

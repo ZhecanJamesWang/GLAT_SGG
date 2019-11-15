@@ -18,7 +18,11 @@ from lib.pytorch_misc import print_para
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 
 # import KERN model
-from lib.kern_model import KERN
+# from lib.kern_model import KERN
+
+#--------updated--------
+from lib.kern_baseline import KERN
+
 from lib.glat import GLATNET
 # import models.models_kern.GLATNET as GLATNET
 
@@ -28,8 +32,18 @@ import copy
 from scipy.special import softmax
 import torch.optim.lr_scheduler as lr_scheduler
 
+#--------updated--------
+import sys
+import os
+codebase = '../../'
+sys.path.append(codebase)
+exp_name = 'exp_002'
+
+
 # os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
+# conf = ModelConfig()
+#--------updated--------
 conf = ModelConfig()
 
 # We use tensorboard to observe results and decrease learning rate manually. If you want to use TB, you need to install TensorFlow fist.
@@ -58,13 +72,7 @@ train_loader, val_loader = VGDataLoader.splits(train, val, mode='rel',
 
 detector = KERN(classes=train.ind_to_classes, rel_classes=train.ind_to_predicates,
                 num_gpus=conf.num_gpus, mode=conf.mode, require_overlap_det=True,
-                use_resnet=conf.use_resnet, use_proposals=conf.use_proposals, pooling_dim=conf.pooling_dim,
-                use_ggnn_obj=conf.use_ggnn_obj, ggnn_obj_time_step_num=conf.ggnn_obj_time_step_num,
-                ggnn_obj_hidden_dim=conf.ggnn_obj_hidden_dim, ggnn_obj_output_dim=conf.ggnn_obj_output_dim,
-                use_obj_knowledge=conf.use_obj_knowledge, obj_knowledge=conf.obj_knowledge,
-                use_ggnn_rel=conf.use_ggnn_rel, ggnn_rel_time_step_num=conf.ggnn_rel_time_step_num,
-                ggnn_rel_hidden_dim=conf.ggnn_rel_hidden_dim, ggnn_rel_output_dim=conf.ggnn_rel_output_dim,
-                use_rel_knowledge=conf.use_rel_knowledge, rel_knowledge=conf.rel_knowledge, return_top100=conf.return_top100)
+                use_resnet=conf.use_resnet, use_proposals=conf.use_proposals, pooling_dim=conf.pooling_dim, return_top100=True)
 
 model = GLATNET(vocab_num=[52, 153],
                 feat_dim=300,
@@ -80,7 +88,7 @@ model = GLATNET(vocab_num=[52, 153],
 # for n, param in detector.detector.named_parameters():
 #     param.requires_grad = False
 
-# Freeze all the kern model detector
+# Freeze all the kern model
 for n, param in detector.named_parameters():
     param.requires_grad = False
 
@@ -105,10 +113,10 @@ def get_optim(lr):
 
     return optimizer, scheduler
 
-detector.cuda()
 ckpt = torch.load(conf.ckpt)
 print("Loading EVERYTHING")
 optimistic_restore(detector, ckpt['state_dict'])
+detector.cuda()
 start_epoch = -1
 
 # if conf.ckpt.split('-')[-2].split('/')[-1] == 'vgrel':
@@ -158,9 +166,6 @@ def train_epoch(epoch_num):
     tr = []
     start = time.time()
     for b, batch in enumerate(train_loader):
-        if b >= 500:
-            break
-
         tr.append(train_batch(batch, verbose=b % (conf.print_interval*10) == 0)) #b == 0))
 
         if b % conf.print_interval == 0 and b >= conf.print_interval:
@@ -295,8 +300,6 @@ def val_epoch():
     evaluator = BasicSceneGraphEvaluator.all_modes() # for calculating recall
     evaluator_multiple_preds = BasicSceneGraphEvaluator.all_modes(multiple_preds=True)
     for val_b, batch in enumerate(val_loader):
-        if val_b >= 500:
-            break
         val_batch(conf.num_gpus * val_b, batch, evaluator, evaluator_multiple_preds, evaluator_list, evaluator_multiple_preds_list)
 
     recall = evaluator[conf.mode].print_stats()

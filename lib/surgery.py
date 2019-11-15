@@ -86,8 +86,8 @@ def filter_dets(boxes, obj_scores, obj_classes, rel_inds, pred_scores, return_to
                    rels_b_100.cpu().numpy(), pred_scores_sorted_b_100.data.cpu().numpy(), rels_a_100.cpu().numpy(), \
                pred_scores_sorted_a_100.data.cpu().numpy(), rel_scores_idx_b_100, rel_scores_idx_a_100
     else:
-        rels = rel_inds[rel_scores_idx].cpu().numpy()
-        pred_scores_sorted = pred_scores[rel_scores_idx].data.cpu().numpy()
+        rels = rel_inds[rel_scores_idx]
+        pred_scores_sorted = pred_scores[rel_scores_idx]
 
         if training:
             return boxes, obj_classes, obj_scores, rels, pred_scores_sorted

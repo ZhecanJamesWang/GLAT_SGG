@@ -17,26 +17,39 @@ from lib.evaluation.sg_eval import BasicSceneGraphEvaluator, calculate_mR_from_e
 from lib.pytorch_misc import print_para
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 
+import pdb
 # import KERN model
-from lib.kern_model import KERN
-from lib.glat import GLATNET
-# import models.models_kern.GLATNET as GLATNET
+# from lib.kern_model import KERN
 
+#--------updated--------
+# from lib.stanford_model import RelModelStanford as RelModel
+from lib.motifnet_model import RelModel
+from lib.glat import GLATNET
 import pdb
 from torch.autograd import Variable
 import copy
 from scipy.special import softmax
 import torch.optim.lr_scheduler as lr_scheduler
 
+#--------updated--------
+import sys
+import os
+codebase = '../../'
+sys.path.append(codebase)
+exp_name = 'motif'
+
+
 # os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
+# conf = ModelConfig()
+#--------updated--------
 conf = ModelConfig()
 
 # We use tensorboard to observe results and decrease learning rate manually. If you want to use TB, you need to install TensorFlow fist.
 if conf.tb_log_dir is not None:
     from tensorboardX import SummaryWriter
     if not os.path.exists(conf.tb_log_dir):
-        os.makedirs(conf.tb_log_dir) 
+        os.makedirs(conf.tb_log_dir)
     writer = SummaryWriter(log_dir=conf.tb_log_dir)
     use_tb = True
 else:
@@ -56,15 +69,40 @@ train_loader, val_loader = VGDataLoader.splits(train, val, mode='rel',
                                                num_workers=conf.num_workers,
                                                num_gpus=conf.num_gpus)
 
-detector = KERN(classes=train.ind_to_classes, rel_classes=train.ind_to_predicates,
-                num_gpus=conf.num_gpus, mode=conf.mode, require_overlap_det=True,
-                use_resnet=conf.use_resnet, use_proposals=conf.use_proposals, pooling_dim=conf.pooling_dim,
-                use_ggnn_obj=conf.use_ggnn_obj, ggnn_obj_time_step_num=conf.ggnn_obj_time_step_num,
-                ggnn_obj_hidden_dim=conf.ggnn_obj_hidden_dim, ggnn_obj_output_dim=conf.ggnn_obj_output_dim,
-                use_obj_knowledge=conf.use_obj_knowledge, obj_knowledge=conf.obj_knowledge,
-                use_ggnn_rel=conf.use_ggnn_rel, ggnn_rel_time_step_num=conf.ggnn_rel_time_step_num,
-                ggnn_rel_hidden_dim=conf.ggnn_rel_hidden_dim, ggnn_rel_output_dim=conf.ggnn_rel_output_dim,
-                use_rel_knowledge=conf.use_rel_knowledge, rel_knowledge=conf.rel_knowledge, return_top100=conf.return_top100)
+# detector = KERN(classes=train.ind_to_classes, rel_classes=train.ind_to_predicates,
+#                 num_gpus=conf.num_gpus, mode=conf.mode, require_overlap_det=True,
+#                 use_resnet=conf.use_resnet, use_proposals=conf.use_proposals, pooling_dim=conf.pooling_dim, return_top100=True)s
+
+# python models/train_rels.py -m sgcls -model stanford -b 4 -p 400 -lr 1e-4 -ngpu 1 -ckpt checkpoints/vgdet/vg-24.tar -save_dir checkpoints/stanford -adam
+
+
+order = 'leftright'
+nl_obj = 2
+nl_edge = 4
+hidden_dim = 512
+pass_in_obj_feats_to_decoder = False
+pass_in_obj_feats_to_edge = False
+rec_dropout = 0.1
+use_bias = True
+use_tanh = False
+limit_vision = False
+
+
+detector = RelModel(classes=train.ind_to_classes, rel_classes=train.ind_to_predicates,
+                    num_gpus=conf.num_gpus, mode=conf.mode, require_overlap_det=True,
+                    use_resnet=conf.use_resnet, order=order,
+                    nl_edge=nl_edge, nl_obj=nl_obj, hidden_dim=hidden_dim,
+                    use_proposals=conf.use_proposals,
+                    pass_in_obj_feats_to_decoder=pass_in_obj_feats_to_decoder,
+                    pass_in_obj_feats_to_edge=pass_in_obj_feats_to_edge,
+                    pooling_dim=conf.pooling_dim,
+                    rec_dropout=rec_dropout,
+                    use_bias=use_bias,
+                    use_tanh=use_tanh,
+                    limit_vision=limit_vision,
+                    return_top100=True
+                    )
+
 
 model = GLATNET(vocab_num=[52, 153],
                 feat_dim=300,
@@ -76,18 +114,19 @@ model = GLATNET(vocab_num=[52, 153],
                 blank=152,
                 types=[2]*6)
 
+
+# Freeze all the motif model
+for n, param in detector.named_parameters():
+    param.requires_grad = False
+
 # Freeze the detector
 # for n, param in detector.detector.named_parameters():
 #     param.requires_grad = False
 
-# Freeze all the kern model detector
-for n, param in detector.named_parameters():
-    param.requires_grad = False
-
 print(print_para(detector), flush=True)
 
 
-def get_optim(lr):
+def get_optim(lr, last_epoch=-1):
     # Lower the learning rate on the VGG fully connected layers by 1/10th. It's a hack, but it helps
     # stabilize the models.
     # fc_params = [p for n,p in detector.named_parameters() if n.startswith('roi_fmap') and p.requires_grad]
@@ -101,14 +140,14 @@ def get_optim(lr):
 
     # scheduler = ReduceLROnPlateau(optimizer, 'max', patience=3, factor=0.1,
     #                               verbose=True, threshold=0.0001, threshold_mode='abs', cooldown=1)
-    scheduler = lr_scheduler.StepLR(optimizer, step_size=5, gamma=0.3)
+    scheduler = lr_scheduler.StepLR(optimizer, step_size=5, gamma=0.3, last_epoch=last_epoch)
 
     return optimizer, scheduler
 
-detector.cuda()
 ckpt = torch.load(conf.ckpt)
-print("Loading EVERYTHING")
+print("Loading EVERYTHING from motifnet", conf.ckpt)
 optimistic_restore(detector, ckpt['state_dict'])
+detector.cuda()
 start_epoch = -1
 
 # if conf.ckpt.split('-')[-2].split('/')[-1] == 'vgrel':
@@ -133,22 +172,33 @@ start_epoch = -1
 #     detector.roi_fmap_obj[3].bias.data.copy_(ckpt['state_dict']['roi_fmap.3.bias'])
 
 
-# # ckpt_glat = torch.load('/home/haoxuan/code/GBERT/models/2019-10-31-03-13_2_2_2_2_2_2_concat_no_init_mask/best_test_node_mask_predicate_acc')
-
-# ---------------pretrained model mask ration 0.5
-# ckpt_glat = torch.load('/home/tangtangwzc/Common_sense/models/2019-11-03-17-51_2_2_2_2_2_2_concat_no_init_mask/best_test_node_mask_predicate_acc.pth')
-
-# ---------------pretrained model mask ration 0.3
-ckpt_glat = torch.load('/home/tangtangwzc/Common_sense/models/2019-11-03-17-28_2_2_2_2_2_2_concat_no_init_mask/best_test_node_mask_predicate_acc.pth')
-
-# ---------------pretrained model mask ration 0.7
-# ckpt_glat = torch.load('/home/tangtangwzc/Common_sense/models/2019-11-07-23-50_2_2_2_2_2_2_concat_no_init_mask/best_test_node_mask_predicate_acc.pth')
-
-optimistic_restore(model, ckpt_glat['model'])
 
 print('finish pretrained GLAT loading')
 # # model.load_state_dict(ckpt_glat['model'])
-model.cuda()
+if conf.resume_training:
+    ckpt_glat = torch.load(conf.resume_ckpt)
+    optimistic_restore(model, ckpt_glat['state_dict'])
+    model.cuda()
+    start_epoch = ckpt_glat['epoch']
+    optimizer, scheduler = get_optim(conf.lr, last_epoch=start_epoch)
+
+else:
+    # # ckpt_glat = torch.load('/home/haoxuan/code/GBERT/models/2019-10-31-03-13_2_2_2_2_2_2_concat_no_init_mask/best_test_node_mask_predicate_acc')
+    # ---------------pretrained model mask ration 0.5
+    # ckpt_glat = torch.load('/home/tangtangwzc/Common_sense/models/2019-11-03-17-51_2_2_2_2_2_2_concat_no_init_mask/best_test_node_mask_predicate_acc.pth')
+
+    # ---------------pretrained model mask ration 0.3
+    ckpt_glat = torch.load(
+        '/home/tangtangwzc/Common_sense/models/2019-11-03-17-28_2_2_2_2_2_2_concat_no_init_mask/best_test_node_mask_predicate_acc.pth')
+
+    # ---------------pretrained model mask ration 0.7
+    # ckpt_glat = torch.load('/home/tangtangwzc/Common_sense/models/2019-11-07-23-50_2_2_2_2_2_2_concat_no_init_mask/best_test_node_mask_predicate_acc.pth')
+
+    optimistic_restore(model, ckpt_glat['model'])
+    model.cuda()
+    start_epoch = -1
+    optimizer, scheduler = get_optim(conf.lr, last_epoch=start_epoch)
+
 
 def train_epoch(epoch_num):
     detector.train()
@@ -158,9 +208,6 @@ def train_epoch(epoch_num):
     tr = []
     start = time.time()
     for b, batch in enumerate(train_loader):
-        if b >= 500:
-            break
-
         tr.append(train_batch(batch, verbose=b % (conf.print_interval*10) == 0)) #b == 0))
 
         if b % conf.print_interval == 0 and b >= conf.print_interval:
@@ -295,13 +342,11 @@ def val_epoch():
     evaluator = BasicSceneGraphEvaluator.all_modes() # for calculating recall
     evaluator_multiple_preds = BasicSceneGraphEvaluator.all_modes(multiple_preds=True)
     for val_b, batch in enumerate(val_loader):
-        if val_b >= 500:
-            break
         val_batch(conf.num_gpus * val_b, batch, evaluator, evaluator_multiple_preds, evaluator_list, evaluator_multiple_preds_list)
 
     recall = evaluator[conf.mode].print_stats()
     recall_mp = evaluator_multiple_preds[conf.mode].print_stats()
-    
+
     mean_recall = calculate_mR_from_evaluator_list(evaluator_list, conf.mode)
     mean_recall_mp = calculate_mR_from_evaluator_list(evaluator_multiple_preds_list, conf.mode, multiple_preds=True)
 
@@ -575,11 +620,11 @@ def val_batch(batch_num, b, evaluator, evaluator_multiple_preds, evaluator_list,
 
 print("Training starts now!")
 # optimizer = get_optim(conf.lr * conf.num_gpus * conf.batch_size)
-optimizer, scheduler = get_optim(conf.lr)
 
 for epoch in range(start_epoch + 1, start_epoch + 1 + conf.num_epochs):
     print("start training epoch: ", epoch)
     scheduler.step()
+    # pdb.set_trace()
     rez = train_epoch(epoch)
     print("overall{:2d}: ({:.3f})\n{}".format(epoch, rez.mean(1)['total'], rez.mean(1)), flush=True)
 
@@ -591,9 +636,10 @@ for epoch in range(start_epoch + 1, start_epoch + 1 + conf.num_epochs):
     if conf.save_dir is not None:
         torch.save({
             'epoch': epoch,
-            'state_dict': detector.state_dict(), #{k:v for k,v in detector.state_dict().items() if not k.startswith('detector.')},
+            'state_dict': model.state_dict(), #{k:v for k,v in detector.state_dict().items() if not k.startswith('detector.')},
             # 'optimizer': optimizer.state_dict(),
-        }, os.path.join(conf.save_dir, '{}-{}.tar'.format('vgrel', epoch)))
+            # 'scheduler': scheduler.state_dict(),
+        }, os.path.join(conf.save_dir, '{}-{}.tar'.format('motifnet_glat', epoch)))
 
     recall, recall_mp, mean_recall, mean_recall_mp = val_epoch()
     if use_tb:
