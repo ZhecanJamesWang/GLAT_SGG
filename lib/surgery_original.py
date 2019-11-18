@@ -17,13 +17,8 @@ from lib.pytorch_misc import unravel_index
 from lib.fpn.box_utils import bbox_overlaps
 # from ad3 import factor_graph as fg
 from time import time
-import pdb
-from torch.autograd import Variable
 
-# return filter_dets(bboxes, result.obj_scores,
-#                    result.obj_preds, rel_inds[:, 1:], rel_rep, self.return_top100)
-
-def filter_dets(boxes, obj_scores, obj_classes, rel_inds, pred_scores, return_top100=False, training=False):
+def filter_dets(boxes, obj_scores, obj_classes, rel_inds, pred_scores):
     """
     Filters detections....
     :param boxes: [num_box, topk, 4] if bbox regression else [num_box, 4]
@@ -55,49 +50,13 @@ def filter_dets(boxes, obj_scores, obj_classes, rel_inds, pred_scores, return_to
     rel_scores_argmaxed = pred_scores_max * obj_scores0 * obj_scores1
     rel_scores_vs, rel_scores_idx = torch.sort(rel_scores_argmaxed.view(-1), dim=0, descending=True)
 
-    # obj_scores_np = obj_scores.data.cpu().numpy()
-    # objs_np = obj_classes.data.cpu().numpy()
-    # boxes_out = boxes.data.cpu().numpy()
+    rels = rel_inds[rel_scores_idx].cpu().numpy()
+    pred_scores_sorted = pred_scores[rel_scores_idx].data.cpu().numpy()
+    obj_scores_np = obj_scores.data.cpu().numpy()
+    objs_np = obj_classes.data.cpu().numpy()
+    boxes_out = boxes.data.cpu().numpy()
 
-    if return_top100:
-
-        # rels_b_100 = rel_inds[rel_scores_idx[:100]].cpu().numpy()
-        # pred_scores_sorted_b_100 = pred_scores[rel_scores_idx[:100]].data.cpu().numpy()
-        # rels_a_100 = rel_inds[rel_scores_idx[100:]].cpu().numpy()
-        # pred_scores_sorted_a_100 = pred_scores[rel_scores_idx[100:]].data.cpu().numpy()
-
-        rels_b_100 = rel_inds[rel_scores_idx[:100]]
-        pred_scores_sorted_b_100 = pred_scores[rel_scores_idx[:100]]
-        rel_scores_idx_b_100 = rel_scores_idx[:100]
-
-        if rel_scores_idx.size()[0] <= 100:
-            rels_a_100 = torch.Tensor([]).long().cuda()
-            pred_scores_sorted_a_100 = Variable(torch.Tensor([]).long().cuda())
-            rel_scores_idx_a_100 = torch.Tensor([]).long().cuda()
-        else:
-            rels_a_100 = rel_inds[rel_scores_idx[100:]]
-            pred_scores_sorted_a_100 = pred_scores[rel_scores_idx[100:]]
-            rel_scores_idx_a_100 = rel_scores_idx[100:]
-
-        if training:
-            return boxes, obj_classes, obj_scores, rels_b_100, pred_scores_sorted_b_100, rels_a_100, \
-               pred_scores_sorted_a_100, rel_scores_idx_b_100, rel_scores_idx_a_100
-        else:
-            return boxes.data.cpu().numpy(), obj_classes.data.cpu().numpy(), obj_scores.data.cpu().numpy(), \
-                   rels_b_100.cpu().numpy(), pred_scores_sorted_b_100.data.cpu().numpy(), rels_a_100.cpu().numpy(), \
-               pred_scores_sorted_a_100.data.cpu().numpy(), rel_scores_idx_b_100, rel_scores_idx_a_100
-    else:
-
-        rels = rel_inds[rel_scores_idx].cpu().numpy()
-        pred_scores_sorted = pred_scores[rel_scores_idx].data.cpu().numpy()
-
-        if training:
-            return boxes, obj_classes, obj_scores, rels, pred_scores_sorted
-        else:
-            # return boxes.data.cpu().numpy(), obj_classes.data.cpu().numpy(), \
-            #        obj_scores.data.cpu().numpy(), rels.cpu().numpy(), pred_scores_sorted.data.cpu().numpy()
-            return boxes.data.cpu().numpy(), obj_classes.data.cpu().numpy(), \
-                   obj_scores.data.cpu().numpy(), rels, pred_scores_sorted
+    return boxes_out, objs_np, obj_scores_np, rels, pred_scores_sorted
 
 # def _get_similar_boxes(boxes, obj_classes_topk, nms_thresh=0.3):
 #     """

@@ -1,5 +1,5 @@
 """
-KERN models
+KERN Baseline, with no GCN
 """
 
 import numpy as np
@@ -20,119 +20,9 @@ from lib.object_detector import ObjectDetector, gather_res, load_vgg
 from lib.pytorch_misc import transpose_packed_sequence_inds, to_onehot, arange, enumerate_by_image, diagonal_inds, Flattener
 from lib.surgery import filter_dets
 from lib.fpn.roi_align.functions.roi_align import RoIAlignFunction
-from lib.ggnn import GGNNObj, GGNNRel
-import pdb
 
 
 MODES = ('sgdet', 'sgcls', 'predcls')
-
-
-
-class GGNNObjReason(nn.Module):
-    """
-    Module for object classification
-    """
-    def __init__(self, mode='sgdet', num_obj_cls=151, obj_dim=4096,   
-                 time_step_num=3, hidden_dim=512, output_dim=512,
-                 use_knowledge=True, knowledge_matrix=''):
-        super(GGNNObjReason, self).__init__()
-        assert mode in MODES
-        self.mode = mode
-        self.num_obj_cls = num_obj_cls
-        self.obj_proj = nn.Linear(obj_dim, hidden_dim)
-        self.ggnn_obj = GGNNObj(num_obj_cls=num_obj_cls, time_step_num=time_step_num, hidden_dim=hidden_dim, 
-                                output_dim=output_dim, use_knowledge=use_knowledge, prior_matrix=knowledge_matrix)
-
-    def forward(self, im_inds, obj_fmaps, obj_labels):
-        """
-        Reason object classes using knowledge of object cooccurrence
-        """
-
-        if self.mode == 'predcls':
-            # in task 'predcls', there is no need to run GGNN_obj
-            obj_dists = Variable(to_onehot(obj_labels.data, self.num_obj_cls))
-            return obj_dists
-        else:
-            input_ggnn = self.obj_proj(obj_fmaps)
-
-            lengths = []
-            for i, s, e in enumerate_by_image(im_inds.data):
-                lengths.append(e - s)
-            obj_cum_add = np.cumsum([0] + lengths)
-            obj_dists = torch.cat([self.ggnn_obj(input_ggnn[obj_cum_add[i] : obj_cum_add[i+1]]) for i in range(len(lengths))], 0)
-            return obj_dists
-
-
-
-
-class GGNNRelReason(nn.Module):
-    """
-    Module for relationship classification.
-    """
-    def __init__(self, mode='sgdet', num_obj_cls=151, num_rel_cls=51, obj_dim=4096, rel_dim=4096, 
-                time_step_num=3, hidden_dim=512, output_dim=512,
-                use_knowledge=True, knowledge_matrix=''):
-
-        super(GGNNRelReason, self).__init__()
-        assert mode in MODES
-        self.mode = mode
-        self.num_obj_cls = num_obj_cls
-        self.num_rel_cls = num_rel_cls
-        self.obj_dim = obj_dim
-        self.rel_dim = rel_dim
-
-
-        self.obj_proj = nn.Linear(self.obj_dim, hidden_dim)
-        self.rel_proj = nn.Linear(self.rel_dim, hidden_dim)
-
-        self.ggnn_rel = GGNNRel(num_rel_cls=num_rel_cls, time_step_num=time_step_num, hidden_dim=hidden_dim, 
-                                output_dim=output_dim, use_knowledge=use_knowledge, prior_matrix=knowledge_matrix)
-
-    def forward(self, obj_fmaps, obj_logits, rel_inds, vr, obj_labels=None, boxes_per_cls=None):
-        """
-        Reason relationship classes using knowledge of object and relationship coccurrence.
-        """
-
-        # print(rel_inds.shape)
-        # (num_rel, 3)
-        if self.mode == 'predcls':
-            obj_dists2 = Variable(to_onehot(obj_labels.data, self.num_obj_cls))
-        else:
-            obj_dists2 = obj_logits
-
-        if self.mode == 'sgdet' and not self.training:
-            # NMS here for baseline
-            probs = F.softmax(obj_dists2, 1)
-            nms_mask = obj_dists2.data.clone()
-            nms_mask.zero_()
-            for c_i in range(1, obj_dists2.size(1)):
-                scores_ci = probs.data[:, c_i]
-                boxes_ci = boxes_per_cls.data[:, c_i]
-
-                keep = apply_nms(scores_ci, boxes_ci,
-                                    pre_nms_topn=scores_ci.size(0), post_nms_topn=scores_ci.size(0),
-                                    nms_thresh=0.3)
-                nms_mask[:, c_i][keep] = 1
-
-            obj_preds = Variable(nms_mask * probs.data, volatile=True)[:,1:].max(1)[1] + 1
-        else:
-            obj_preds = obj_labels if obj_labels is not None else obj_dists2[:,1:].max(1)[1] + 1
-
-        sub_obj_preds = torch.cat((obj_preds[rel_inds[:, 1]].view(-1, 1), obj_preds[rel_inds[:, 2]].view(-1, 1)), 1)
-
-        obj_fmaps = self.obj_proj(obj_fmaps)
-        vr = self.rel_proj(vr)
-        input_ggnn = torch.stack([torch.cat([obj_fmaps[rel_ind[1]].unsqueeze(0), 
-                                             obj_fmaps[rel_ind[2]].unsqueeze(0), 
-                                             vr[index].repeat(self.num_rel_cls, 1)], 0) 
-                                 for index, rel_ind in enumerate(rel_inds)])
-
-        rel_dists = self.ggnn_rel(rel_inds[:, 1:], sub_obj_preds, input_ggnn)
-
-        return obj_dists2, obj_preds, rel_dists
-
-
-
 
 class VRFC(nn.Module):
     """
@@ -182,22 +72,9 @@ class KERN(nn.Module):
     """
     Knowledge-Embedded Routing Network 
     """
-    def __init__(self, classes, rel_classes, mode='sgdet', num_gpus=1, 
+    def __init__(self, classes, rel_classes, mode='sgdet', num_gpus=1,
                  require_overlap_det=True, pooling_dim=4096, use_resnet=False, thresh=0.01,
-                 use_proposals=False,
-                 use_ggnn_obj=False,
-                 ggnn_obj_time_step_num=3,
-                 ggnn_obj_hidden_dim=512,
-                 ggnn_obj_output_dim=512,
-                 use_ggnn_rel=False,
-                 ggnn_rel_time_step_num=3,
-                 ggnn_rel_hidden_dim=512,
-                 ggnn_rel_output_dim=512,
-                 use_obj_knowledge=True,
-                 use_rel_knowledge=True,
-                 obj_knowledge='',
-                 rel_knowledge='',
-                 return_top100=False):
+                 use_proposals=False,return_top100=False):
 
         """
         :param classes: Object classes
@@ -207,7 +84,6 @@ class KERN(nn.Module):
         :param require_overlap_det: Whether two objects must intersect
         """
         super(KERN, self).__init__()
-
         self.return_top100 = return_top100
 
         self.classes = classes
@@ -219,9 +95,6 @@ class KERN(nn.Module):
         self.obj_dim = 2048 if use_resnet else 4096
         self.rel_dim = self.obj_dim
         self.pooling_dim = pooling_dim
-
-        self.use_ggnn_obj=use_ggnn_obj
-        self.use_ggnn_rel = use_ggnn_rel
 
         self.require_overlap = require_overlap_det and self.mode == 'sgdet'
 
@@ -253,36 +126,14 @@ class KERN(nn.Module):
             self.roi_fmap = nn.Sequential(*roi_fmap)
             self.roi_fmap_obj = load_vgg(pretrained=False).classifier
 
-        if self.use_ggnn_obj:
-            self.ggnn_obj_reason = GGNNObjReason(mode=self.mode,
-                                                 num_obj_cls=len(self.classes), 
-                                                 obj_dim=self.obj_dim,
-                                                 time_step_num=ggnn_obj_time_step_num,
-                                                 hidden_dim=ggnn_obj_hidden_dim,
-                                                 output_dim=ggnn_obj_output_dim,
-                                                 use_knowledge=use_obj_knowledge,
-                                                 knowledge_matrix=obj_knowledge)
-
-        if self.use_ggnn_rel:
-            self.ggnn_rel_reason = GGNNRelReason(mode=self.mode, 
-                                                 num_obj_cls=len(self.classes), 
-                                                 num_rel_cls=len(rel_classes), 
-                                                 obj_dim=self.obj_dim, 
-                                                 rel_dim=self.rel_dim, 
-                                                 time_step_num=ggnn_rel_time_step_num, 
-                                                 hidden_dim=ggnn_rel_hidden_dim, 
-                                                 output_dim=ggnn_obj_output_dim,
-                                                 use_knowledge=use_rel_knowledge,
-                                                 knowledge_matrix=rel_knowledge)
-        else:
-            self.vr_fc_cls = VRFC(self.mode, self.rel_dim, len(self.classes), len(self.rel_classes))
+        self.vr_fc_cls = VRFC(self.mode, self.rel_dim, len(self.classes), len(self.rel_classes))
 
     @property
     def num_classes(self):
         return len(self.classes)
 
     @property
-    def num_rels(slf):
+    def num_rels(self):
         return len(self.rel_classes)
 
     def visual_rep(self, features, rois, pair_inds):
@@ -371,42 +222,30 @@ class KERN(nn.Module):
                                                 num_sample_per_gt=1)
 
 
-        rel_inds = self.get_rel_inds(result.rel_labels, im_inds, boxes)   # [num_relations(num_boxes^2-num_boxes), 3(imh_ind,sub,obj)]
-        rois = torch.cat((im_inds[:, None].float(), boxes), 1)   # [num_boxes, 5(img_ind, x1,x2,y1,y2)]
+        rel_inds = self.get_rel_inds(result.rel_labels, im_inds, boxes)
+        rois = torch.cat((im_inds[:, None].float(), boxes), 1)
 
-        result.obj_fmap = self.obj_feature_map(result.fmap.detach(), rois)  # [num_boxes, feature_dimension]
-
-
-        if self.use_ggnn_obj:          
-                result.rm_obj_dists = self.ggnn_obj_reason(im_inds, 
-                                                           result.obj_fmap,
-                                                           result.rm_obj_labels if self.training or self.mode == 'predcls' else None)
+        result.obj_fmap = self.obj_feature_map(result.fmap.detach(), rois)
 
         vr = self.visual_rep(result.fmap.detach(), rois, rel_inds[:, 1:])
 
 
-        if self.use_ggnn_rel:
-            result.rm_obj_dists, result.obj_preds, result.rel_dists = self.ggnn_rel_reason(
-                obj_fmaps=result.obj_fmap,
-                obj_logits=result.rm_obj_dists,
-                vr=vr,
-                rel_inds=rel_inds,
-                obj_labels=result.rm_obj_labels if self.training or self.mode == 'predcls' else None,
-                boxes_per_cls=result.boxes_all
-            )   
-        else:
-            result.rm_obj_dists, result.obj_preds, result.rel_dists = self.vr_fc_cls(
-                obj_logits=result.rm_obj_dists,
-                vr=vr,
-                obj_labels=result.rm_obj_labels if self.training or self.mode == 'predcls' else None,
-                boxes_per_cls=result.boxes_all)
+        result.rm_obj_dists, result.obj_preds, result.rel_dists = self.vr_fc_cls(
+            obj_logits=result.rm_obj_dists,
+            vr=vr,
+            obj_labels=result.rm_obj_labels if self.training or self.mode == 'predcls' else None,
+            boxes_per_cls=result.boxes_all)
+
 
         result.rel_inds = rel_inds
-        # pdb.set_trace()
+
+
+        # if self.training:
+        #     return result
 
         if self.training:
             if self.return_top100:
-
+                # pdb.set_trace()
                 twod_inds = arange(result.obj_preds.data) * self.num_classes + result.obj_preds.data
                 result.obj_scores = F.softmax(result.rm_obj_dists, dim=1).view(-1)[twod_inds]
 
@@ -419,11 +258,78 @@ class KERN(nn.Module):
 
                 rel_rep = F.softmax(result.rel_dists, dim=1)
 
-                return result, filter_dets(bboxes, result.obj_scores,
+                if rel_inds[:, 0].max() - rel_inds[:, 0].min() + 1 == 1:
+                    return result, filter_dets(bboxes, result.obj_scores,
                                    result.obj_preds, rel_inds[:, 1:], rel_rep, self.return_top100, self.training)
+
+                # -----------------------------------Above: 1 batch_size, Below: Multiple batch_size------------------
+                #  assume rel_inds[:, 0] is from 0 to num_img-1
+                num_img = rel_inds[:, 0].max() - rel_inds[:, 0].min() + 1
+                rel_ind_per_img = []
+                obj_ind_per_img = []
+                for i in range(num_img):
+                    rel_ind_cur_img = torch.nonzero(rel_inds[:, 0] == i).squeeze(-1)
+                    rel_ind_per_img.append(rel_ind_cur_img)
+                    obj_ind_cur_img = rel_inds[rel_ind_cur_img][:, 1]
+                    obj_ind_cur_img_norepeat = []
+                    for j in range(obj_ind_cur_img.size(0)):
+                        obj_ind_cur_img_norepeat += [obj_ind_cur_img[j]] if obj_ind_cur_img[j] not in obj_ind_cur_img_norepeat else []
+                    obj_ind_per_img.append(torch.Tensor(obj_ind_cur_img_norepeat).type_as(rel_ind_cur_img))
+
+                rels_b_100_all = []
+                pred_scores_sorted_b_100_all = []
+                rels_a_100_all = []
+                pred_scores_sorted_a_100_all = []
+                rel_scores_idx_b_100_all = []
+                rel_scores_idx_a_100_all = []
+
+                for i in range(len(rel_ind_per_img)):
+                    boxes, obj_classes, obj_scores, rels_b_100, pred_scores_sorted_b_100, rels_a_100, \
+                    pred_scores_sorted_a_100, rel_scores_idx_b_100, rel_scores_idx_a_100 = filter_dets(bboxes, result.obj_scores,
+                                result.obj_preds, rel_inds[rel_ind_per_img[i]][:, 1:], rel_rep[rel_ind_per_img[i]][:, 1:], self.return_top100, self.training)
+
+                    # pdb.set_trace()
+
+                    rels_b_100_all.append(torch.cat((i*torch.ones(rels_b_100.size(0), 1).type_as(rels_b_100), rels_b_100), dim=1))
+                    pred_scores_sorted_b_100_all.append(pred_scores_sorted_b_100)
+                    try:
+                        rels_a_100_all.append(torch.cat((i*torch.ones(rels_a_100.size(0), 1).type_as(rels_a_100), rels_a_100), dim=1))
+                    except:
+                        rels_a_100_all.append(torch.Tensor([]).long().cuda())
+
+                    pred_scores_sorted_a_100_all.append(pred_scores_sorted_a_100)
+                    rel_scores_idx_b_100_all.append(rel_ind_per_img[i][rel_scores_idx_b_100])
+                    # pdb.set_trace()
+                    try:
+                        rel_scores_idx_a_100_all.append(rel_ind_per_img[i][rel_scores_idx_a_100])
+                    except:
+                        rel_scores_idx_a_100_all.append(torch.Tensor([]).long().cuda())
+
+                # pdb.set_trace()
+                rels_b_100_all = torch.cat(rels_b_100_all, dim=0)
+                pred_scores_sorted_b_100_all = torch.cat(pred_scores_sorted_b_100_all, dim=0)
+                rel_scores_idx_b_100_all = torch.cat(rel_scores_idx_b_100_all, 0)
+
+                try:
+                    rels_a_100_all = torch.cat(rels_a_100_all, 0)
+                except:
+                    rels_a_100_all = torch.Tensor([]).long().cuda()
+
+                try:
+                    pred_scores_sorted_a_100_all = torch.cat(pred_scores_sorted_a_100_all, 0)
+                except:
+                    pred_scores_sorted_a_100_all = Variable(torch.Tensor([]).long().cuda())
+
+                try:
+                    rel_scores_idx_a_100_all = torch.cat(rel_scores_idx_a_100_all, 0)
+                except:
+                    rel_scores_idx_a_100_all = torch.Tensor([]).long().cuda()
+
+                return result, [boxes, obj_classes, obj_scores, rels_b_100_all, pred_scores_sorted_b_100_all, rels_a_100_all,
+                                pred_scores_sorted_a_100_all, rel_scores_idx_b_100_all, rel_scores_idx_a_100_all]
+
             else:
                 return result, []
-
         twod_inds = arange(result.obj_preds.data) * self.num_classes + result.obj_preds.data
         result.obj_scores = F.softmax(result.rm_obj_dists, dim=1).view(-1)[twod_inds]
 
@@ -437,18 +343,15 @@ class KERN(nn.Module):
         rel_rep = F.softmax(result.rel_dists, dim=1)
 
         return filter_dets(bboxes, result.obj_scores,
-                           result.obj_preds, rel_inds[:, 1:], rel_rep, self.return_top100, self.training)
+                           result.obj_preds, rel_inds[:, 1:], rel_rep, self.return_top100)
 
     def __getitem__(self, batch):
         """ Hack to do multi-GPU training"""
         batch.scatter()
-
         if self.num_gpus == 1:
             return self(*batch[0])
-
         replicas = nn.parallel.replicate(self, devices=list(range(self.num_gpus)))
         outputs = nn.parallel.parallel_apply(replicas, [batch[i] for i in range(self.num_gpus)])
-
         if self.training:
             return gather_res(outputs, 0, dim=0)
         return outputs

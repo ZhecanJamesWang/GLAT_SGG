@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-python models/eval_rels.py -m predcls -p 100 -clip 5 \
+python models/eval_rels_original.py -m predcls -p 100 -clip 5 \
 -ckpt checkpoints/kern_sgcls_predcls.tar \
 -test \
 -b 1 \

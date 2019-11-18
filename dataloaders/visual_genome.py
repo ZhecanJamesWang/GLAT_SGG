@@ -448,6 +448,9 @@ def build_graph_structure(entries, index2name_object, index2name_predicate, if_p
     entries_minibatch['rel_scores'] = []
 
     if entries['pred_relations'].size(1) == 4:
+
+        pdb.set_trace()
+
         for i in range(entries['pred_relations'][:, 0].max()+1):
             rel_idx_cur_img = (entries['pred_relations'][:, 0] == i).view(-1, 1).expand(-1, 4)
             entries_minibatch['pred_relations'].append(entries['pred_relations'][rel_idx_cur_img].view(-1, 4)[:, 1:])
