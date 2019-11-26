@@ -2,28 +2,20 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="11066203-4164-4413-bd1b-0e742342911b" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/lib/kern_baseline.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/stanford_model.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/stanford_rel.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/models/stanford_copy.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/models/train_rels_baseline_1.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/models/train_rels_baseline_2.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/models/train_rels_motifnet.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/models/train_rels_stanford.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scripts/train_kern_predcls_exp2.sh" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scripts/train_kern_predcls_exp2_lowlr.sh" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scripts/train_kern_predcls_exp3.sh" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scripts/train_kern_stanford.sh" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scripts/train_stanford_ori.sh" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/models/eval_rels_ori.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/models/eval_stanford_motif.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/models/eval_stanford_motif_glat.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/scripts/eval_motifnet_glat.sh" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/scripts/eval_motifnet_sgcls.sh" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/scripts/eval_stanford_glat.sh" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/scripts/eval_stanford_motif_glat.sh" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/scripts/eval_stanford_sgcls.sh" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Makefile" beforeDir="false" afterPath="$PROJECT_DIR$/Makefile" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/config.py" beforeDir="false" afterPath="$PROJECT_DIR$/config.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/dataloaders/visual_genome.py" beforeDir="false" afterPath="$PROJECT_DIR$/dataloaders/visual_genome.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/kern_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/lib/kern_model.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/models_kern.py" beforeDir="false" afterPath="$PROJECT_DIR$/lib/glat.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/surgery.py" beforeDir="false" afterPath="$PROJECT_DIR$/lib/surgery.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/models/train_rels.py" beforeDir="false" afterPath="$PROJECT_DIR$/models/train_rels.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/train_kern_predcls_glat.sh" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/train_kern_predcls_glat.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/eval_rels.py" beforeDir="false" afterPath="$PROJECT_DIR$/models/eval_rels.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/eval_kern_sgcls.sh" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/eval_kern_sgcls.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/train_kern_stanford.sh" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/train_kern_stanford.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/visualization/visualize_sgcls.py" beforeDir="false" afterPath="$PROJECT_DIR$/visualization/visualize_sgcls.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -88,53 +80,86 @@
     <splitter split-orientation="horizontal" split-proportion="0.5">
       <split-first>
         <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-          <file leaf-file-name="train_rels_motifnet.py" pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/models/train_rels_motifnet.py">
+          <file leaf-file-name="eval_motifnet_glat.sh" pinned="false" current-in-tab="true">
+            <entry file="file://$PROJECT_DIR$/scripts/eval_motifnet_glat.sh">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="933">
-                  <caret line="640" column="50" lean-forward="true" selection-start-line="640" selection-start-column="50" selection-end-line="640" selection-end-column="50" />
+                <state relative-caret-position="629">
+                  <caret line="37" lean-forward="true" selection-start-line="37" selection-end-line="37" />
+                </state>
+              </provider>
+            </entry>
+          </file>
+          <file leaf-file-name="eval_stanford_glat.sh" pinned="false" current-in-tab="false">
+            <entry file="file://$PROJECT_DIR$/scripts/eval_stanford_glat.sh">
+              <provider selected="true" editor-type-id="text-editor">
+                <state relative-caret-position="544">
+                  <caret line="32" column="119" selection-start-line="32" selection-start-column="111" selection-end-line="32" selection-end-column="119" />
+                </state>
+              </provider>
+            </entry>
+          </file>
+          <file leaf-file-name="visualize_sgcls.py" pinned="false" current-in-tab="false">
+            <entry file="file://$PROJECT_DIR$/visualization/visualize_sgcls.py">
+              <provider selected="true" editor-type-id="text-editor">
+                <state relative-caret-position="697">
+                  <caret line="41" column="38" selection-start-line="41" selection-start-column="30" selection-end-line="41" selection-end-column="38" />
                   <folding>
-                    <element signature="e#94#171#0" expanded="true" />
+                    <element signature="e#186#240#0" expanded="true" />
                   </folding>
                 </state>
               </provider>
             </entry>
           </file>
-          <file leaf-file-name="train_stanford_ori.sh" pinned="false" current-in-tab="true">
-            <entry file="file://$PROJECT_DIR$/scripts/train_stanford_ori.sh">
+          <file leaf-file-name="visual_genome.py" pinned="false" current-in-tab="false">
+            <entry file="file://$PROJECT_DIR$/dataloaders/visual_genome.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="17">
-                  <caret line="1" column="26" selection-start-line="1" selection-start-column="26" selection-end-line="1" selection-end-column="26" />
-                </state>
-              </provider>
-            </entry>
-          </file>
-          <file leaf-file-name="stanford_copy.py" pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/models/stanford_copy.py">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="-40">
-                  <caret line="27" column="36" selection-start-line="27" selection-start-column="36" selection-end-line="27" selection-end-column="36" />
+                <state relative-caret-position="2754">
+                  <caret line="162" selection-start-line="162" selection-end-line="162" />
                   <folding>
-                    <element signature="e#89#143#0" expanded="true" />
+                    <element signature="e#71#82#0" expanded="true" />
                   </folding>
                 </state>
               </provider>
             </entry>
           </file>
-          <file leaf-file-name="pytorch_misc.py" pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/lib/pytorch_misc.py">
+          <file leaf-file-name="glat.py" pinned="false" current-in-tab="false">
+            <entry file="file://$PROJECT_DIR$/lib/glat.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="136">
-                  <caret line="15" column="13" selection-start-line="15" selection-start-column="4" selection-end-line="15" selection-end-column="13" />
+                <state relative-caret-position="643">
+                  <caret line="424" lean-forward="true" selection-start-line="424" selection-end-line="424" />
+                  <folding>
+                    <element signature="e#0#21#0" expanded="true" />
+                  </folding>
                 </state>
               </provider>
             </entry>
           </file>
-          <file leaf-file-name="train_kern_stanford.sh" pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/scripts/train_kern_stanford.sh">
+          <file leaf-file-name="eval_rels.py" pinned="false" current-in-tab="false">
+            <entry file="file://$PROJECT_DIR$/models/eval_rels.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="170">
-                  <caret line="10" lean-forward="true" selection-start-line="10" selection-end-line="10" />
+                <state relative-caret-position="947">
+                  <caret line="300" column="57" lean-forward="true" selection-start-line="300" selection-start-column="57" selection-end-line="300" selection-end-column="57" />
+                  <folding>
+                    <element signature="e#0#77#0" expanded="true" />
+                  </folding>
+                </state>
+              </provider>
+            </entry>
+          </file>
+          <file leaf-file-name="config.py" pinned="false" current-in-tab="false">
+            <entry file="file://$PROJECT_DIR$/config.py">
+              <provider selected="true" editor-type-id="text-editor">
+                <state relative-caret-position="466">
+                  <caret line="69" column="26" selection-start-line="69" selection-start-column="13" selection-end-line="69" selection-end-column="26" />
+                </state>
+              </provider>
+            </entry>
+          </file>
+          <file leaf-file-name="eval_kern_sgcls.sh" pinned="false" current-in-tab="false">
+            <entry file="file://$PROJECT_DIR$/scripts/eval_kern_sgcls.sh">
+              <provider selected="true" editor-type-id="text-editor">
+                <state relative-caret-position="306">
+                  <caret line="18" column="27" selection-start-line="18" selection-start-column="27" selection-end-line="18" selection-end-column="27" />
                 </state>
               </provider>
             </entry>
@@ -142,7 +167,7 @@
           <file leaf-file-name="motifnet_model.py" pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/lib/motifnet_model.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="880">
+                <state relative-caret-position="1598">
                   <caret line="117" column="48" selection-start-line="117" selection-start-column="20" selection-end-line="117" selection-end-column="48" />
                   <folding>
                     <element signature="e#40#58#0" expanded="true" />
@@ -151,42 +176,60 @@
               </provider>
             </entry>
           </file>
-          <file leaf-file-name="decoder_rnn.py" pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/lib/lstm/decoder_rnn.py">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="92">
-                  <caret line="40" column="49" lean-forward="true" selection-start-line="40" selection-start-column="49" selection-end-line="40" selection-end-column="49" />
-                </state>
-              </provider>
-            </entry>
-          </file>
-          <file leaf-file-name="config.py" pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/config.py">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="415">
-                  <caret line="128" column="17" selection-start-line="128" selection-start-column="17" selection-end-line="128" selection-end-column="17" />
-                </state>
-              </provider>
-            </entry>
-          </file>
-          <file leaf-file-name="train_kern_motifnet.sh" pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/scripts/train_kern_motifnet.sh">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="170">
-                  <caret line="10" lean-forward="true" selection-start-line="10" selection-end-line="10" />
-                </state>
-              </provider>
-            </entry>
-          </file>
         </leaf>
       </split-first>
       <split-second>
-        <leaf>
-          <file leaf-file-name="train_rels_stanford.py" pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/models/train_rels_stanford.py">
+        <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
+          <file leaf-file-name="eval_stanford_motif_glat.py" pinned="false" current-in-tab="false">
+            <entry file="file://$PROJECT_DIR$/models/eval_stanford_motif_glat.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="663">
-                  <caret line="160" column="1" lean-forward="true" selection-start-line="160" selection-start-column="1" selection-end-line="160" selection-end-column="1" />
+                <state relative-caret-position="661">
+                  <caret line="352" column="36" lean-forward="true" selection-start-line="352" selection-start-column="36" selection-end-line="352" selection-end-column="36" />
+                  <folding>
+                    <element signature="e#1#78#0" expanded="true" />
+                  </folding>
+                </state>
+              </provider>
+            </entry>
+          </file>
+          <file leaf-file-name="eval_stanford_motif.py" pinned="false" current-in-tab="false">
+            <entry file="file://$PROJECT_DIR$/models/eval_stanford_motif.py">
+              <provider selected="true" editor-type-id="text-editor">
+                <state relative-caret-position="-1209">
+                  <caret line="31" column="37" selection-start-line="31" selection-start-column="37" selection-end-line="31" selection-end-column="37" />
+                  <folding>
+                    <element signature="e#1#55#0" expanded="true" />
+                  </folding>
+                </state>
+              </provider>
+            </entry>
+          </file>
+          <file leaf-file-name="sg_eval.py" pinned="false" current-in-tab="false">
+            <entry file="file://$PROJECT_DIR$/lib/evaluation/sg_eval.py">
+              <provider selected="true" editor-type-id="text-editor">
+                <state relative-caret-position="793">
+                  <caret line="319" column="19" selection-start-line="319" selection-start-column="12" selection-end-line="319" selection-end-column="19" />
+                  <folding>
+                    <element signature="e#69#87#0" expanded="true" />
+                  </folding>
+                </state>
+              </provider>
+            </entry>
+          </file>
+          <file leaf-file-name="eval_stanford_motif_glat.sh" pinned="false" current-in-tab="true">
+            <entry file="file://$PROJECT_DIR$/scripts/eval_stanford_motif_glat.sh">
+              <provider selected="true" editor-type-id="text-editor">
+                <state relative-caret-position="400">
+                  <caret line="41" column="157" lean-forward="true" selection-start-line="41" selection-start-column="134" selection-end-line="41" selection-end-column="157" />
+                </state>
+              </provider>
+            </entry>
+          </file>
+          <file leaf-file-name="train_rels_motifnet.py" pinned="false" current-in-tab="false">
+            <entry file="file://$PROJECT_DIR$/models/train_rels_motifnet.py">
+              <provider selected="true" editor-type-id="text-editor">
+                <state relative-caret-position="748">
+                  <caret line="222" selection-start-line="222" selection-end-line="222" />
                   <folding>
                     <element signature="e#94#171#0" expanded="true" />
                   </folding>
@@ -194,10 +237,40 @@
               </provider>
             </entry>
           </file>
+          <file leaf-file-name="stanford_copy.py" pinned="false" current-in-tab="false">
+            <entry file="file://$PROJECT_DIR$/models/stanford_copy.py">
+              <provider selected="true" editor-type-id="text-editor">
+                <state relative-caret-position="884">
+                  <caret line="65" column="37" selection-start-line="65" selection-start-column="29" selection-end-line="65" selection-end-column="37" />
+                  <folding>
+                    <element signature="e#89#143#0" expanded="true" />
+                  </folding>
+                </state>
+              </provider>
+            </entry>
+          </file>
+          <file leaf-file-name="eval_motifnet_sgcls.sh" pinned="false" current-in-tab="false">
+            <entry file="file://$PROJECT_DIR$/scripts/eval_motifnet_sgcls.sh">
+              <provider selected="true" editor-type-id="text-editor">
+                <state relative-caret-position="578">
+                  <caret line="34" lean-forward="true" selection-start-line="34" selection-end-line="34" />
+                </state>
+              </provider>
+            </entry>
+          </file>
+          <file leaf-file-name="LICENSE" pinned="false" current-in-tab="false">
+            <entry file="file://$PROJECT_DIR$/LICENSE">
+              <provider selected="true" editor-type-id="text-editor">
+                <state relative-caret-position="153">
+                  <caret line="9" column="55" selection-start-line="9" selection-start-column="55" selection-end-line="9" selection-end-column="55" />
+                </state>
+              </provider>
+            </entry>
+          </file>
           <file leaf-file-name="stanford_model.py" pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/lib/stanford_model.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="1137">
+                <state relative-caret-position="5610">
                   <caret line="339" column="23" selection-start-line="339" selection-start-column="23" selection-end-line="339" selection-end-column="23" />
                   <folding>
                     <element signature="e#40#52#0" expanded="true" />
@@ -206,27 +279,10 @@
               </provider>
             </entry>
           </file>
-          <file leaf-file-name="kern_baseline.py" pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/lib/kern_baseline.py">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="408">
-                  <caret line="24" column="37" selection-start-line="24" selection-start-column="37" selection-end-line="24" selection-end-column="37" />
-                  <folding>
-                    <element signature="e#36#54#0" expanded="true" />
-                  </folding>
-                </state>
-              </provider>
-            </entry>
-          </file>
-          <file leaf-file-name="train_rels.py" pinned="false" current-in-tab="false">
-            <entry file="file://$USER_HOME$/Downloads/neural-motifs-master/models/train_rels.py">
-              <provider selected="true" editor-type-id="text-editor" />
-            </entry>
-          </file>
-          <file leaf-file-name="surgery.py" pinned="false" current-in-tab="true">
+          <file leaf-file-name="surgery.py" pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/lib/surgery.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="425">
+                <state relative-caret-position="306">
                   <caret line="25" column="4" selection-start-line="25" selection-start-column="4" selection-end-line="25" selection-end-column="4" />
                   <folding>
                     <element signature="e#266#284#0" expanded="true" />
@@ -248,27 +304,14 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>resnet_l4</find>
-      <find>exp_name</find>
-      <find>nl_edge</find>
-      <find>use_proposals</find>
-      <find>co</find>
-      <find>conf.model</find>
-      <find>model</find>
-      <find>model``</find>
-      <find>ngpu</find>
-      <find>conf</find>
-      <find>glove</find>
       <find>path</find>
       <find>DATA_PATH</find>
       <find>rm_obj_dists</find>
       <find>writer</find>
-      <find>return_top100</find>
-      <find>pooling_dim</find>
       <find>tb_log_dir</find>
       <find>start_epoch</find>
       <find>grad</find>
-      <find>loading word vectors</find>
+      <find />
       <find>__getitem__</find>
       <find>obj_edge_vectorsobj_edge_vector</find>
       <find>obj_edge_vectors</find>
@@ -278,6 +321,19 @@
       <find>input_linearity</find>
       <find>inputs_dim</find>
       <find>obj_embed</find>
+      <find>model</find>
+      <find>MODES</find>
+      <find>self.mode</find>
+      <find>pooling_dim</find>
+      <find>evaluator_multiple_preds</find>
+      <find>evaluator_list</find>
+      <find>thrs</find>
+      <find>node_logit</find>
+      <find>logit</find>
+      <find>print</find>
+      <find>eval_entry</find>
+      <find>return_top100</find>
+      <find>save_dir</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -293,7 +349,6 @@
         <option value="$PROJECT_DIR$/scripts/train_kern_predcls_pretrain.sh" />
         <option value="$PROJECT_DIR$/lib/pytorch_misc.py" />
         <option value="$PROJECT_DIR$/scripts/eval_kern_predcls.sh" />
-        <option value="$PROJECT_DIR$/models/eval_rels.py" />
         <option value="$PROJECT_DIR$/lib/evaluation/sg_eval.py" />
         <option value="$PROJECT_DIR$/lib/evaluation/sg_eval_all_rel_cates.py" />
         <option value="$PROJECT_DIR$/lib/kern_model.py" />
@@ -312,15 +367,28 @@
         <option value="$PROJECT_DIR$/lib/surgery.py" />
         <option value="$PROJECT_DIR$/lib/kern_baseline.py" />
         <option value="$PROJECT_DIR$/models/train_rels_neuralmotif.py" />
-        <option value="$PROJECT_DIR$/config.py" />
         <option value="$PROJECT_DIR$/scripts/train_kern_motifnet.sh" />
         <option value="$PROJECT_DIR$/lib/motifnet_model.py" />
         <option value="$PROJECT_DIR$/models/stanford_copy.py" />
         <option value="$PROJECT_DIR$/scripts/train_stanford_ori.sh" />
-        <option value="$PROJECT_DIR$/scripts/train_kern_stanford.sh" />
         <option value="$PROJECT_DIR$/models/train_rels_stanford.py" />
         <option value="$PROJECT_DIR$/lib/stanford_model.py" />
         <option value="$PROJECT_DIR$/models/train_rels_motifnet.py" />
+        <option value="$PROJECT_DIR$/scripts/train_kern_stanford.sh" />
+        <option value="$PROJECT_DIR$/models/eval_rels.py" />
+        <option value="$PROJECT_DIR$/scripts/eval_kern_sgcls_ori.sh" />
+        <option value="$PROJECT_DIR$/models/eval_rels_ori.py" />
+        <option value="$PROJECT_DIR$/models/eval_stanford_glat.py" />
+        <option value="$PROJECT_DIR$/config.py" />
+        <option value="$PROJECT_DIR$/scripts/eval_motifnet_kern.sh" />
+        <option value="$PROJECT_DIR$/scripts/eval_stanford_glat.sh" />
+        <option value="$PROJECT_DIR$/models/eval_stanford_motif_glat.py" />
+        <option value="$PROJECT_DIR$/models/eval_stanford_motif.py" />
+        <option value="$PROJECT_DIR$/scripts/eval_stanford_motif_glat.sh" />
+        <option value="$PROJECT_DIR$/visualization/visualize_sgcls.py" />
+        <option value="$PROJECT_DIR$/scripts/eval_motifnet_sgcls.sh" />
+        <option value="$PROJECT_DIR$/scripts/eval_stanford_sgcls.sh" />
+        <option value="$PROJECT_DIR$/scripts/eval_motifnet_glat.sh" />
       </list>
     </option>
   </component>
@@ -343,6 +411,7 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -380,11 +449,15 @@
               <item name="KERN" type="462c0819:PsiDirectoryNode" />
               <item name="scripts" type="462c0819:PsiDirectoryNode" />
             </path>
+            <path>
+              <item name="KERN" type="b2602c69:ProjectViewProjectNode" />
+              <item name="KERN" type="462c0819:PsiDirectoryNode" />
+              <item name="visualization" type="462c0819:PsiDirectoryNode" />
+            </path>
           </expand>
           <select />
         </subPane>
       </pane>
-      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -398,14 +471,14 @@
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
   </component>
   <component name="RecentsManager">
-    <key name="MoveFile.RECENT_KEYS">
-      <recent name="$PROJECT_DIR$/lib" />
-    </key>
     <key name="CopyFile.RECENT_KEYS">
-      <recent name="$PROJECT_DIR$/models" />
       <recent name="$PROJECT_DIR$/scripts" />
+      <recent name="$PROJECT_DIR$/models" />
       <recent name="$PROJECT_DIR$/lib" />
       <recent name="$PROJECT_DIR$" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/lib" />
     </key>
   </component>
   <component name="RunDashboard">
@@ -468,19 +541,18 @@
       <window_info anchor="bottom" id="TODO" order="6" />
       <window_info anchor="bottom" id="Event Log" order="12" side_tool="true" />
       <window_info anchor="bottom" id="Database Changes" order="10" show_stripe_button="false" />
+      <window_info anchor="bottom" id="Run" order="2" weight="0.3987952" />
       <window_info anchor="bottom" id="Version Control" order="8" />
       <window_info anchor="bottom" id="Python Console" order="13" />
-      <window_info anchor="bottom" id="Run" order="2" weight="0.3987952" />
       <window_info anchor="bottom" id="Terminal" order="11" />
       <window_info anchor="right" id="Remote Host" order="3" weight="0.32991013" />
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.2609047" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.2180937" />
       <window_info anchor="bottom" id="Docker" order="7" show_stripe_button="false" />
       <window_info anchor="right" id="Database" order="5" weight="0.32991013" />
-      <window_info anchor="bottom" id="Find" order="1" weight="0.32891566" />
       <window_info anchor="right" id="SciView" order="4" weight="0.03494837" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
-      <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.0" />
+      <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
@@ -488,31 +560,32 @@
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="File Transfer" order="9" weight="0.14337349" />
+      <window_info anchor="bottom" id="Find" order="1" weight="0.32891566" />
     </layout>
     <layout-to-restore>
+      <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
       <window_info anchor="bottom" id="Docker" order="7" show_stripe_button="false" />
-      <window_info anchor="bottom" id="Version Control" order="8" />
-      <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
+      <window_info anchor="bottom" id="Run" order="2" weight="0.3987952" />
       <window_info anchor="right" id="Remote Host" order="3" weight="0.32991013" />
+      <window_info id="Favorites" order="2" side_tool="true" />
       <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.21890146" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
+      <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="bottom" id="TODO" order="6" />
-      <window_info anchor="bottom" id="Database Changes" order="10" show_stripe_button="false" />
-      <window_info anchor="bottom" id="Run" order="2" weight="0.3987952" />
-      <window_info anchor="bottom" id="Find" order="1" weight="0.32891566" />
-      <window_info anchor="bottom" id="Python Console" order="13" />
+      <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
+      <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.0" />
       <window_info anchor="right" id="Database" order="5" weight="0.32991013" />
       <window_info anchor="bottom" id="Terminal" order="11" />
       <window_info anchor="bottom" id="Event Log" order="12" side_tool="true" />
-      <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
+      <window_info anchor="bottom" id="Database Changes" order="10" show_stripe_button="false" />
+      <window_info anchor="bottom" id="Version Control" order="8" />
       <window_info anchor="right" id="SciView" order="4" weight="0.03494837" />
-      <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="File Transfer" order="9" weight="0.14337349" />
-      <window_info anchor="bottom" id="Message" order="0" />
-      <window_info id="Favorites" order="2" side_tool="true" />
+      <window_info anchor="bottom" id="Find" order="1" weight="0.32891566" />
+      <window_info anchor="bottom" id="Python Console" order="13" />
     </layout-to-restore>
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -683,91 +756,10 @@ Unexpected key g</expression-string>
     </expressions>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/scripts/train_kern_sgdet.sh">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="60">
-          <caret line="4" column="58" selection-start-line="4" selection-start-column="55" selection-end-line="4" selection-end-column="58" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/models/train_detector.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="152">
-          <caret line="26" column="13" selection-start-line="26" selection-start-column="13" selection-end-line="26" selection-end-column="13" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Makefile">
-      <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <caret column="4" selection-start-column="4" selection-end-column="39" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file:///Library/Frameworks/Python.framework/Versions/3.6/lib/python3.6/pdb.py" />
-    <entry file="file://$PROJECT_DIR$/.gitignore.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="210">
-          <caret line="14" column="5" lean-forward="true" selection-start-line="14" selection-start-column="5" selection-end-line="14" selection-end-column="5" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/lib/ggnn.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="169">
-          <caret line="73" column="10" selection-start-line="73" selection-start-column="10" selection-end-line="73" selection-end-column="10" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/lib/layernorm.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <caret lean-forward="true" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/lib/layers.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-1902">
-          <caret line="225" column="17" selection-start-line="225" selection-start-column="10" selection-end-line="225" selection-end-column="17" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/scripts/train_kern_sgcls.sh">
-      <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <caret column="19" lean-forward="true" selection-start-column="19" selection-end-column="19" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/models/eval_rels.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="63">
-          <caret line="27" column="15" selection-start-line="27" selection-start-column="15" selection-end-line="27" selection-end-column="15" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/scripts/train_kern_predcls_pretrain.sh">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="136">
-          <caret line="8" column="10" lean-forward="true" selection-start-line="8" selection-start-column="10" selection-end-line="8" selection-end-column="10" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/scripts/eval_kern_predcls.sh">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="68">
           <caret line="4" column="3" selection-start-line="4" selection-start-column="3" selection-end-line="4" selection-end-column="4" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/lib/evaluation/sg_eval.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="3332">
-          <caret line="196" column="17" selection-start-line="195" selection-start-column="17" selection-end-line="196" selection-end-column="17" />
-          <folding>
-            <element signature="e#69#87#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -796,9 +788,6 @@ Unexpected key g</expression-string>
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="102">
           <caret line="6" column="7" lean-forward="true" selection-start-line="6" selection-start-column="7" selection-end-line="6" selection-end-column="7" />
-          <folding>
-            <element signature="e#0#12#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -806,9 +795,6 @@ Unexpected key g</expression-string>
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1137">
           <caret line="71" column="6" selection-start-line="71" selection-start-column="6" selection-end-line="71" selection-end-column="6" />
-          <folding>
-            <element signature="e#73#91#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -816,9 +802,6 @@ Unexpected key g</expression-string>
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="188">
           <caret line="316" column="46" selection-start-line="316" selection-start-column="46" selection-end-line="316" selection-end-column="46" />
-          <folding>
-            <element signature="e#94#171#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -826,16 +809,6 @@ Unexpected key g</expression-string>
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-675">
           <caret line="85" column="107" selection-start-line="85" selection-start-column="107" selection-end-line="85" selection-end-column="107" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/dataloaders/visual_genome.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="4137">
-          <caret line="459" column="15" selection-start-line="459" selection-start-column="15" selection-end-line="459" selection-end-column="15" />
-          <folding>
-            <element signature="e#71#82#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -850,9 +823,6 @@ Unexpected key g</expression-string>
           <caret line="75" column="44" selection-start-line="75" selection-start-column="44" selection-end-line="75" selection-end-column="44" />
         </state>
       </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/lib/fpn/stanford_rel.py">
-      <provider selected="true" editor-type-id="text-editor" />
     </entry>
     <entry file="file://$PROJECT_DIR$/lib/resnet.py">
       <provider selected="true" editor-type-id="text-editor">
@@ -875,16 +845,6 @@ Unexpected key g</expression-string>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/lib/glat.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="610">
-          <caret line="524" column="45" selection-start-line="260" selection-start-column="40" selection-end-line="260" selection-end-column="68" />
-          <folding>
-            <element signature="e#0#21#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/scripts/train_kern_predcls_glat.sh">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="68">
@@ -896,16 +856,6 @@ Unexpected key g</expression-string>
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="153">
           <caret line="9" selection-start-line="9" selection-end-line="9" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/models/train_rels.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-306">
-          <caret line="108" column="27" selection-start-line="108" selection-start-column="23" selection-end-line="108" selection-end-column="27" />
-          <folding>
-            <element signature="e#94#171#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -936,9 +886,6 @@ Unexpected key g</expression-string>
         </state>
       </provider>
     </entry>
-    <entry file="file://$USER_HOME$/Downloads/neural-motifs-master/models/train_rels.py">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
     <entry file="file://$PROJECT_DIR$/scripts/train_kern_predcls_exp2.sh">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="68">
@@ -950,9 +897,6 @@ Unexpected key g</expression-string>
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="323">
           <caret line="19" column="4" selection-start-line="19" selection-start-column="4" selection-end-line="19" selection-end-column="4" />
-          <folding>
-            <element signature="e#46#58#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -960,15 +904,12 @@ Unexpected key g</expression-string>
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1261">
           <caret line="603" column="18" selection-start-line="603" selection-start-column="12" selection-end-line="603" selection-end-column="18" />
-          <folding>
-            <element signature="e#94#171#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/lib/kern_baseline.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="408">
+        <state relative-caret-position="119">
           <caret line="24" column="37" selection-start-line="24" selection-start-column="37" selection-end-line="24" selection-end-column="37" />
           <folding>
             <element signature="e#36#54#0" expanded="true" />
@@ -983,13 +924,6 @@ Unexpected key g</expression-string>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/config.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="415">
-          <caret line="128" column="17" selection-start-line="128" selection-start-column="17" selection-end-line="128" selection-end-column="17" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/lib/lstm/decoder_rnn.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="92">
@@ -997,19 +931,9 @@ Unexpected key g</expression-string>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/models/train_rels_stanford.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="663">
-          <caret line="160" column="1" lean-forward="true" selection-start-line="160" selection-start-column="1" selection-end-line="160" selection-end-column="1" />
-          <folding>
-            <element signature="e#94#171#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/lib/stanford_model.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1137">
+        <state relative-caret-position="5610">
           <caret line="339" column="23" selection-start-line="339" selection-start-column="23" selection-end-line="339" selection-end-column="23" />
           <folding>
             <element signature="e#40#52#0" expanded="true" />
@@ -1019,7 +943,7 @@ Unexpected key g</expression-string>
     </entry>
     <entry file="file://$PROJECT_DIR$/lib/surgery.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="425">
+        <state relative-caret-position="306">
           <caret line="25" column="4" selection-start-line="25" selection-start-column="4" selection-end-line="25" selection-end-column="4" />
           <folding>
             <element signature="e#266#284#0" expanded="true" />
@@ -1027,36 +951,16 @@ Unexpected key g</expression-string>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/models/train_rels_motifnet.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="933">
-          <caret line="640" column="50" lean-forward="true" selection-start-line="640" selection-start-column="50" selection-end-line="640" selection-end-column="50" />
-          <folding>
-            <element signature="e#94#171#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/models/stanford_copy.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-40">
-          <caret line="27" column="36" selection-start-line="27" selection-start-column="36" selection-end-line="27" selection-end-column="36" />
-          <folding>
-            <element signature="e#89#143#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/scripts/train_kern_motifnet.sh">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="170">
-          <caret line="10" lean-forward="true" selection-start-line="10" selection-end-line="10" />
+          <caret line="10" selection-start-line="10" selection-end-line="10" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/lib/motifnet_model.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="880">
+        <state relative-caret-position="1598">
           <caret line="117" column="48" selection-start-line="117" selection-start-column="20" selection-end-line="117" selection-end-column="48" />
           <folding>
             <element signature="e#40#58#0" expanded="true" />
@@ -1064,10 +968,24 @@ Unexpected key g</expression-string>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/scripts/train_kern_stanford.sh">
+    <entry file="file://$PROJECT_DIR$/scripts/eval_kern_sgcls.sh">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="170">
-          <caret line="10" lean-forward="true" selection-start-line="10" selection-end-line="10" />
+        <state relative-caret-position="204">
+          <caret line="12" column="27" lean-forward="true" selection-start-line="12" selection-start-column="27" selection-end-line="12" selection-end-column="27" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/models/eval_rels_ori.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="255">
+          <caret line="15" lean-forward="true" selection-start-line="15" selection-end-line="15" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/scripts/eval_kern_sgcls.sh">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="306">
+          <caret line="18" column="27" selection-start-line="18" selection-start-column="27" selection-end-line="18" selection-end-column="27" />
         </state>
       </provider>
     </entry>
@@ -1075,6 +993,166 @@ Unexpected key g</expression-string>
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="17">
           <caret line="1" column="26" selection-start-line="1" selection-start-column="26" selection-end-line="1" selection-end-column="26" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/scripts/train_kern_stanford.sh">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="85">
+          <caret line="5" column="41" selection-start-line="5" selection-start-column="41" selection-end-line="5" selection-end-column="41" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/models/stanford_copy.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="884">
+          <caret line="65" column="37" selection-start-line="65" selection-start-column="29" selection-end-line="65" selection-end-column="37" />
+          <folding>
+            <element signature="e#89#143#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/LICENSE">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="153">
+          <caret line="9" column="55" selection-start-line="9" selection-start-column="55" selection-end-line="9" selection-end-column="55" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/models/train_rels_stanford.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="54">
+          <caret line="97" column="16" selection-start-line="97" selection-start-column="16" selection-end-line="97" selection-end-column="16" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/models/train_rels.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-2310">
+          <caret line="165" column="69" lean-forward="true" selection-start-line="165" selection-start-column="69" selection-end-line="165" selection-end-column="69" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/models/train_rels_motifnet.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="748">
+          <caret line="222" selection-start-line="222" selection-end-line="222" />
+          <folding>
+            <element signature="e#94#171#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/glat.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="643">
+          <caret line="424" lean-forward="true" selection-start-line="424" selection-end-line="424" />
+          <folding>
+            <element signature="e#0#21#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/config.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="466">
+          <caret line="69" column="26" selection-start-line="69" selection-start-column="13" selection-end-line="69" selection-end-column="26" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/models/eval_stanford_motif_glat.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="661">
+          <caret line="352" column="36" lean-forward="true" selection-start-line="352" selection-start-column="36" selection-end-line="352" selection-end-column="36" />
+          <folding>
+            <element signature="e#1#78#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/models/eval_rels.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="947">
+          <caret line="300" column="57" lean-forward="true" selection-start-line="300" selection-start-column="57" selection-end-line="300" selection-end-column="57" />
+          <folding>
+            <element signature="e#0#77#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/dataloaders/visual_genome.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="2754">
+          <caret line="162" selection-start-line="162" selection-end-line="162" />
+          <folding>
+            <element signature="e#71#82#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/visualization/visualize_sgcls.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="697">
+          <caret line="41" column="38" selection-start-line="41" selection-start-column="30" selection-end-line="41" selection-end-column="38" />
+          <folding>
+            <element signature="e#186#240#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/scripts/eval_stanford_glat.sh">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="544">
+          <caret line="32" column="119" selection-start-line="32" selection-start-column="111" selection-end-line="32" selection-end-column="119" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/scripts/eval_stanford_sgcls.sh">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="544">
+          <caret line="32" column="119" selection-start-line="32" selection-start-column="119" selection-end-line="32" selection-end-column="119" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/evaluation/sg_eval.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="793">
+          <caret line="319" column="19" selection-start-line="319" selection-start-column="12" selection-end-line="319" selection-end-column="19" />
+          <folding>
+            <element signature="e#69#87#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/models/eval_stanford_motif.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-1209">
+          <caret line="31" column="37" selection-start-line="31" selection-start-column="37" selection-end-line="31" selection-end-column="37" />
+          <folding>
+            <element signature="e#1#55#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/scripts/eval_motifnet_sgcls.sh">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="578">
+          <caret line="34" lean-forward="true" selection-start-line="34" selection-end-line="34" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/scripts/eval_stanford_motif_glat.sh">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="400">
+          <caret line="41" column="157" lean-forward="true" selection-start-line="41" selection-start-column="134" selection-end-line="41" selection-end-column="157" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/scripts/eval_motifnet_glat.sh">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="629">
+          <caret line="37" lean-forward="true" selection-start-line="37" selection-end-line="37" />
         </state>
       </provider>
     </entry>

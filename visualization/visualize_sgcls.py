@@ -2,7 +2,7 @@
 # visualization code for sgcls task
 # in KERN root dir, run python visualization/visualize_sgcls.py -cache_dir caches/kern_sgcls.pkl -save_dir visualization/saves
 from dataloaders.visual_genome import VGDataLoader, VG
-from dataloaders.VRD import VRDDataLoader, VRD
+# from dataloaders.VRD import VRDDataLoader, VRD
 from graphviz import Digraph
 import numpy as np
 import torch
@@ -213,6 +213,8 @@ with open(args.cache_dir, 'rb') as f:
     all_pred_entries = pkl.load(f)
 
 for i, pred_entry in enumerate(tqdm(all_pred_entries)):
+    if i == 500:
+        break
     gt_entry = {
         'gt_classes': val.gt_classes[i].copy(),
         'gt_relations': val.relationships[i].copy(),
