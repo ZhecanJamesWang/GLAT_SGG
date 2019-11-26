@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-python models/eval_rels.py -m predcls -p 100 -clip 5 \
+python models/eval_rels_original.py -m predcls -p 100 -clip 5 \
 -ckpt checkpoints/kern_sgcls_predcls.tar \
 -test \
 -b 1 \
@@ -9,5 +9,4 @@ python models/eval_rels.py -m predcls -p 100 -clip 5 \
 -ggnn_rel_output_dim 512 \
 -use_rel_knowledge \
 -rel_knowledge prior_matrices/rel_matrix.npy \
--cache caches/kern_predcls_11252019_1.pkl \
 -save_rel_recall results/kern_rel_recall_predcls.pkl

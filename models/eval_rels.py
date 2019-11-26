@@ -13,13 +13,17 @@ from lib.kern_model import KERN
 from lib.glat import GLATNET
 from torch.autograd import Variable
 
+os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+
+
 conf = ModelConfig()
 
 train, val, test = VG.splits(num_val_im=conf.val_size, filter_duplicate_rels=True,
-                             use_proposals=conf.use_proposals,
-                             filter_non_overlap=conf.mode == 'sgdet')
+                          use_proposals=conf.use_proposals,
+                          filter_non_overlap=conf.mode == 'sgdet')
 
-ind_to_predicates = train.ind_to_predicates  # ind_to_predicates[0] means no relationship
+ind_to_predicates = train.ind_to_predicates # ind_to_predicates[0] means no relationship
+
 ind_to_classes = train.ind_to_classes
 
 if conf.test:
@@ -49,7 +53,7 @@ model = GLATNET(vocab_num=[52, 153],
                 dropout=0.1,
                 nheads=8,
                 blank=152,
-                types=[2] * 6)
+                types=[2]*6)
 
 detector.cuda()
 ckpt = torch.load(conf.ckpt)
@@ -64,7 +68,21 @@ optimistic_restore(detector, ckpt['state_dict'])
 
 # ckpt_glat = torch.load('/home/haoxuan/code/GBERT/models/2019-10-31-03-13_2_2_2_2_2_2_concat_no_init_mask/best_test_node_mask_predicate_acc')
 # ckpt_glat = torch.load('/home/tangtangwzc/Common_sense/models/2019-11-03-17-51_2_2_2_2_2_2_concat_no_init_mask/best_test_node_mask_predicate_acc.pth')
-ckpt_glat = torch.load('/home/tangtangwzc/KERN/saved_models/2019-11-13-00-04/with_constrant_mean__R@100.pth')
+# ckpt_glat = torch.load('/home/tangtangwzc/KERN/saved_models/2019-11-13-00-04/with_constrant_mean__R@100.pth')
+# ckpt_glat = torch.load('/home/tangtangwzc/KERN/saved_models/2019-11-13-00-04/with_constrant_mean__R@100.pth')
+# ckpt_glat = torch.load('/home/tangtangwzc/KERN/saved_models/2019-11-20-17-16/with_constrant_mean__R@100.pth')
+# ckpt_glat = torch.load('/home/tangtangwzc/KERN/saved_models/2019-11-20-17-14/with_constrant_mean__R@100.pth')
+
+# ckpt_glat = torch.load('/home/tangtangwzc/KERN/saved_models/2019-11-21-00-11/with_constrant_mean__R@100.pth')
+# ckpt_glat = torch.load('/home/tangtangwzc/KERN/saved_models/2019-11-21-17-04/with_constrant_mean__R@100.pth')
+# ckpt_glat = torch.load('/home/tangtangwzc/KERN/saved_models/2019-11-20-17-14/with_constrant_mean__R@100.pth')
+# ckpt_glat = torch.load('/home/tangtangwzc/KERN/saved_models/2019-11-21-00-00/with_constrant_mean__R@100.pth')
+# ckpt_glat = torch.load('/home/tangtangwzc/KERN/saved_models/2019-11-20-23-59/with_constrant_mean__R@100.pth')
+# ckpt_glat = torch.load('/home/tangtangwzc/KERN/saved_models/2019-11-19-17-20/with_constrant_mean__R@100.pth')
+ckpt_glat = torch.load('/home/tangtangwzc/Common_sense/models/2019-11-03-17-28_2_2_2_2_2_2_concat_no_init_mask/best_test_node_mask_predicate_acc.pth')
+# ckpt_glat = torch.load('/home/tangtangwzc/KERN/saved_models/2019-11-22-15-29/with_constrant_mean__R@100.pth')
+
+
 optimistic_restore(model, ckpt_glat['model'])
 print('finish pretrained loading')
 # model.load_state_dict(ckpt_glat['model'])
@@ -128,13 +146,14 @@ def my_collate(total_data):
         input_classes.append(torch.cat((input_class, pad_input_class), 0).unsqueeze(0))
         # input_classes.append(torch.cat((input_class, blank_idx*torch.ones(max_length-input_class.size(0)).long().cuda()), 0).unsqueeze(0))
 
-        new_adj = torch.cat((adj, torch.zeros(max_length - adj.size(0), adj.size(1)).long().cuda()), 0)
+
+        new_adj = torch.cat((adj, torch.zeros(max_length-adj.size(0), adj.size(1)).long().cuda()), 0)
         if max_length != new_adj.size(1):
-            new_adj = torch.cat((new_adj, torch.zeros(new_adj.size(0), max_length - new_adj.size(1)).long().cuda()), 1)
+            new_adj = torch.cat((new_adj, torch.zeros(new_adj.size(0), max_length-new_adj.size(1)).long().cuda()), 1)
         adjs.append(new_adj.unsqueeze(0))
         # pdb.set_trace()
         node_types.append(
-            torch.cat((node_type, 2 * torch.ones(max_length - node_type.size(0)).long().cuda()), 0).unsqueeze(0))
+            torch.cat((node_type, 2 * torch.ones(max_length-node_type.size(0)).long().cuda()), 0).unsqueeze(0))
 
     input_classes = torch.cat(input_classes, 0)
 
@@ -224,25 +243,25 @@ def val_batch(batch_num, b, evaluator, evaluator_multiple_preds, evaluator_list,
         print("rels_i_a100.size(): ", rels_i_a100.shape)
 
         gt_entry = {
-            'gt_classes': val.gt_classes[batch_num + i].copy(),  # (23,) (16,)
-            'gt_relations': val.relationships[batch_num + i].copy(),  # (29, 3) (6, 3)
-            'gt_boxes': val.gt_boxes[batch_num + i].copy(),  # (23, 4) (16, 4)
+            'gt_classes': val.gt_classes[batch_num + i].copy(), #(23,) (16,)
+            'gt_relations': val.relationships[batch_num + i].copy(), #(29, 3) (6, 3)
+            'gt_boxes': val.gt_boxes[batch_num + i].copy(), #(23, 4) (16, 4)
         }
 
         if conf.return_top100:
             pred_entry = {
-                'pred_boxes': boxes_i * BOX_SCALE / IM_SCALE,  # (23, 4) (16, 4)
-                'pred_classes': objs_i,  # (23,) (16,)
-                'pred_rel_inds': rels_i_b100,  # (506, 2) (240, 2)
-                'obj_scores': obj_scores_i,  # (23,) (16,)
+                'pred_boxes': boxes_i * BOX_SCALE/IM_SCALE, #(23, 4) (16, 4)
+                'pred_classes': objs_i, #(23,) (16,)
+                'pred_rel_inds': rels_i_b100, #(506, 2) (240, 2)
+                'obj_scores': obj_scores_i, #(23,) (16,)
                 'rel_scores': pred_scores_i_b100,  # hack for now. (506, 51) (240, 51)
             }
         else:
             pred_entry = {
-                'pred_boxes': boxes_i * BOX_SCALE / IM_SCALE,  # (23, 4) (16, 4)
-                'pred_classes': objs_i,  # (23,) (16,)
-                'pred_rel_inds': rels_i,  # (506, 2) (240, 2)
-                'obj_scores': obj_scores_i,  # (23,) (16,)
+                'pred_boxes': boxes_i * BOX_SCALE/IM_SCALE, #(23, 4) (16, 4)
+                'pred_classes': objs_i, #(23,) (16,)
+                'pred_rel_inds': rels_i, #(506, 2) (240, 2)
+                'obj_scores': obj_scores_i, #(23,) (16,)
                 'rel_scores': pred_scores_i,  # hack for now. (506, 51) (240, 51)
             }
 
@@ -257,29 +276,30 @@ def val_batch(batch_num, b, evaluator, evaluator_multiple_preds, evaluator_list,
         else:
 
             pred_entry['pred_rel_inds'] = np.concatenate((pred_entry['pred_rel_inds'], rels_i_a100), axis=0)
-            # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+        # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
             pred_entry['rel_scores'] = np.concatenate((pred_entry['rel_scores'][:, :-1], pred_scores_i_a100), axis=0)
             # pred_entry['rel_scores'] = np.concatenate((rel_scores_one_hot, pred_scores_i_a100), axis=0)
         # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
         # pred_entry = rank_predicate(pred_entry)
 
-        # for i, (boxes_i, objs_i, obj_scores_i, rels_i, pred_scores_i) in enumerate(det_res):
-        #     gt_entry = {
-        #         'gt_classes': val.gt_classes[batch_num + i].copy(),
-        #         'gt_relations': val.relationships[batch_num + i].copy(),
-        #         'gt_boxes': val.gt_boxes[batch_num + i].copy(),
-        #     }
-        #     assert np.all(objs_i[rels_i[:,0]] > 0) and np.all(objs_i[rels_i[:,1]] > 0)
-        #     # assert np.all(rels_i[:,2] > 0)
-        #
-        #     pred_entry = {
-        #         'pred_boxes': boxes_i * BOX_SCALE/IM_SCALE,
-        #         'pred_classes': objs_i,
-        #         'pred_rel_inds': rels_i,
-        #         'obj_scores': obj_scores_i,
-        #         'rel_scores': pred_scores_i,
-        #     }
+
+    # for i, (boxes_i, objs_i, obj_scores_i, rels_i, pred_scores_i) in enumerate(det_res):
+    #     gt_entry = {
+    #         'gt_classes': val.gt_classes[batch_num + i].copy(),
+    #         'gt_relations': val.relationships[batch_num + i].copy(),
+    #         'gt_boxes': val.gt_boxes[batch_num + i].copy(),
+    #     }
+    #     assert np.all(objs_i[rels_i[:,0]] > 0) and np.all(objs_i[rels_i[:,1]] > 0)
+    #     # assert np.all(rels_i[:,2] > 0)
+    #
+    #     pred_entry = {
+    #         'pred_boxes': boxes_i * BOX_SCALE/IM_SCALE,
+    #         'pred_classes': objs_i,
+    #         'pred_rel_inds': rels_i,
+    #         'obj_scores': obj_scores_i,
+    #         'rel_scores': pred_scores_i,
+    #     }
 
         all_pred_entries.append(pred_entry)
 
@@ -332,6 +352,8 @@ else:
     mean_recall = calculate_mR_from_evaluator_list(evaluator_list, conf.mode, save_file=conf.save_rel_recall)
     mean_recall_mp = calculate_mR_from_evaluator_list(evaluator_multiple_preds_list, conf.mode, multiple_preds=True,
                                                       save_file=conf.save_rel_recall)
+
+    torch.cuda.empty_cache()
 
     torch.cuda.empty_cache()
 

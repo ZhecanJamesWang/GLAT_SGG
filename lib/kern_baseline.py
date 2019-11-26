@@ -20,7 +20,7 @@ from lib.object_detector import ObjectDetector, gather_res, load_vgg
 from lib.pytorch_misc import transpose_packed_sequence_inds, to_onehot, arange, enumerate_by_image, diagonal_inds, Flattener
 from lib.surgery import filter_dets
 from lib.fpn.roi_align.functions.roi_align import RoIAlignFunction
-
+import pdb
 
 MODES = ('sgdet', 'sgcls', 'predcls')
 

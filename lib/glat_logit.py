@@ -253,13 +253,23 @@ class Connect_Cls(nn.Module):
 class Pred_label(nn.Module):
     def __init__(self, model):
         super(Pred_label, self).__init__()
-        embed_shape_predicate = model.embed_predicate.weight.shape
+        # embed_shape_predicate = model.embed_predicate.weight.shape
+        # embed_shape_predicate_logit = model.embed_predicate_logit.weight.shape
+        embed_shape_predicate = model.embed_predicate_logit.weight.shape
         embed_shape_entity = model.embed_predicate.weight.shape
 
-        self.FC = nn.Linear(embed_shape_predicate[1], embed_shape_predicate[1])
+        # self.FC = nn.Linear(embed_shape_predicate[1], embed_shape_predicate[1])
+        # self.FC = nn.Linear(embed_shape_predicate_logit[0], embed_shape_predicate_logit[0])
+        self.FC = nn.Linear(embed_shape_predicate[0], embed_shape_predicate[0])
+
+        print("embed_shape_predicate: ", embed_shape_predicate)
 
         self.decoder_predicate = nn.Linear(embed_shape_predicate[1], embed_shape_predicate[0], bias=False)
         self.decoder_predicate.weight = model.embed_predicate.weight
+
+        # self.size = [embed_shape_predicate_logit[0], embed_shape_predicate_logit[1]]
+        # self.decoder_predicate_logit = nn.Linear(embed_shape_predicate_logit[0], embed_shape_predicate_logit[1], bias=False)
+        # self.decoder_predicate_logit.weight = model.embed_predicate_logit.weight.t()
 
         self.decoder_entity = nn.Linear(embed_shape_entity[1], embed_shape_entity[0], bias=False)
         self.decoder_entity.weight = model.embed_entity.weight
@@ -272,11 +282,12 @@ class Pred_label(nn.Module):
 
         # pdb.set_trace()
 
-        predicate, predicate_order_list, entity, entity_order_list, blank, blank_order_list = split(h, node_type)
+        predicate, predicate_order_list, entity, entity_order_list, blank, blank_order_list, _ = split(h, node_type)
 
         # pdb.set_trace()
 
         predicate = self.decoder_predicate(predicate)
+        # predicate = self.decoder_predicate_logit(predicate)
         entity = self.decoder_entity(entity)
         if len(blank.size()) != 0:
             blank = self.decoder_entity(blank)
@@ -299,7 +310,7 @@ class Pred_label(nn.Module):
         _, predicate_labels = torch.max(predicate_logits, dim=-1, keepdim=True)
         _, entity_labels = torch.max(entity_logits, dim=-1, keepdim=True)
 
-        all_labels = combine(predicate_labels, predicate_order_list, entity_labels, entity_order_list, blank_labels, blank_order_list, b_size, n_num)
+        all_labels = combine(predicate_labels, predicate_order_list, entity_labels, entity_order_list, blank_labels, blank_order_list, b_size, n_num, predicate_labels)
         return predicate_logits, entity_logits, all_labels
 
 
@@ -358,11 +369,15 @@ class GLAT(nn.Module):
         return x
 
 
-def split(fea, node_type):
+def split(fea, node_type, node_logit=[]):
     batch_size = fea.size(0)
     num_node = fea.size(1)
     fea_flatten = fea.view(batch_size*num_node, -1)
     dim = fea_flatten.size()[-1]
+
+    if len(node_logit) != 0:
+        node_logit_flatten = node_logit.view(batch_size*num_node, -1)
+        dim_logit = node_logit_flatten.size()[-1]
 
 
     # torch.repeat(node_type, (-1, dim))
@@ -377,6 +392,10 @@ def split(fea, node_type):
 
 
     predicate = fea_flatten[predicate_mask].view(-1, dim)
+    if len(node_logit) != 0:
+        predicate_logit = node_logit[predicate_mask].view(-1, dim_logit)
+    else:
+        predicate_logit = []
     predicate_order_list = order_list[predicate_mask[:, 0]]
 
     entity = fea_flatten[entity_mask].view(-1, dim)
@@ -390,17 +409,19 @@ def split(fea, node_type):
 
     # pdb.set_trace()
 
-    return predicate.squeeze(-1), predicate_order_list, entity.squeeze(-1), entity_order_list, blank, blank_order_list
+    return predicate.squeeze(-1), predicate_order_list, entity.squeeze(-1), entity_order_list, blank, blank_order_list, predicate_logit
 
 
-def combine(predicate, predicate_order_list, entity, entity_order_list, blank, blank_order_list, b_size, n_num):
+def combine(predicate, predicate_order_list, entity, entity_order_list, blank, blank_order_list, b_size, n_num, predicate_logit):
 
     # pdb.set_trace()
     if len(blank.size()) != 0:
-        fea_embed = torch.cat((entity, predicate, blank), 0)
+        # fea_embed = torch.cat((entity, predicate, blank), 0)
+        fea_embed = torch.cat((entity, predicate_logit, blank), 0)
         order_list = torch.cat((entity_order_list, predicate_order_list, blank_order_list), 0)
     else:
-        fea_embed = torch.cat((entity, predicate), 0)
+        # fea_embed = torch.cat((entity, predicate), 0)
+        fea_embed = torch.cat((entity, predicate_logit), 0)
         order_list = torch.cat((entity_order_list, predicate_order_list), 0)
 
     # pdb.set_trace()
@@ -421,6 +442,9 @@ class GLAT_Seq(nn.Module):
         self.num = len(types)
         # self.embed = nn.Embedding(vocab_num, fea_dim)
         self.embed_predicate = nn.Embedding(vocab_num[0], fea_dim)
+        # self.embed_predicate_logit = nn.Linear(fea_dim, vocab_num[0])
+        self.embed_predicate_logit = nn.Linear(vocab_num[0], fea_dim)
+
         self.embed_entity = nn.Embedding(vocab_num[1], fea_dim)
 
         self.GLATs = nn.ModuleList()
@@ -431,7 +455,7 @@ class GLAT_Seq(nn.Module):
 
 
 
-    def forward(self, fea, adj, node_type, non_pad_mask=None, slf_attn_mask=None):
+    def forward(self, fea, adj, node_type, node_logit, non_pad_mask=None, slf_attn_mask=None):
         fea = fea.long()
         # x = self.embed(fea)
         b_size, n_num = fea.size()
@@ -449,9 +473,10 @@ class GLAT_Seq(nn.Module):
         # entity = fea_flatten[entity_mask]
         # entity_order_list = order_list[entity_mask]
 
-        predicate, predicate_order_list, entity, entity_order_list, blank, blank_order_list = split(fea, node_type)
+        predicate, predicate_order_list, entity, entity_order_list, blank, blank_order_list, predicate_logit = split(fea, node_type, node_logit)
         predicate = self.embed_predicate(predicate)
         entity = self.embed_entity(entity)
+        predicate_logit = self.embed_predicate_logit(predicate_logit)
 
         if len(blank.size()) != 0:
             blank = self.embed_entity(blank)
@@ -467,7 +492,7 @@ class GLAT_Seq(nn.Module):
         # new_fea = torch.cat(new_fea, 0)
         # new_fea = new_fea.view(b_size, n_num, new_fea.size(-1))
 
-        new_fea = combine(predicate, predicate_order_list, entity, entity_order_list, blank, blank_order_list, b_size, n_num)
+        new_fea = combine(predicate, predicate_order_list, entity, entity_order_list, blank, blank_order_list, b_size, n_num, predicate_logit)
 
         # pdb.set_trace()
 
@@ -492,11 +517,11 @@ class GLATNET(nn.Module):
 
         self.blank = blank
 
-    def forward(self, fea, adj, node_type):
+    def forward(self, fea, adj, node_type, node_logit):
         slf_attn_mask = get_attn_key_pad_mask(seq_q=fea, node_type=node_type)
         non_pad_mask = get_non_pad_mask(seq=fea, node_type=node_type)
 
-        x = self.GLAT_Seq(fea, adj, node_type, non_pad_mask=non_pad_mask, slf_attn_mask=slf_attn_mask)
+        x = self.GLAT_Seq(fea, adj, node_type, node_logit, non_pad_mask=non_pad_mask, slf_attn_mask=slf_attn_mask)
 
         # pdb.set_trace()
 

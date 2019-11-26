@@ -25,6 +25,7 @@ from lib.kern_baseline import KERN
 
 from lib.glat import GLATNET
 # import models.models_kern.GLATNET as GLATNET
+from lib.utils import Counter, save_model
 
 import pdb
 from torch.autograd import Variable
@@ -44,6 +45,18 @@ exp_name = 'exp_002'
 
 # conf = ModelConfig()
 #--------updated--------
+
+# conf = ModelConfig(f'''
+# -m predcls -p 1000 -clip 5
+# -tb_log_dir summaries/kern_glat_{exp_name}
+# -save_dir checkpoints/kern_glat_{exp_name}
+# -ckpt checkpoints/exp_2_23.tar
+# -val_size 5000
+# -adam
+# -b 1
+# -lr 1e-4
+# ''')
+
 conf = ModelConfig()
 
 # We use tensorboard to observe results and decrease learning rate manually. If you want to use TB, you need to install TensorFlow fist.
@@ -72,7 +85,8 @@ train_loader, val_loader = VGDataLoader.splits(train, val, mode='rel',
 
 detector = KERN(classes=train.ind_to_classes, rel_classes=train.ind_to_predicates,
                 num_gpus=conf.num_gpus, mode=conf.mode, require_overlap_det=True,
-                use_resnet=conf.use_resnet, use_proposals=conf.use_proposals, pooling_dim=conf.pooling_dim, return_top100=True)
+                use_resnet=conf.use_resnet, use_proposals=conf.use_proposals, pooling_dim=conf.pooling_dim,
+                return_top100=True)
 
 model = GLATNET(vocab_num=[52, 153],
                 feat_dim=300,
@@ -580,6 +594,11 @@ print("Training starts now!")
 # optimizer = get_optim(conf.lr * conf.num_gpus * conf.batch_size)
 optimizer, scheduler = get_optim(conf.lr)
 
+wc_counter = Counter("with_constrant_")
+wtc_counter = Counter("without_constrant_")
+wcm_counter = Counter("with_constrant_mean_")
+wtcm_counter = Counter("without_constrant_mean_")
+
 for epoch in range(start_epoch + 1, start_epoch + 1 + conf.num_epochs):
     print("start training epoch: ", epoch)
     scheduler.step()
@@ -602,10 +621,14 @@ for epoch in range(start_epoch + 1, start_epoch + 1 + conf.num_epochs):
     if use_tb:
         for key, value in recall.items():
             writer.add_scalar('eval_' + conf.mode + '_with_constraint/' + key, value, epoch)
+            wc_counter.add(key, value, model, epoch)
         for key, value in recall_mp.items():
             writer.add_scalar('eval_' + conf.mode + '_without_constraint/' + key, value, epoch)
+            wtc_counter.add(key, value, model, epoch)
         for key, value in mean_recall.items():
             writer.add_scalar('eval_' + conf.mode + '_with_constraint/mean ' + key, value, epoch)
+            wcm_counter.add(key, value, model, epoch)
         for key, value in mean_recall_mp.items():
             writer.add_scalar('eval_' + conf.mode + '_without_constraint/mean ' + key, value, epoch)
+            wtcm_counter.add(key, value, model, epoch)
 
