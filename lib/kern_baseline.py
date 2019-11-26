@@ -330,6 +330,9 @@ class KERN(nn.Module):
 
             else:
                 return result, []
+
+
+        #validation here~~~~~~~~~~~~~~~~
         twod_inds = arange(result.obj_preds.data) * self.num_classes + result.obj_preds.data
         result.obj_scores = F.softmax(result.rm_obj_dists, dim=1).view(-1)[twod_inds]
 

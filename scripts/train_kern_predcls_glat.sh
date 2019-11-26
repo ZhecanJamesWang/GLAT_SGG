@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 python models/train_rels.py -m predcls -p 100 -clip 5 \
--tb_log_dir summaries/kern_predcls \
--save_dir checkpoints/kern_predcls \
+-tb_log_dir summaries/kern_predcls_glat \
+-save_dir checkpoints/kern_predcls_glat \
 -ckpt checkpoints/kern_sgcls_predcls.tar \
 -val_size 5000 \
 -adam \
--b 1 \
+-b 4 \
 -lr 1e-4 \
 -use_ggnn_rel \
 -ggnn_rel_time_step_num 3 \

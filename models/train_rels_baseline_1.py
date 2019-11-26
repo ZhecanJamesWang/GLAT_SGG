@@ -18,7 +18,7 @@ from lib.pytorch_misc import print_para
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 
 # import KERN model
-from lib.kern_model import KERN
+# from lib.kern_model import KERN
 
 #--------updated--------
 from lib.kern_baseline import KERN
@@ -38,13 +38,14 @@ import sys
 import os
 codebase = '../../'
 sys.path.append(codebase)
-exp_name = 'exp_003'
+exp_name = 'exp_002'
 
 
 # os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
 # conf = ModelConfig()
 #--------updated--------
+
 # conf = ModelConfig(f'''
 # -m predcls -p 1000 -clip 5
 # -tb_log_dir summaries/kern_glat_{exp_name}

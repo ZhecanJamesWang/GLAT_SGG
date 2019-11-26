@@ -448,16 +448,19 @@ def build_graph_structure(entries, index2name_object, index2name_predicate, if_p
     entries_minibatch['rel_scores'] = []
 
     if entries['pred_relations'].size(1) == 4:
-
-        pdb.set_trace()
+        # pdb.set_trace()
+        # entries_minibatch['pred_relations'].append(entries['pred_relations'][:, 1:])
+        # entries_minibatch['pred_classes'].append(entries['pred_classes'])
 
         for i in range(entries['pred_relations'][:, 0].max()+1):
             rel_idx_cur_img = (entries['pred_relations'][:, 0] == i).view(-1, 1).expand(-1, 4)
             entries_minibatch['pred_relations'].append(entries['pred_relations'][rel_idx_cur_img].view(-1, 4)[:, 1:])
-            entity_idx_cur_img = entries_minibatch['pred_relations'][i][:, 0]
+            entity_idx_cur_img = entries_minibatch['pred_relations'][i][:, :2]
             entries_minibatch['pred_classes'].append(entries['pred_classes'][entity_idx_cur_img.min():entity_idx_cur_img.max()+1])
             # pdb.set_trace()
             entries_minibatch['pred_relations'][i][:, :2] = entries_minibatch['pred_relations'][i][:, :2] - entries_minibatch['pred_relations'][i][:, :2].min()
+
+            # pdb.set_trace()
     else:
         entries_minibatch['pred_relations'].append(entries['pred_relations'])
         entries_minibatch['pred_classes'].append(entries['pred_classes'])
