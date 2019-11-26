@@ -42,7 +42,7 @@ class Counter(object):
         if key in self.best_values:
             if float(value) > self.best_values[key]:
                 self.best_values[key] = value
-                save_model(key, model, self.prefix)
+                save_model(key, model, self.prefix, epoch, self.best_values[key])
         else:
             self.best_values[key] = value
             save_model(key, model, self.prefix, epoch, self.best_values[key])

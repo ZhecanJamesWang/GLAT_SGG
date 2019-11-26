@@ -135,8 +135,24 @@ start_epoch = -1
 #     detector.roi_fmap_obj[3].bias.data.copy_(ckpt['state_dict']['roi_fmap.3.bias'])
 
 
-# ckpt_glat = torch.load('/home/haoxuan/code/GBERT/models/2019-10-31-03-13_2_2_2_2_2_2_concat_no_init_mask/best_test_node_mask_predicate_acc')
-ckpt_glat = torch.load('/home/tangtangwzc/Common_sense/models/2019-11-03-17-51_2_2_2_2_2_2_concat_no_init_mask/best_test_node_mask_predicate_acc.pth')
+# ---------------pretrained model mask ration 0.5
+# ckpt_glat = torch.load('/home/tangtangwzc/Common_sense/models/2019-11-03-17-51_2_2_2_2_2_2_concat_no_init_mask/best_test_node_mask_predicate_acc.pth')
+
+# # ---------------pretrained model mask ration 0.3
+# ckpt_glat = torch.load('/home/tangtangwzc/Common_sense/models/2019-11-03-17-28_2_2_2_2_2_2_concat_no_init_mask/best_test_node_mask_predicate_acc.pth')
+
+# ---------------pretrained model mask ration 0.7
+# ckpt_glat = torch.load('/home/tangtangwzc/Common_sense/models/2019-11-07-23-50_2_2_2_2_2_2_concat_no_init_mask/best_test_node_mask_predicate_acc.pth')
+
+# ckpt_glat = torch.load('/home/tangtangwzc/KERN/saved_models/2019-11-19-17-36/with_constrant_mean__R@100.pth')
+# ckpt_glat = torch.load('/home/tangtangwzc/KERN/saved_models/2019-11-19-17-41/with_constrant_mean__R@100.pth')
+# ckpt_glat = torch.load('/home/tangtangwzc/KERN/saved_models/2019-11-19-16-55/with_constrant_mean__R@100.pth')
+# ckpt_glat = torch.load('/home/tangtangwzc/KERN/saved_models/2019-11-19-16-54/with_constrant_mean__R@100.pth')
+# ckpt_glat = torch.load('/home/tangtangwzc/KERN/saved_models/2019-11-20-17-16/with_constrant_mean__R@100.pth')
+
+# ckpt_glat = torch.load('/home/tangtangwzc/Common_sense/models/2019-11-20-15-18_2_2_2_2_2_2_concat_no_init_mask/best_test_node_mask_predicate_acc.pth')
+ckpt_glat = torch.load('/home/tangtangwzc/KERN/saved_models/2019-11-18-21-32/with_constrant_mean__R@100.pth')
+
 optimistic_restore(model, ckpt_glat['model'])
 print('finish pretrained loading')
 # model.load_state_dict(ckpt_glat['model'])
