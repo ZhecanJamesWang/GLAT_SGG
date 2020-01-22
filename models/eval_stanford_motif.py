@@ -87,7 +87,9 @@ all_pred_entries = []
 # def val_batch(batch_num, b, evaluator, thrs=(20, 50, 100)):
 
 def val_batch(batch_num, b, evaluator, evaluator_multiple_preds, evaluator_list, evaluator_multiple_preds_list):
-    det_res = detector[b]
+    # det_res, _ = detector[b]
+    dict_gt, det_res = detector[b]
+
     if conf.num_gpus == 1:
         det_res = [det_res]
 

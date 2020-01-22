@@ -99,16 +99,36 @@ optimistic_restore(detector, ckpt['state_dict'])
 #     detector.detector.score_fc.weight.data.copy_(det_ckpt['score_fc.weight'])
 #     detector.detector.score_fc.bias.data.copy_(det_ckpt['score_fc.bias'])
 if conf.model_s_m == 'stanford':
-    ckpt_glat = torch.load('/home/haoxuan/code/KERN/checkpoints/stanford_glat_1/stanford_glat-20.tar')
-
-    # ckpt_glat = torch.load('/home/haoxuan/code/KERN/checkpoints/motifnet_glat/motifnet_glat-25.tar')
-elif conf.model_s_m == 'motifnet':
-    ckpt_glat = torch.load('/home/haoxuan/code/KERN/checkpoints/motifnet_glat/motifnet_glat-25.tar')
-
+    print('stanford mode ckpt wrong!!!')
     # ckpt_glat = torch.load('/home/haoxuan/code/KERN/checkpoints/stanford_glat_1/stanford_glat-20.tar')
 
+    # Pretrained Model
+    ckpt_glat = torch.load(
+        '/home/tangtangwzc/Common_sense/models/2019-12-18-16-08_2_2_2_2_2_2_concat_no_init_mask/best_test_node_mask_predicate_acc.pth')
+
+    # ckpt_glat = torch.load(
+    #     '/home/tangtangwzc/Common_sense/models/2019-11-03-17-28_2_2_2_2_2_2_concat_no_init_mask/best_test_node_mask_predicate_acc.pth')
+
+elif conf.model_s_m == 'motifnet':
+    # Finetuned model
+    ckpt_glat = torch.load('/home/haoxuan/code/KERN/checkpoints/motifnet_glat_predcls_mask_rank_mbz/motifnet_glat-12.tar')
+    # ckpt_glat = torch.load('/home/haoxuan/code/KERN/checkpoints/motifnet_glat_predcls_mask_rank_mbz/motifnet_glat-45.tar')
+
+    # Pretrained Model
+    # ckpt_glat = torch.load(
+    #     '/home/tangtangwzc/Common_sense/models/2019-12-18-16-08_2_2_2_2_2_2_concat_no_init_mask/best_test_node_mask_predicate_acc.pth')
+
+    # ckpt_glat = torch.load(
+    #     '/home/tangtangwzc/Common_sense/models/2019-11-03-17-28_2_2_2_2_2_2_concat_no_init_mask/best_test_node_mask_predicate_acc.pth')
+
+# Finetuned model
 optimistic_restore(model, ckpt_glat['state_dict'])
-print('finish pretrained loading')
+print('finish finetuned loading')
+
+
+# Pretrained Model
+# optimistic_restore(model, ckpt_glat['model'])
+# print('finish pretrained loading')
 model.cuda()
 model.eval()
 
@@ -215,7 +235,7 @@ def glat_wrapper(total_data):
     # return pred_label_predicate.data.cpu().numpy(), pred_label_entities.data.cpu().numpy()
 
 
-def glat_postprocess(pred_entry, if_predicting=False):
+def glat_postprocess(pred_entry, mask_idx, if_predicting=False):
     # pred_entry = {
     #     'pred_boxes': boxes_i * BOX_SCALE / IM_SCALE,  # (23, 4) (16, 4)
     #     'pred_classes': objs_i,  # (23,) (16,)
@@ -231,6 +251,8 @@ def glat_postprocess(pred_entry, if_predicting=False):
     pred_entry['pred_classes'] = tensor2variable(pred_entry['pred_classes'])
 
     pred_entry['rel_classes'] = torch.max(pred_entry['rel_scores'][:, 1:], dim=1)[1].unsqueeze(1) + 1
+    if mask_idx is not None:
+        pred_entry['rel_classes'][mask_idx] = 51
     pred_entry['rel_classes'] = variable2tensor(pred_entry['rel_classes'])
     pred_entry['pred_relations'] = torch.cat((pred_entry['pred_rel_inds'], pred_entry['rel_classes']), dim=1)
 
@@ -244,8 +266,9 @@ def glat_postprocess(pred_entry, if_predicting=False):
 
 all_pred_entries = []
 
-def val_batch(batch_num, b, evaluator,evaluator_multiple_preds, evaluator_list, evaluator_multiple_preds_list):
-    det_res = detector[b]
+def val_batch(batch_num, b, evaluator,evaluator_multiple_preds, evaluator_list, evaluator_multiple_preds_list, accs):
+    # det_res = detector[b]
+    dict_gt, det_res = detector[b]
 
     if conf.num_gpus == 1:
         det_res = [det_res]
@@ -286,15 +309,64 @@ def val_batch(batch_num, b, evaluator,evaluator_multiple_preds, evaluator_list, 
                 'rel_scores': pred_scores_i,  # hack for now. (506, 51) (240, 51)
             }
 
-        pred_entry = glat_postprocess(pred_entry, if_predicting=True)
+        # wrong_idxs = []
+        # for i in range(len(rels_i_b100)):
+        #     if (int(rels_i_b100[i][0]), int(rels_i_b100[i][1])) in dict_gt:
+        #         pred_lbl = pred_scores_i_b100[i, 1:].argmax(0) + 1
+        #         if int(pred_lbl) not in dict_gt[(int(rels_i_b100[i][0]), int(rels_i_b100[i][1]))]:
+        #             wrong_idxs.append(i)
+        #
+        # if len(wrong_idxs) == 0:
+        #     mask_idx = None
+        # else:
+        #     mask_idx = wrong_idxs
+
+        num_predicate = rel_scores_idx_b100.shape[0]
+        mask_idx = torch.Tensor(range(int(num_predicate*(1-0.3)),num_predicate)).long().cuda()
+        if len(mask_idx) == 0:
+            mask_idx = None
+
+        pred_entry = glat_postprocess(pred_entry, if_predicting=True, mask_idx=mask_idx)
         pred_entry = cuda2numpy_dict(pred_entry)
 
+        # Change only mask samples' classes
+        pred_scores_i_a100_mask_update = pred_scores_i_b100
+        assert pred_scores_i_a100_mask_update.shape[0] == pred_entry['rel_scores'].shape[0]
+        for i in mask_idx:
+            pred_scores_i_a100_mask_update[i] = pred_entry['rel_scores'][i, :-1]
         if len(rels_i_a100.shape) == 1:
-            pred_entry['rel_scores'] = pred_entry['rel_scores'][:, :-1]
+            pred_entry['rel_scores'] = pred_scores_i_a100_mask_update
         else:
-
             pred_entry['pred_rel_inds'] = np.concatenate((pred_entry['pred_rel_inds'], rels_i_a100), axis=0)
-            pred_entry['rel_scores'] = np.concatenate((pred_entry['rel_scores'][:, :-1], pred_scores_i_a100), axis=0)
+            pred_entry['rel_scores'] = np.concatenate((pred_scores_i_a100_mask_update, pred_scores_i_a100), axis=0)
+
+
+        # if len(rels_i_a100.shape) == 1:
+        #     pred_entry['rel_scores'] = pred_entry['rel_scores'][:, :-1]
+        # else:
+        #     pred_entry['pred_rel_inds'] = np.concatenate((pred_entry['pred_rel_inds'], rels_i_a100), axis=0)
+        #     pred_entry['rel_scores'] = np.concatenate((pred_entry['rel_scores'][:, :-1], pred_scores_i_a100), axis=0)
+
+
+        if mask_idx is not None:
+            for idx in range(mask_idx.size(0)):
+                sub = rels_i_b100.data[mask_idx[idx], 0]
+                obj = rels_i_b100.data[mask_idx[idx], 1]
+                pred_class = pred_entry['rel_scores'][mask_idx[idx], 1:].argmax()+1
+                if (int(sub), int(obj)) in dict_gt.keys():
+                    accs[1] += 1
+                    if int(pred_class) in dict_gt[(int(sub), int(obj))]:
+                        accs[0] += 1
+
+
+        # if mask_idx is not None:
+        #     for idx in mask_idx:
+        #         accs[1] += 1
+        #         sub = rels_i_b100.data[idx, 0]
+        #         obj = rels_i_b100.data[idx, 1]
+        #         pred_class = pred_entry['rel_scores'][idx, 1:].argmax()+1
+        #         if int(pred_class) in dict_gt[(int(sub), int(obj))]:
+        #             accs[0] += 1
 
         all_pred_entries.append(pred_entry)
 
@@ -344,44 +416,47 @@ for index, name in enumerate(ind_to_predicates):
     evaluator_list.append((index, name, BasicSceneGraphEvaluator.all_modes()))
     evaluator_multiple_preds_list.append((index, name, BasicSceneGraphEvaluator.all_modes(multiple_preds=True)))
 
-if conf.cache is not None and os.path.exists(conf.cache):
-    print("Found {}! Loading from it".format(conf.cache))
-    with open(conf.cache,'rb') as f:
-        all_pred_entries = pkl.load(f)
-    for i, pred_entry in enumerate(tqdm(all_pred_entries)):
-        gt_entry = {
-            'gt_classes': val.gt_classes[i].copy(),
-            'gt_relations': val.relationships[i].copy(),
-            'gt_boxes': val.gt_boxes[i].copy(),
-        }
-        eval_entry(conf.mode, gt_entry, pred_entry, evaluator, evaluator_multiple_preds,
-                   evaluator_list, evaluator_multiple_preds_list)
+# if conf.cache is not None and os.path.exists(conf.cache):
+#     print("Found {}! Loading from it".format(conf.cache))
+#     with open(conf.cache,'rb') as f:
+#         all_pred_entries = pkl.load(f)
+#     for i, pred_entry in enumerate(tqdm(all_pred_entries)):
+#         gt_entry = {
+#             'gt_classes': val.gt_classes[i].copy(),
+#             'gt_relations': val.relationships[i].copy(),
+#             'gt_boxes': val.gt_boxes[i].copy(),
+#         }
+#         eval_entry(conf.mode, gt_entry, pred_entry, evaluator, evaluator_multiple_preds,
+#                    evaluator_list, evaluator_multiple_preds_list)
+#
+#     recall = evaluator[conf.mode].print_stats()
+#     recall_mp = evaluator_multiple_preds[conf.mode].print_stats()
+#
+#     mean_recall = calculate_mR_from_evaluator_list(evaluator_list, conf.mode, save_file=conf.save_rel_recall)
+#     mean_recall_mp = calculate_mR_from_evaluator_list(evaluator_multiple_preds_list, conf.mode, multiple_preds=True,
+#                                                       save_file=conf.save_rel_recall)
+# else:
 
-    recall = evaluator[conf.mode].print_stats()
-    recall_mp = evaluator_multiple_preds[conf.mode].print_stats()
+detector.eval()
+accs = [0, 0]
+for val_b, batch in enumerate(tqdm(val_loader)):
+    # val_batch(conf.num_gpus*val_b, batch, evaluator)
+    val_batch(conf.num_gpus * val_b, batch, evaluator, evaluator_multiple_preds, evaluator_list,
+              evaluator_multiple_preds_list, accs)
+    # pdb.set_trace()
 
-    mean_recall = calculate_mR_from_evaluator_list(evaluator_list, conf.mode, save_file=conf.save_rel_recall)
-    mean_recall_mp = calculate_mR_from_evaluator_list(evaluator_multiple_preds_list, conf.mode, multiple_preds=True,
-                                                      save_file=conf.save_rel_recall)
-else:
-    detector.eval()
-    for val_b, batch in enumerate(tqdm(val_loader)):
-        # val_batch(conf.num_gpus*val_b, batch, evaluator)
-        val_batch(conf.num_gpus * val_b, batch, evaluator, evaluator_multiple_preds, evaluator_list,
-                  evaluator_multiple_preds_list)
-        # pdb.set_trace()
+    torch.cuda.empty_cache()
 
-        torch.cuda.empty_cache()
+print('test acc of mask:', accs[0] * 1.0 / accs[1])
 
+recall = evaluator[conf.mode].print_stats()
+recall_mp = evaluator_multiple_preds[conf.mode].print_stats()
 
-    recall = evaluator[conf.mode].print_stats()
-    recall_mp = evaluator_multiple_preds[conf.mode].print_stats()
+mean_recall = calculate_mR_from_evaluator_list(evaluator_list, conf.mode, save_file=conf.save_rel_recall)
+mean_recall_mp = calculate_mR_from_evaluator_list(evaluator_multiple_preds_list, conf.mode, multiple_preds=True,
+                                                  save_file=conf.save_rel_recall)
+# evaluator[conf.mode].print_stats()
 
-    mean_recall = calculate_mR_from_evaluator_list(evaluator_list, conf.mode, save_file=conf.save_rel_recall)
-    mean_recall_mp = calculate_mR_from_evaluator_list(evaluator_multiple_preds_list, conf.mode, multiple_preds=True,
-                                                      save_file=conf.save_rel_recall)
-    # evaluator[conf.mode].print_stats()
-
-    if conf.cache is not None:
-        with open(conf.cache,'wb') as f:
-            pkl.dump(all_pred_entries, f)
+if conf.cache is not None:
+    with open(conf.cache,'wb') as f:
+        pkl.dump(all_pred_entries, f)

@@ -517,7 +517,8 @@ def rank_predicate(pred_entry):
 
 
 def val_batch(batch_num, b, evaluator, evaluator_multiple_preds, evaluator_list, evaluator_multiple_preds_list):
-    det_res = detector[b]
+    # det_res = detector[b]
+    dict_gt, det_res = detector[b]
 
 
     if conf.num_gpus == 1:

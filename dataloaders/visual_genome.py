@@ -457,6 +457,7 @@ def build_graph_structure(entries, index2name_object, index2name_predicate, if_p
             # pdb.set_trace()
             entries_minibatch['pred_relations'][i][:, :2] = entries_minibatch['pred_relations'][i][:, :2] - entries_minibatch['pred_relations'][i][:, :2].min()
 
+            # print('go through 460 in visual_genome.py')
             # pdb.set_trace()
     else:
         entries_minibatch['pred_relations'].append(entries['pred_relations'])

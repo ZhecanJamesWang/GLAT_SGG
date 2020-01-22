@@ -20,12 +20,15 @@ from lib.fpn.box_utils import bbox_overlaps, center_size
 from lib.get_union_boxes import UnionBoxesAndFeats
 from lib.fpn.proposal_assignments.rel_assignments import rel_assignments
 from lib.object_detector import ObjectDetector, gather_res, load_vgg
+from lib.fpn.proposal_assignments.proposal_assignments_gtbox import proposal_assignments_gtbox_test
+
 from lib.pytorch_misc import transpose_packed_sequence_inds, to_onehot, arange, enumerate_by_image, diagonal_inds, Flattener
 from lib.sparse_targets import FrequencyBias
 from lib.surgery import filter_dets
 from lib.word_vectors import obj_edge_vectors
 from lib.fpn.roi_align.functions.roi_align import RoIAlignFunction
 import math
+import pdb
 
 
 def _sort_by_score(im_inds, scores):
@@ -305,7 +308,7 @@ class RelModel(nn.Module):
                  nl_obj=1, nl_edge=2, use_resnet=False, order='confidence', thresh=0.01,
                  use_proposals=False, pass_in_obj_feats_to_decoder=True,
                  pass_in_obj_feats_to_edge=True, rec_dropout=0.0, use_bias=True, use_tanh=True,
-                 limit_vision=True, return_top100=False):
+                 limit_vision=True, return_top100=False, inter_fea=False):
 
         """
         :param classes: Object classes
@@ -326,6 +329,7 @@ class RelModel(nn.Module):
         self.mode = mode
 
         self.return_top100 = return_top100
+        self.inter_fea = inter_fea
 
         self.pooling_size = 7
         self.embed_dim = embed_dim
@@ -523,6 +527,8 @@ class RelModel(nn.Module):
         if self.use_tanh:
             prod_rep = F.tanh(prod_rep)
 
+        # pdb.set_trace()
+
         result.rel_dists = self.rel_compress(prod_rep)
 
         if self.use_bias:
@@ -551,7 +557,11 @@ class RelModel(nn.Module):
                 rel_rep = F.softmax(result.rel_dists, dim=1)
 
                 if rel_inds[:, 0].max() - rel_inds[:, 0].min() + 1 == 1:
-                    return result, filter_dets(bboxes, result.obj_scores,
+                    if self.inter_fea:
+                        return result, prod_rep, filter_dets(bboxes, result.obj_scores,
+                                   result.obj_preds, rel_inds[:, 1:], rel_rep, self.return_top100, self.training)
+                    else:
+                        return result, filter_dets(bboxes, result.obj_scores,
                                    result.obj_preds, rel_inds[:, 1:], rel_rep, self.return_top100, self.training)
 
                 # -----------------------------------Above: 1 batch_size, Below: Multiple batch_size------------------
@@ -576,9 +586,13 @@ class RelModel(nn.Module):
                 rel_scores_idx_a_100_all = []
 
                 for i in range(len(rel_ind_per_img)):
+                    # boxes, obj_classes, obj_scores, rels_b_100, pred_scores_sorted_b_100, rels_a_100, \
+                    # pred_scores_sorted_a_100, rel_scores_idx_b_100, rel_scores_idx_a_100 = filter_dets(bboxes, result.obj_scores,
+                    #             result.obj_preds, rel_inds[rel_ind_per_img[i]][:, 1:], rel_rep[rel_ind_per_img[i]][:, 1:], self.return_top100, self.training)
+
                     boxes, obj_classes, obj_scores, rels_b_100, pred_scores_sorted_b_100, rels_a_100, \
                     pred_scores_sorted_a_100, rel_scores_idx_b_100, rel_scores_idx_a_100 = filter_dets(bboxes, result.obj_scores,
-                                result.obj_preds, rel_inds[rel_ind_per_img[i]][:, 1:], rel_rep[rel_ind_per_img[i]][:, 1:], self.return_top100, self.training)
+                                result.obj_preds, rel_inds[rel_ind_per_img[i]][:, 1:], rel_rep[rel_ind_per_img[i]], self.return_top100, self.training)
 
                     # pdb.set_trace()
 
@@ -617,7 +631,12 @@ class RelModel(nn.Module):
                 except:
                     rel_scores_idx_a_100_all = torch.Tensor([]).long().cuda()
 
-                return result, [boxes, obj_classes, obj_scores, rels_b_100_all, pred_scores_sorted_b_100_all, rels_a_100_all,
+                if self.inter_fea:
+                    return result, prod_rep, [boxes, obj_classes, obj_scores, rels_b_100_all, pred_scores_sorted_b_100_all,
+                                    rels_a_100_all,
+                                    pred_scores_sorted_a_100_all, rel_scores_idx_b_100_all, rel_scores_idx_a_100_all]
+                else:
+                    return result, [boxes, obj_classes, obj_scores, rels_b_100_all, pred_scores_sorted_b_100_all, rels_a_100_all,
                                 pred_scores_sorted_a_100_all, rel_scores_idx_b_100_all, rel_scores_idx_a_100_all]
 
             else:
@@ -637,7 +656,24 @@ class RelModel(nn.Module):
 
         rel_rep = F.softmax(result.rel_dists, dim=1)
 
-        return filter_dets(bboxes, result.obj_scores,
+        # GT relation labels for
+        # gt_im_inds = gt_classes[:, 0] - image_offset
+        # gt_rois = torch.cat((gt_im_inds.float()[:, None], gt_boxes), 1)
+        # gt_gt_rois, gt_gt_labels, gt_rel_labels = proposal_assignments_gtbox_test(gt_rois.data, gt_boxes.data, gt_classes.data, gt_rels.data, image_offset, fg_thresh=0.5)
+
+        dict_gt = {}
+        for i in range(gt_rels.size(0)):
+            if (int(gt_rels[i, 1]), int(gt_rels[i, 2])) in dict_gt:
+                dict_gt[(int(gt_rels[i, 1]), int(gt_rels[i, 2]))].append(int(gt_rels[i, 3]))
+            else:
+                dict_gt[(int(gt_rels[i, 1]), int(gt_rels[i, 2]))] = [int(gt_rels[i, 3])]
+
+        # pdb.set_trace()
+        if self.inter_fea:
+            return dict_gt, prod_rep, filter_dets(bboxes, result.obj_scores,
+                           result.obj_preds, rel_inds[:, 1:], rel_rep, self.return_top100)
+        else:
+            return dict_gt, filter_dets(bboxes, result.obj_scores,
                            result.obj_preds, rel_inds[:, 1:], rel_rep, self.return_top100)
 
         # if self.training:

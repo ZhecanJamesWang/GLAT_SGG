@@ -34,6 +34,8 @@ import torch.optim.lr_scheduler as lr_scheduler
 #--------updated--------
 import sys
 import os
+import matplotlib.pyplot as plt
+
 codebase = '../../'
 sys.path.append(codebase)
 exp_name = 'motif'
@@ -150,29 +152,6 @@ optimistic_restore(detector, ckpt['state_dict'])
 detector.cuda()
 start_epoch = -1
 
-# if conf.ckpt.split('-')[-2].split('/')[-1] == 'vgrel':
-#     print("Loading EVERYTHING")
-#     start_epoch = ckpt['epoch']
-#
-#     if not optimistic_restore(detector, ckpt['state_dict']):
-#         start_epoch = -1
-#         # optimistic_restore(detector.detector, torch.load('checkpoints/vgdet/vg-28.tar')['state_dict'])
-# else:
-#     start_epoch = -1
-#     optimistic_restore(detector.detector, ckpt['state_dict'])
-#
-#     detector.roi_fmap[1][0].weight.data.copy_(ckpt['state_dict']['roi_fmap.0.weight'])
-#     detector.roi_fmap[1][3].weight.data.copy_(ckpt['state_dict']['roi_fmap.3.weight'])
-#     detector.roi_fmap[1][0].bias.data.copy_(ckpt['state_dict']['roi_fmap.0.bias'])
-#     detector.roi_fmap[1][3].bias.data.copy_(ckpt['state_dict']['roi_fmap.3.bias'])
-#
-#     detector.roi_fmap_obj[0].weight.data.copy_(ckpt['state_dict']['roi_fmap.0.weight'])
-#     detector.roi_fmap_obj[3].weight.data.copy_(ckpt['state_dict']['roi_fmap.3.weight'])
-#     detector.roi_fmap_obj[0].bias.data.copy_(ckpt['state_dict']['roi_fmap.0.bias'])
-#     detector.roi_fmap_obj[3].bias.data.copy_(ckpt['state_dict']['roi_fmap.3.bias'])
-
-
-
 print('finish pretrained GLAT loading')
 # # model.load_state_dict(ckpt_glat['model'])
 if conf.resume_training:
@@ -188,158 +167,17 @@ else:
     # ckpt_glat = torch.load('/home/tangtangwzc/Common_sense/models/2019-11-03-17-51_2_2_2_2_2_2_concat_no_init_mask/best_test_node_mask_predicate_acc.pth')
 
     # ---------------pretrained model mask ration 0.3
-    ckpt_glat = torch.load(
-        '/home/tangtangwzc/Common_sense/models/2019-11-03-17-28_2_2_2_2_2_2_concat_no_init_mask/best_test_node_mask_predicate_acc.pth')
-
+    # ckpt_glat = torch.load(
+    #     '/home/tangtangwzc/Common_sense/models/2019-11-03-17-28_2_2_2_2_2_2_concat_no_init_mask/best_test_node_mask_predicate_acc.pth')
+    ckpt_glat = torch.load('/home/haoxuan/code/KERN/checkpoints/motifnet_glat_mask_pred_sgcls/motifnet_glat-22.tar')
     # ---------------pretrained model mask ration 0.7
     # ckpt_glat = torch.load('/home/tangtangwzc/Common_sense/models/2019-11-07-23-50_2_2_2_2_2_2_concat_no_init_mask/best_test_node_mask_predicate_acc.pth')
 
-    optimistic_restore(model, ckpt_glat['model'])
+    # optimistic_restore(model, ckpt_glat['model'])
+    optimistic_restore(model, ckpt_glat['state_dict'])
     model.cuda()
     start_epoch = -1
     optimizer, scheduler = get_optim(conf.lr, last_epoch=start_epoch)
-
-
-def train_epoch(epoch_num):
-    detector.train()
-    for n, param in detector.named_parameters():
-        param.requires_grad = False
-    model.train()
-    tr = []
-    start = time.time()
-    for b, batch in enumerate(train_loader):
-        tr.append(train_batch(batch, verbose=b % (conf.print_interval*10) == 0)) #b == 0))
-
-        if b % conf.print_interval == 0 and b >= conf.print_interval:
-            mn = pd.concat(tr[-conf.print_interval:], axis=1).mean(1)
-            time_per_batch = (time.time() - start) / conf.print_interval
-            print("\ne{:2d}b{:5d}/{:5d} {:.3f}s/batch, {:.1f}m/epoch".format(
-                epoch_num, b, len(train_loader), time_per_batch, len(train_loader) * time_per_batch / 60))
-            print(mn)
-            print('-----------', flush=True)
-            start = time.time()
-    return pd.concat(tr, axis=1)
-
-
-def train_batch(b, verbose=False):
-    """
-    :param b: contains:
-          :param imgs: the image, [batch_size, 3, IM_SIZE, IM_SIZE]
-          :param all_anchors: [num_anchors, 4] the boxes of all anchors that we'll be using
-          :param all_anchor_inds: [num_anchors, 2] array of the indices into the concatenated
-                                  RPN feature vector that give us all_anchors,
-                                  each one (img_ind, fpn_idx)
-          :param im_sizes: a [batch_size, 4] numpy array of (h, w, scale, num_good_anchors) for each image.
-
-          :param num_anchors_per_img: int, number of anchors in total over the feature pyramid per img
-
-          Training parameters:
-          :param train_anchor_inds: a [num_train, 5] array of indices for the anchors that will
-                                    be used to compute the training loss (img_ind, fpn_idx)
-          :param gt_boxes: [num_gt, 4] GT boxes over the batch.
-          :param gt_classes: [num_gt, 2] gt boxes where each one is (img_id, class)
-    :return:
-    """
-    # t0 = time.time()
-
-    result, det_res = detector[b]
-
-    # result.rm_obj_dists(num_entities, 151)  result.obj_preds(num_entities)  result.rm_obj_labels(num_entities)
-    # result.rel_dists(num_predicates, 51)  result.rel_labels(num_predicates)
-    # result.rel_inds(num_predicates, 3) 3
-    # pdb.set_trace()
-    # rel_inds obj_idx?-> global idx
-
-    # t1 = time.time()
-    # print('base model time', t1-t0)
-
-    if conf.return_top100 and len(det_res) != 0:
-
-        pred_entry = {
-            'pred_classes': result.obj_preds,  # (num_entities) Tensor Variable
-            'pred_rel_inds': det_res[3],  # (num_predicates, 3) Tensor Variable
-            'rel_scores': det_res[4],  # (num_predicates, 51) Tensor Variable
-        }
-    else:
-        pred_entry = {
-            'pred_classes': result.obj_preds,   # (num_entities) Tensor Variable
-            'pred_rel_inds': result.rel_inds,  # (num_predicates, 3) Tensor Variable
-            'rel_scores': result.rel_dists,   # (num_predicates, 51) Tensor Variable
-        }
-    # pdb.set_trace()
-    pred_entry = glat_postprocess(pred_entry, if_predicting=False)
-
-    b_100_idx = det_res[-2]
-    # a_100_idx = det_res[-1]
-    # totla_idx = b_100_idx + a_100_idx
-    # totla_idx = torch.cat((b_100_idx, a_100_idx), dim=0)
-
-    rels_b_100 = pred_entry['pred_rel_inds']
-    pred_scores_sorted_b_100 = pred_entry['rel_scores'][:, :-1]
-    # rels_a_100 = det_res[5]
-    # pred_scores_sorted_a_100 = det_res[6]
-
-    # if len(rels_a_100.size()) == 1:
-    #     rels_total = rels_b_100
-    # else:
-    #     rels_total = torch.cat((rels_b_100, rels_a_100), dim=0)
-    #
-    # if len(pred_scores_sorted_a_100.size()) == 1:
-    #     pred_scores_sorted_total = pred_scores_sorted_b_100
-    # else:
-    #     pred_scores_sorted_total = torch.cat((pred_scores_sorted_b_100, pred_scores_sorted_a_100), dim=0)
-
-    # pdb.set_trace()
-    # b_100_idx abs coor?
-
-    for i in range(int(b_100_idx.size()[0])):
-        # pdb.set_trace()
-        idx = b_100_idx[i]
-        result.rel_dists[idx] = pred_scores_sorted_b_100[i]
-        # pdb.set_trace()
-        assert (result.rel_inds[idx] == rels_b_100[i]).all()
-
-        # if conf.batch_size != 1:
-        #     result.rel_inds[idx] = rels_b_100[i]
-        # else:
-        #     result.rel_inds[idx, 1:] = rels_b_100[i]
-    result.obj_preds = pred_entry['pred_classes']
-
-    # t2 = time.time()
-    # print('glat model time', t2-t1)
-
-    #
-    # rels_total = sorted(set(zip(totla_idx, rels_total)))
-    # rels_total = [rels[1] for rels in rels_total]
-    #
-    # pred_scores_sorted_total = sorted(set(zip(totla_idx, pred_scores_sorted_total)))
-    # pred_scores_sorted_total = [pred_scores[1] for pred_scores in pred_scores_sorted_total]
-
-    # merge two lists
-
-    # if conf.return_top100:
-    #     result.rel_inds = rels_total
-    #     result.rel_dists = pred_scores_sorted_total
-    # else:
-    #     result.rel_inds = pred_entry['pred_rel_inds']
-    #     result.rel_dists = pred_entry['rel_scores']
-
-    losses = {}
-    if conf.use_ggnn_obj: # if not use ggnn obj, we just use scores of faster rcnn as their scores, there is no need to train
-        losses['class_loss'] = F.cross_entropy(result.rm_obj_dists, result.rm_obj_labels)
-    # pdb.set_trace()
-    losses['rel_loss'] = F.cross_entropy(result.rel_dists, result.rel_labels[:, -1])
-    loss = sum(losses.values())
-
-    optimizer.zero_grad()
-    loss.backward()
-    clip_grad_norm(
-        [(n, p) for n, p in detector.named_parameters() if p.grad is not None],
-        max_norm=conf.clip, verbose=verbose, clip=True)
-    losses['total'] = loss
-    optimizer.step()
-    res = pd.Series({x: y.data[0] for x, y in losses.items()})
-    return res
 
 
 def val_epoch():
@@ -348,6 +186,7 @@ def val_epoch():
     model.eval()
     evaluator_list = [] # for calculating recall of each relationship except no relationship
     evaluator_multiple_preds_list = []
+    accs = [0, 0]
     for index, name in enumerate(ind_to_predicates):
         if index == 0:
             continue
@@ -355,10 +194,8 @@ def val_epoch():
         evaluator_multiple_preds_list.append((index, name, BasicSceneGraphEvaluator.all_modes(multiple_preds=True)))
     evaluator = BasicSceneGraphEvaluator.all_modes() # for calculating recall
     evaluator_multiple_preds = BasicSceneGraphEvaluator.all_modes(multiple_preds=True)
-    # print(len(val_loader))
     for val_b, batch in enumerate(val_loader):
-        # val_batch(conf.num_gpus * val_b, batch, evaluator, evaluator_multiple_preds, evaluator_list, evaluator_multiple_preds_list)
-        val_batch(val_b, batch, evaluator, evaluator_multiple_preds, evaluator_list, evaluator_multiple_preds_list)
+        val_batch(conf.num_gpus * val_b, batch, evaluator, evaluator_multiple_preds, evaluator_list, evaluator_multiple_preds_list, accs)
 
     recall = evaluator[conf.mode].print_stats()
     recall_mp = evaluator_multiple_preds[conf.mode].print_stats()
@@ -366,6 +203,7 @@ def val_epoch():
     mean_recall = calculate_mR_from_evaluator_list(evaluator_list, conf.mode)
     mean_recall_mp = calculate_mR_from_evaluator_list(evaluator_multiple_preds_list, conf.mode, multiple_preds=True)
 
+    print('test acc of mask:', accs[0] * 1.0 / accs[1])
     return recall, recall_mp, mean_recall, mean_recall_mp
 
 
@@ -461,7 +299,7 @@ def variable2tensor(input):
         input = input.data
     return input
 
-def glat_postprocess(pred_entry, if_predicting=False):
+def glat_postprocess(pred_entry, mask_idx, if_predicting=False):
     # pred_entry = {
     #     'pred_boxes': boxes_i * BOX_SCALE / IM_SCALE,  # (23, 4) (16, 4)
     #     'pred_classes': objs_i,  # (23,) (16,)
@@ -477,6 +315,8 @@ def glat_postprocess(pred_entry, if_predicting=False):
     pred_entry['pred_classes'] = tensor2variable(pred_entry['pred_classes'])
 
     pred_entry['rel_classes'] = torch.max(pred_entry['rel_scores'][:, 1:], dim=1)[1].unsqueeze(1) + 1
+    if mask_idx is not None:
+        pred_entry['rel_classes'][mask_idx] = 51
     pred_entry['rel_classes'] = variable2tensor(pred_entry['rel_classes'])
     # pdb.set_trace()
     pred_entry['pred_relations'] = torch.cat((pred_entry['pred_rel_inds'], pred_entry['rel_classes']), dim=1)
@@ -538,13 +378,12 @@ def rank_predicate(pred_entry):
     return pred_entry
 
 
-def val_batch(batch_num, b, evaluator, evaluator_multiple_preds, evaluator_list, evaluator_multiple_preds_list):
-    # det_res = detector[b]
+def val_batch(batch_num, b, evaluator, evaluator_multiple_preds, evaluator_list, evaluator_multiple_preds_list, accs):
     dict_gt, det_res = detector[b]
 
 
-    # if conf.num_gpus == 1:
-    det_res = [det_res]
+    if conf.num_gpus == 1:
+        det_res = [det_res]
 
     for i, det in enumerate(det_res):
 
@@ -581,90 +420,118 @@ def val_batch(batch_num, b, evaluator, evaluator_multiple_preds, evaluator_list,
                 'rel_scores': pred_scores_i,  # hack for now. (506, 51) (240, 51)
             }
 
-        # pred_entry_init = copy.deepcopy(pred_entry)
+        pdb.set_trace()
 
-        # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-        pred_entry = glat_postprocess(pred_entry, if_predicting=True)
-        pred_entry = cuda2numpy_dict(pred_entry)
+        wrong_idxs = []
+        right_idxs = []
+        for j in range(len(rels_i_b100)):
+            if (int(rels_i_b100[j][0]), int(rels_i_b100[j][1])) in dict_gt:
+                pred_lbl = pred_scores_i_b100[j, 1:].argmax(0) + 1
+                if int(pred_lbl) not in dict_gt[(int(rels_i_b100[j][0]), int(rels_i_b100[j][1]))]:
+                    wrong_idxs.append(j)
+                else:
+                    right_idxs.append(j)
 
-        # rel_scores_one_hot = np.zeros((len(pred_entry['rel_scores']), 51))
-        # for i in range(len(pred_entry['rel_scores'])):
-        #     rel_scores_one_hot[i, pred_entry['rel_scores'][i]] = 0.99 - (i*0.1/100)
+                num_classes = pred_scores_i_b100.shape[1]
+                color = ['b']*num_classes
+                for gt_class in dict_gt[(int(rels_i_b100[j][0]), int(rels_i_b100[j][1]))]:
+                    color[gt_class] = 'r'
+                plt.bar(range(num_classes), list(pred_scores_i_b100[j]), color=color)
+                plt.grid(True)
+                if int(pred_lbl) not in dict_gt[(int(rels_i_b100[j][0]), int(rels_i_b100[j][1]))]:
+                    plt.savefig('./vis_result/wrong_{}_{}.jpg'.format(batch_num, j))
+                else:
+                    plt.savefig('./vis_result/right_{}_{}.jpg'.format(batch_num, j))
+                plt.close()
 
-        # max_index = pred_entry['rel_scores'][:, 1:].argmax(1) + 1
-        # for i in range(pred_entry_init['rel_scores'].shape[0]):
-        #     # pdb.set_trace()
-        #     pred_entry_init['rel_scores'][i, max_index[i]] = 100 - i
-        #     # for j in range(pred_entry_init['rel_scores'].shape[1]):
-        #     #     if j == max_index[i]:
-        #     #         pred_entry_init['rel_scores'][i, j] = 1
-        #     # pdb.set_trace()
-        # # pdb.set_trace()
-        # pred_entry_init['rel_scores'] = softmax(pred_entry_init['rel_scores'], axis=1)
-                    # pred_entry_init['rel_scores'][i, j] = 0
 
-        # rel_scores_one_hot[np.arange(len(pred_entry['rel_scores'])), pred_entry['rel_scores']] = 1
-        # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-
-        if len(rels_i_a100.shape) == 1:
-            # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-            # pred_entry_init['rel_scores'] = pred_entry_init['rel_scores']
-            # pred_entry['rel_scores'] = rel_scores_one_hot
-            pred_entry['rel_scores'] = pred_entry['rel_scores'][:, :-1]
-            # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+        if len(wrong_idxs) == 0:
+            mask_idx = None
         else:
+            mask_idx = wrong_idxs
 
-            # pred_entry_init['pred_rel_inds'] = np.concatenate((pred_entry_init['pred_rel_inds'], rels_i_a100), axis=0)
-            pred_entry['pred_rel_inds'] = np.concatenate((pred_entry['pred_rel_inds'], rels_i_a100), axis=0)
-        # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-        #     pred_entry_init['rel_scores'] = np.concatenate((pred_entry_init['rel_scores'], pred_scores_i_a100), axis=0)
-        #     pred_entry['rel_scores'] = np.concatenate((rel_scores_one_hot, pred_scores_i_a100), axis=0)
-            pred_entry['rel_scores'] = np.concatenate((pred_entry['rel_scores'][:, :-1], pred_scores_i_a100), axis=0)
-        # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+        print('right prediction in top100:', len(right_idxs))
+        print('right idx', right_idxs)
 
+        print('wrong prediction in top100:', len(wrong_idxs))
+        print('wrong idx', wrong_idxs)
 
-        # pred_entry['pred_rel_inds'] = pred_entry['pred_rel_inds'][:100]
-        # pred_entry['rel_scores'] = pred_entry['rel_scores'][:100]
+        print('all ground truths:', len(dict_gt))
 
         # pdb.set_trace()
-        # pred_entry = rank_predicate(pred_entry)
 
-        # eval_entry(conf.mode, gt_entry, pred_entry_init, evaluator, evaluator_multiple_preds,
-        #            evaluator_list, evaluator_multiple_preds_list)
+        # gt_label = gt_rel_labels[:, -1][rel_scores_idx_b100]
+        # pdb.set_trace()
+        # non_background_idx = torch.nonzero(gt_label)
+        # non_background_idx = non_background_idx.squeeze()
+        # pred_label = pred_entry['rel_scores'][:, 1:].max(1)[1] + 1
+        # pred_label_no_back = pred_label[non_background_idx]
+        # gt_label_no_back = gt_label[non_background_idx]
+        #
+        # wrong_idx = torch.nonzero(pred_label_no_back != gt_label_no_back)
+        # if len(wrong_idx) != 0:
+        #     wrong_idx = wrong_idx.squeeze(-1)
+        #     mask_idx = non_background_idx[wrong_idx]
+        # else:
+        #     mask_idx = None
+
+        # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+        pred_entry = glat_postprocess(pred_entry, if_predicting=True, mask_idx=mask_idx)
+        pred_entry = cuda2numpy_dict(pred_entry)
+
+        if len(rels_i_a100.shape) == 1:
+            pred_entry['rel_scores'] = pred_entry['rel_scores'][:, :-1]
+        else:
+            pred_entry['pred_rel_inds'] = np.concatenate((pred_entry['pred_rel_inds'], rels_i_a100), axis=0)
+            pred_entry['rel_scores'] = np.concatenate((pred_entry['rel_scores'][:, :-1], pred_scores_i_a100), axis=0)
+
+        correct_sample_num = 0
+        if mask_idx is not None:
+            for idx in mask_idx:
+                accs[1] += 1
+                sub = rels_i_b100.data[idx, 0]
+                obj = rels_i_b100.data[idx, 1]
+                pred_class = pred_entry['rel_scores'][idx, 1:].argmax()+1
+                if int(pred_class) in dict_gt[(int(sub), int(obj))]:
+                    accs[0] += 1
+                    correct_sample_num += 1
+
+        print('corrected samples:', correct_sample_num)
 
         eval_entry(conf.mode, gt_entry, pred_entry, evaluator, evaluator_multiple_preds,
                    evaluator_list, evaluator_multiple_preds_list)
 
-print("Training starts now!")
+print("Visualization starts now!")
 # optimizer = get_optim(conf.lr * conf.num_gpus * conf.batch_size)
 
-for epoch in range(start_epoch + 1, start_epoch + 1 + conf.num_epochs):
-    print("start training epoch: ", epoch)
-    scheduler.step()
-    rez = train_epoch(epoch)
-    print("overall{:2d}: ({:.3f})\n{}".format(epoch, rez.mean(1)['total'], rez.mean(1)), flush=True)
+# for epoch in range(start_epoch + 1, start_epoch + 1 + conf.num_epochs):
+    # print("start training epoch: ", epoch)
+    # scheduler.step()
+    # # pdb.set_trace()
+    # rez = train_epoch(epoch)
+    # print("overall{:2d}: ({:.3f})\n{}".format(epoch, rez.mean(1)['total'], rez.mean(1)), flush=True)
+    #
+    # if use_tb:
+    #     writer.add_scalar('loss/rel_loss', rez.mean(1)['rel_loss'], epoch)
+    #     if conf.use_ggnn_obj:
+    #         writer.add_scalar('loss/class_loss', rez.mean(1)['class_loss'], epoch)
+    #     writer.add_scalar('loss/total', rez.mean(1)['total'], epoch)
+    # if conf.save_dir is not None:
+    #     torch.save({
+    #         'epoch': epoch,
+    #         'state_dict': model.state_dict(), #{k:v for k,v in detector.state_dict().items() if not k.startswith('detector.')},
+    #         # 'optimizer': optimizer.state_dict(),
+    #         # 'scheduler': scheduler.state_dict(),
+    #     }, os.path.join(conf.save_dir, '{}-{}.tar'.format('motifnet_glat', epoch)))
 
-    if use_tb:
-        writer.add_scalar('loss/rel_loss', rez.mean(1)['rel_loss'], epoch)
-        if conf.use_ggnn_obj:
-            writer.add_scalar('loss/class_loss', rez.mean(1)['class_loss'], epoch)
-        writer.add_scalar('loss/total', rez.mean(1)['total'], epoch)
-    if conf.save_dir is not None:
-        torch.save({
-            'epoch': epoch,
-            'state_dict': model.state_dict(), #{k:v for k,v in detector.state_dict().items() if not k.startswith('detector.')},
-            # 'optimizer': optimizer.state_dict(),
-            # 'scheduler': scheduler.state_dict(),
-        }, os.path.join(conf.save_dir, '{}-{}.tar'.format('motifnet_glat', epoch)))
-
-    recall, recall_mp, mean_recall, mean_recall_mp = val_epoch()
-    if use_tb:
-        for key, value in recall.items():
-            writer.add_scalar('eval_' + conf.mode + '_with_constraint/' + key, value, epoch)
-        for key, value in recall_mp.items():
-            writer.add_scalar('eval_' + conf.mode + '_without_constraint/' + key, value, epoch)
-        for key, value in mean_recall.items():
-            writer.add_scalar('eval_' + conf.mode + '_with_constraint/mean ' + key, value, epoch)
-        for key, value in mean_recall_mp.items():
-            writer.add_scalar('eval_' + conf.mode + '_without_constraint/mean ' + key, value, epoch)
+recall, recall_mp, mean_recall, mean_recall_mp = val_epoch()
+# if use_tb:
+#     for key, value in recall.items():
+#         writer.add_scalar('eval_' + conf.mode + '_with_constraint/' + key, value, 0)
+#     for key, value in recall_mp.items():
+#         writer.add_scalar('eval_' + conf.mode + '_without_constraint/' + key, value, 0)
+#     for key, value in mean_recall.items():
+#         writer.add_scalar('eval_' + conf.mode + '_with_constraint/mean ' + key, value, 0)
+#     for key, value in mean_recall_mp.items():
+#         writer.add_scalar('eval_' + conf.mode + '_without_constraint/mean ' + key, value, 0)
 

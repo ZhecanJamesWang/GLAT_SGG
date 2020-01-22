@@ -234,17 +234,23 @@ class RelModelStanford(RelModel):
                 rel_scores_idx_a_100_all = []
 
                 for i in range(len(rel_ind_per_img)):
+                    # boxes, obj_classes, obj_scores, rels_b_100, pred_scores_sorted_b_100, rels_a_100, \
+                    # pred_scores_sorted_a_100, rel_scores_idx_b_100, rel_scores_idx_a_100 = filter_dets(bboxes,
+                    #                                                                                    result.obj_scores,
+                    #                                                                                    result.obj_preds,
+                    #                                                                                    rel_inds[
+                    #                                                                                        rel_ind_per_img[
+                    #                                                                                            i]][:,
+                    #                                                                                    1:], rel_rep[
+                    #                                                                                             rel_ind_per_img[
+                    #                                                                                                 i]][
+                    #                                                                                         :, 1:],
+                    #                                                                                    self.return_top100,
+                    #                                                                                    self.training)
+
                     boxes, obj_classes, obj_scores, rels_b_100, pred_scores_sorted_b_100, rels_a_100, \
                     pred_scores_sorted_a_100, rel_scores_idx_b_100, rel_scores_idx_a_100 = filter_dets(bboxes,
-                                                                                                       result.obj_scores,
-                                                                                                       result.obj_preds,
-                                                                                                       rel_inds[
-                                                                                                           rel_ind_per_img[
-                                                                                                               i]][:,
-                                                                                                       1:], rel_rep[
-                                                                                                                rel_ind_per_img[
-                                                                                                                    i]][
-                                                                                                            :, 1:],
+                    result.obj_scores, result.obj_preds, rel_inds[rel_ind_per_img[i]][:,1:], rel_rep[rel_ind_per_img[i]],
                                                                                                        self.return_top100,
                                                                                                        self.training)
 
@@ -337,5 +343,15 @@ class RelModelStanford(RelModel):
             bboxes = result.rm_box_priors
         rel_rep = F.softmax(result.rel_dists)
 
-        return filter_dets(bboxes, result.obj_scores,
-                           result.obj_preds, rel_inds[:, 1:], rel_rep, self.return_top100)
+        # return filter_dets(bboxes, result.obj_scores,
+        #                    result.obj_preds, rel_inds[:, 1:], rel_rep, self.return_top100)
+
+        dict_gt = {}
+        for i in range(gt_rels.size(0)):
+            if (int(gt_rels[i, 1]), int(gt_rels[i, 2])) in dict_gt:
+                dict_gt[(int(gt_rels[i, 1]), int(gt_rels[i, 2]))].append(int(gt_rels[i, 3]))
+            else:
+                dict_gt[(int(gt_rels[i, 1]), int(gt_rels[i, 2]))] = [int(gt_rels[i, 3])]
+
+        return dict_gt, filter_dets(bboxes, result.obj_scores,
+                                    result.obj_preds, rel_inds[:, 1:], rel_rep, self.return_top100)

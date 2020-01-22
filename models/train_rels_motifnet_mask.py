@@ -207,8 +207,10 @@ def train_epoch(epoch_num):
     model.train()
     tr = []
     start = time.time()
+    accs = [0, 0]
     for b, batch in enumerate(train_loader):
-        tr.append(train_batch(batch, verbose=b % (conf.print_interval*10) == 0)) #b == 0))
+        # res = train_batch(batch, accs=accs, verbose=b % (conf.print_interval*10) == 0)
+        tr.append(train_batch(batch, accs=accs, verbose=b % (conf.print_interval*10) == 0))
 
         if b % conf.print_interval == 0 and b >= conf.print_interval:
             mn = pd.concat(tr[-conf.print_interval:], axis=1).mean(1)
@@ -216,12 +218,14 @@ def train_epoch(epoch_num):
             print("\ne{:2d}b{:5d}/{:5d} {:.3f}s/batch, {:.1f}m/epoch".format(
                 epoch_num, b, len(train_loader), time_per_batch, len(train_loader) * time_per_batch / 60))
             print(mn)
+            print('acc of mask:', accs[0]*1.0 / accs[1])
+            print('num of mask:', accs[1])
             print('-----------', flush=True)
             start = time.time()
     return pd.concat(tr, axis=1)
 
 
-def train_batch(b, verbose=False):
+def train_batch(b, accs, verbose=False):
     """
     :param b: contains:
           :param imgs: the image, [batch_size, 3, IM_SIZE, IM_SIZE]
@@ -262,11 +266,28 @@ def train_batch(b, verbose=False):
         }
     # pdb.set_trace()
     b_100_idx = det_res[-2]
-    pdb.set_trace()
+
+    gt_label = result.rel_labels[:, -1][b_100_idx]
+    non_background_idx = torch.nonzero(gt_label)
+    if len(non_background_idx) != 0:
+        non_background_idx = non_background_idx.squeeze(-1)
+        pred_label = pred_entry['rel_scores'][:, 1:].max(1)[1] + 1
+        pred_label_no_back = pred_label[non_background_idx]
+        gt_label_no_back = gt_label[non_background_idx]
+
+        wrong_idx = torch.nonzero(pred_label_no_back != gt_label_no_back)
+        if len(wrong_idx) != 0:
+            wrong_idx = wrong_idx.squeeze(-1)
+            mask_idx = non_background_idx[wrong_idx].data
+        else:
+            mask_idx = None
+    else:
+        mask_idx = None
     # pred_entry['rel_scores'][:, 1:].argmax(1) + 1
     # result.rel_labels[b_100_idx]
-    
-    pred_entry = glat_postprocess(pred_entry, if_predicting=False)
+    # pdb.set_trace()
+    #
+    pred_entry = glat_postprocess(pred_entry, if_predicting=False, mask_idx=mask_idx)
 
     # b_100_idx = det_res[-2]
     # a_100_idx = det_res[-1]
@@ -329,6 +350,20 @@ def train_batch(b, verbose=False):
         max_norm=conf.clip, verbose=verbose, clip=True)
     losses['total'] = loss
     optimizer.step()
+
+    # pdb.set_trace()
+    # mask_idx = mask_idx.data.tolist()
+    if mask_idx is not None:
+        abs_mask_idx = b_100_idx[mask_idx]
+        gt = result.rel_labels.data[abs_mask_idx][:, -1]
+        pred = result.rel_dists.data[abs_mask_idx, :].max(1)[1] + 1
+        # pred = pred.type_as(gt)
+
+        correct = int((pred == gt).sum())
+        total = int(pred.size(0))
+        accs[0] = accs[0] + correct
+        accs[1] = accs[1] + total
+
     res = pd.Series({x: y.data[0] for x, y in losses.items()})
     return res
 
@@ -339,6 +374,7 @@ def val_epoch():
     model.eval()
     evaluator_list = [] # for calculating recall of each relationship except no relationship
     evaluator_multiple_preds_list = []
+    accs = [0, 0]
     for index, name in enumerate(ind_to_predicates):
         if index == 0:
             continue
@@ -347,7 +383,7 @@ def val_epoch():
     evaluator = BasicSceneGraphEvaluator.all_modes() # for calculating recall
     evaluator_multiple_preds = BasicSceneGraphEvaluator.all_modes(multiple_preds=True)
     for val_b, batch in enumerate(val_loader):
-        val_batch(conf.num_gpus * val_b, batch, evaluator, evaluator_multiple_preds, evaluator_list, evaluator_multiple_preds_list)
+        val_batch(conf.num_gpus * val_b, batch, evaluator, evaluator_multiple_preds, evaluator_list, evaluator_multiple_preds_list, accs)
 
     recall = evaluator[conf.mode].print_stats()
     recall_mp = evaluator_multiple_preds[conf.mode].print_stats()
@@ -355,6 +391,7 @@ def val_epoch():
     mean_recall = calculate_mR_from_evaluator_list(evaluator_list, conf.mode)
     mean_recall_mp = calculate_mR_from_evaluator_list(evaluator_multiple_preds_list, conf.mode, multiple_preds=True)
 
+    print('test acc of mask:', accs[0] * 1.0 / accs[1])
     return recall, recall_mp, mean_recall, mean_recall_mp
 
 
@@ -450,7 +487,7 @@ def variable2tensor(input):
         input = input.data
     return input
 
-def glat_postprocess(pred_entry, if_predicting=False):
+def glat_postprocess(pred_entry, mask_idx, if_predicting=False):
     # pred_entry = {
     #     'pred_boxes': boxes_i * BOX_SCALE / IM_SCALE,  # (23, 4) (16, 4)
     #     'pred_classes': objs_i,  # (23,) (16,)
@@ -466,6 +503,8 @@ def glat_postprocess(pred_entry, if_predicting=False):
     pred_entry['pred_classes'] = tensor2variable(pred_entry['pred_classes'])
 
     pred_entry['rel_classes'] = torch.max(pred_entry['rel_scores'][:, 1:], dim=1)[1].unsqueeze(1) + 1
+    if mask_idx is not None:
+        pred_entry['rel_classes'][mask_idx] = 51
     pred_entry['rel_classes'] = variable2tensor(pred_entry['rel_classes'])
     # pdb.set_trace()
     pred_entry['pred_relations'] = torch.cat((pred_entry['pred_rel_inds'], pred_entry['rel_classes']), dim=1)
@@ -527,8 +566,8 @@ def rank_predicate(pred_entry):
     return pred_entry
 
 
-def val_batch(batch_num, b, evaluator, evaluator_multiple_preds, evaluator_list, evaluator_multiple_preds_list):
-    det_res = detector[b]
+def val_batch(batch_num, b, evaluator, evaluator_multiple_preds, evaluator_list, evaluator_multiple_preds_list, accs):
+    dict_gt, det_res = detector[b]
 
 
     if conf.num_gpus == 1:
@@ -571,8 +610,39 @@ def val_batch(batch_num, b, evaluator, evaluator_multiple_preds, evaluator_list,
 
         # pred_entry_init = copy.deepcopy(pred_entry)
 
+        # pdb.set_trace()
+
+        wrong_idxs = []
+        for i in range(len(rels_i_b100)):
+            if (int(rels_i_b100[i][0]), int(rels_i_b100[i][1])) in dict_gt:
+                pred_lbl = pred_scores_i_b100[i, 1:].argmax(0) + 1
+                if int(pred_lbl) not in dict_gt[(int(rels_i_b100[i][0]), int(rels_i_b100[i][1]))]:
+                    wrong_idxs.append(i)
+
+        if len(wrong_idxs) == 0:
+            mask_idx = None
+        else:
+            mask_idx = wrong_idxs
+
+        # pdb.set_trace()
+
+        # gt_label = gt_rel_labels[:, -1][rel_scores_idx_b100]
+        # pdb.set_trace()
+        # non_background_idx = torch.nonzero(gt_label)
+        # non_background_idx = non_background_idx.squeeze()
+        # pred_label = pred_entry['rel_scores'][:, 1:].max(1)[1] + 1
+        # pred_label_no_back = pred_label[non_background_idx]
+        # gt_label_no_back = gt_label[non_background_idx]
+        #
+        # wrong_idx = torch.nonzero(pred_label_no_back != gt_label_no_back)
+        # if len(wrong_idx) != 0:
+        #     wrong_idx = wrong_idx.squeeze(-1)
+        #     mask_idx = non_background_idx[wrong_idx]
+        # else:
+        #     mask_idx = None
+
         # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-        pred_entry = glat_postprocess(pred_entry, if_predicting=True)
+        pred_entry = glat_postprocess(pred_entry, if_predicting=True, mask_idx=mask_idx)
         pred_entry = cuda2numpy_dict(pred_entry)
 
         # rel_scores_one_hot = np.zeros((len(pred_entry['rel_scores']), 51))
@@ -610,6 +680,15 @@ def val_batch(batch_num, b, evaluator, evaluator_multiple_preds, evaluator_list,
             pred_entry['rel_scores'] = np.concatenate((pred_entry['rel_scores'][:, :-1], pred_scores_i_a100), axis=0)
         # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
+        # pdb.set_trace()
+        if mask_idx is not None:
+            for idx in mask_idx:
+                accs[1] += 1
+                sub = rels_i_b100.data[idx, 0]
+                obj = rels_i_b100.data[idx, 1]
+                pred_class = pred_entry['rel_scores'][idx, 1:].argmax()+1
+                if int(pred_class) in dict_gt[(int(sub), int(obj))]:
+                    accs[0] += 1
 
         # pred_entry['pred_rel_inds'] = pred_entry['pred_rel_inds'][:100]
         # pred_entry['rel_scores'] = pred_entry['rel_scores'][:100]
@@ -618,7 +697,7 @@ def val_batch(batch_num, b, evaluator, evaluator_multiple_preds, evaluator_list,
         # pred_entry = rank_predicate(pred_entry)
 
         # eval_entry(conf.mode, gt_entry, pred_entry_init, evaluator, evaluator_multiple_preds,
-        #            evaluator_list, evaluator_multiple_preds_list)
+        #            evaluator_list, evalutator_multiple_preds_list)
 
         eval_entry(conf.mode, gt_entry, pred_entry, evaluator, evaluator_multiple_preds,
                    evaluator_list, evaluator_multiple_preds_list)

@@ -17,13 +17,11 @@ from lib.evaluation.sg_eval import BasicSceneGraphEvaluator, calculate_mR_from_e
 from lib.pytorch_misc import print_para
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 
-import pdb
 # import KERN model
 # from lib.kern_model import KERN
 
 #--------updated--------
-# from lib.stanford_model import RelModelStanford as RelModel
-from lib.motifnet_model import RelModel
+from lib.stanford_model import RelModelStanford as RelModel
 from lib.glat import GLATNET
 import pdb
 from torch.autograd import Variable
@@ -36,7 +34,7 @@ import sys
 import os
 codebase = '../../'
 sys.path.append(codebase)
-exp_name = 'motif'
+exp_name = 'stanford'
 
 
 # os.environ["CUDA_VISIBLE_DEVICES"] = "0"
@@ -76,16 +74,23 @@ train_loader, val_loader = VGDataLoader.splits(train, val, mode='rel',
 # python models/train_rels.py -m sgcls -model stanford -b 4 -p 400 -lr 1e-4 -ngpu 1 -ckpt checkpoints/vgdet/vg-24.tar -save_dir checkpoints/stanford -adam
 
 
-order = 'leftright'
-nl_obj = 2
-nl_edge = 4
-hidden_dim = 512
+order = 'confidence'
+nl_edge = 2
+nl_obj = 1
+hidden_dim = 256
+rec_dropout = 0.1
+
 pass_in_obj_feats_to_decoder = False
 pass_in_obj_feats_to_edge = False
-rec_dropout = 0.1
-use_bias = True
+use_bias = False
 use_tanh = False
 limit_vision = False
+
+# pass_in_obj_feats_to_decoder = True
+# pass_in_obj_feats_to_edge = True
+# use_bias = True
+# use_tanh = True
+# limit_vision = True
 
 
 detector = RelModel(classes=train.ind_to_classes, rel_classes=train.ind_to_predicates,
@@ -115,7 +120,7 @@ model = GLATNET(vocab_num=[52, 153],
                 types=[2]*6)
 
 
-# Freeze all the motif model
+# Freeze all the stanford model
 for n, param in detector.named_parameters():
     param.requires_grad = False
 
@@ -126,7 +131,7 @@ for n, param in detector.named_parameters():
 print(print_para(detector), flush=True)
 
 
-def get_optim(lr, last_epoch=-1):
+def get_optim(lr):
     # Lower the learning rate on the VGG fully connected layers by 1/10th. It's a hack, but it helps
     # stabilize the models.
     # fc_params = [p for n,p in detector.named_parameters() if n.startswith('roi_fmap') and p.requires_grad]
@@ -140,12 +145,12 @@ def get_optim(lr, last_epoch=-1):
 
     # scheduler = ReduceLROnPlateau(optimizer, 'max', patience=3, factor=0.1,
     #                               verbose=True, threshold=0.0001, threshold_mode='abs', cooldown=1)
-    scheduler = lr_scheduler.StepLR(optimizer, step_size=5, gamma=0.3, last_epoch=last_epoch)
+    scheduler = lr_scheduler.StepLR(optimizer, step_size=5, gamma=0.3)
 
     return optimizer, scheduler
 
 ckpt = torch.load(conf.ckpt)
-print("Loading EVERYTHING from motifnet", conf.ckpt)
+print("Loading EVERYTHING from", conf.ckpt)
 optimistic_restore(detector, ckpt['state_dict'])
 detector.cuda()
 start_epoch = -1
@@ -172,35 +177,24 @@ start_epoch = -1
 #     detector.roi_fmap_obj[3].bias.data.copy_(ckpt['state_dict']['roi_fmap.3.bias'])
 
 
+# # ckpt_glat = torch.load('/home/haoxuan/code/GBERT/models/2019-10-31-03-13_2_2_2_2_2_2_concat_no_init_mask/best_test_node_mask_predicate_acc')
+
+# ---------------pretrained model mask ration 0.5
+# ckpt_glat = torch.load('/home/tangtangwzc/Common_sense/models/2019-11-03-17-51_2_2_2_2_2_2_concat_no_init_mask/best_test_node_mask_predicate_acc.pth')
+
+# ---------------pretrained model mask ration 0.3
+ckpt_glat = torch.load('/home/tangtangwzc/Common_sense/models/2019-11-03-17-28_2_2_2_2_2_2_concat_no_init_mask/best_test_node_mask_predicate_acc.pth')
+
+# ---------------pretrained model mask ration 0.7
+# ckpt_glat = torch.load('/home/tangtangwzc/Common_sense/models/2019-11-07-23-50_2_2_2_2_2_2_concat_no_init_mask/best_test_node_mask_predicate_acc.pth')
+
+optimistic_restore(model, ckpt_glat['model'])
 
 print('finish pretrained GLAT loading')
 # # model.load_state_dict(ckpt_glat['model'])
-if conf.resume_training:
-    ckpt_glat = torch.load(conf.resume_ckpt)
-    optimistic_restore(model, ckpt_glat['state_dict'])
-    model.cuda()
-    start_epoch = ckpt_glat['epoch']
-    optimizer, scheduler = get_optim(conf.lr, last_epoch=start_epoch)
+model.cuda()
 
-else:
-    # # ckpt_glat = torch.load('/home/haoxuan/code/GBERT/models/2019-10-31-03-13_2_2_2_2_2_2_concat_no_init_mask/best_test_node_mask_predicate_acc')
-    # ---------------pretrained model mask ration 0.5
-    # ckpt_glat = torch.load('/home/tangtangwzc/Common_sense/models/2019-11-03-17-51_2_2_2_2_2_2_concat_no_init_mask/best_test_node_mask_predicate_acc.pth')
-
-    # ---------------pretrained model mask ration 0.3
-    ckpt_glat = torch.load(
-        '/home/tangtangwzc/Common_sense/models/2019-11-03-17-28_2_2_2_2_2_2_concat_no_init_mask/best_test_node_mask_predicate_acc.pth')
-
-    # ---------------pretrained model mask ration 0.7
-    # ckpt_glat = torch.load('/home/tangtangwzc/Common_sense/models/2019-11-07-23-50_2_2_2_2_2_2_concat_no_init_mask/best_test_node_mask_predicate_acc.pth')
-
-    optimistic_restore(model, ckpt_glat['model'])
-    model.cuda()
-    start_epoch = -1
-    optimizer, scheduler = get_optim(conf.lr, last_epoch=start_epoch)
-
-
-def train_epoch(epoch_num):
+def train_epoch(epoch_num, train_results, train_det_ress):
     detector.train()
     for n, param in detector.named_parameters():
         param.requires_grad = False
@@ -208,7 +202,8 @@ def train_epoch(epoch_num):
     tr = []
     start = time.time()
     for b, batch in enumerate(train_loader):
-        tr.append(train_batch(batch, verbose=b % (conf.print_interval*10) == 0)) #b == 0))
+        tr.append(train_batch(batch, train_results, train_det_ress, epoch_num=epoch_num, batch_num=b,
+                              verbose=b % (conf.print_interval*10) == 0)) #b == 0))
 
         if b % conf.print_interval == 0 and b >= conf.print_interval:
             mn = pd.concat(tr[-conf.print_interval:], axis=1).mean(1)
@@ -221,7 +216,7 @@ def train_epoch(epoch_num):
     return pd.concat(tr, axis=1)
 
 
-def train_batch(b, verbose=False):
+def train_batch(b, train_results, train_det_ress, epoch_num, batch_num, verbose=False):
     """
     :param b: contains:
           :param imgs: the image, [batch_size, 3, IM_SIZE, IM_SIZE]
@@ -240,18 +235,20 @@ def train_batch(b, verbose=False):
           :param gt_classes: [num_gt, 2] gt boxes where each one is (img_id, class)
     :return:
     """
-    # t0 = time.time()
-
-    result, det_res = detector[b]
-
+    if epoch_num == 0:
+        result, det_res = detector[b]
+        train_results.append(result)
+        train_det_ress.append(det_res)
+    else:
+        result = train_results[batch_num]
+        det_res = train_det_ress[batch_num]
     # result.rm_obj_dists(num_entities, 151)  result.obj_preds(num_entities)  result.rm_obj_labels(num_entities)
     # result.rel_dists(num_predicates, 51)  result.rel_labels(num_predicates)
-    # result.rel_inds(num_predicates, 3) 3
+    # result.rel_inds(num_predicates, 4)
     # pdb.set_trace()
-    # rel_inds obj_idx?-> global idx
 
-    # t1 = time.time()
-    # print('base model time', t1-t0)
+    # pdb.set_trace()
+
 
     if conf.return_top100 and len(det_res) != 0:
 
@@ -289,24 +286,16 @@ def train_batch(b, verbose=False):
     # else:
     #     pred_scores_sorted_total = torch.cat((pred_scores_sorted_b_100, pred_scores_sorted_a_100), dim=0)
 
-    # pdb.set_trace()
-    # b_100_idx abs coor?
-
     for i in range(int(b_100_idx.size()[0])):
         # pdb.set_trace()
         idx = b_100_idx[i]
         result.rel_dists[idx] = pred_scores_sorted_b_100[i]
         # pdb.set_trace()
-        assert (result.rel_inds[idx] == rels_b_100[i]).all()
-
-        # if conf.batch_size != 1:
-        #     result.rel_inds[idx] = rels_b_100[i]
-        # else:
-        #     result.rel_inds[idx, 1:] = rels_b_100[i]
+        if conf.batch_size != 1:
+            result.rel_inds[idx] = rels_b_100[i]
+        else:
+            result.rel_inds[idx, 1:] = rels_b_100[i]
     result.obj_preds = pred_entry['pred_classes']
-
-    # t2 = time.time()
-    # print('glat model time', t2-t1)
 
     #
     # rels_total = sorted(set(zip(totla_idx, rels_total)))
@@ -342,7 +331,7 @@ def train_batch(b, verbose=False):
     return res
 
 
-def val_epoch():
+def val_epoch(epoch, eval_results, eval_det_ress):
 
     detector.eval()
     model.eval()
@@ -355,10 +344,10 @@ def val_epoch():
         evaluator_multiple_preds_list.append((index, name, BasicSceneGraphEvaluator.all_modes(multiple_preds=True)))
     evaluator = BasicSceneGraphEvaluator.all_modes() # for calculating recall
     evaluator_multiple_preds = BasicSceneGraphEvaluator.all_modes(multiple_preds=True)
-    # print(len(val_loader))
     for val_b, batch in enumerate(val_loader):
         # val_batch(conf.num_gpus * val_b, batch, evaluator, evaluator_multiple_preds, evaluator_list, evaluator_multiple_preds_list)
-        val_batch(val_b, batch, evaluator, evaluator_multiple_preds, evaluator_list, evaluator_multiple_preds_list)
+        val_batch(val_b, batch, evaluator, evaluator_multiple_preds, evaluator_list,
+                  evaluator_multiple_preds_list, epoch, eval_results, eval_det_ress)
 
     recall = evaluator[conf.mode].print_stats()
     recall_mp = evaluator_multiple_preds[conf.mode].print_stats()
@@ -538,9 +527,17 @@ def rank_predicate(pred_entry):
     return pred_entry
 
 
-def val_batch(batch_num, b, evaluator, evaluator_multiple_preds, evaluator_list, evaluator_multiple_preds_list):
+def val_batch(batch_num, b, evaluator, evaluator_multiple_preds, evaluator_list,
+              evaluator_multiple_preds_list, epoch_num, eval_results, eval_det_ress):
     # det_res = detector[b]
-    dict_gt, det_res = detector[b]
+    if epoch_num == 0:
+        dict_gt, det_res = detector[b]
+        eval_results.append(dict_gt)
+        eval_det_ress.append(det_res)
+    else:
+        dict_gt = eval_results[batch_num]
+        det_res = eval_det_ress[batch_num]
+
 
 
     # if conf.num_gpus == 1:
@@ -637,11 +634,19 @@ def val_batch(batch_num, b, evaluator, evaluator_multiple_preds, evaluator_list,
 
 print("Training starts now!")
 # optimizer = get_optim(conf.lr * conf.num_gpus * conf.batch_size)
+optimizer, scheduler = get_optim(conf.lr)
+
+
+train_results = []
+train_det_ress = []
+
+eval_results = []
+eval_det_ress = []
 
 for epoch in range(start_epoch + 1, start_epoch + 1 + conf.num_epochs):
     print("start training epoch: ", epoch)
     scheduler.step()
-    rez = train_epoch(epoch)
+    rez = train_epoch(epoch, train_results, train_det_ress)
     print("overall{:2d}: ({:.3f})\n{}".format(epoch, rez.mean(1)['total'], rez.mean(1)), flush=True)
 
     if use_tb:
@@ -654,10 +659,9 @@ for epoch in range(start_epoch + 1, start_epoch + 1 + conf.num_epochs):
             'epoch': epoch,
             'state_dict': model.state_dict(), #{k:v for k,v in detector.state_dict().items() if not k.startswith('detector.')},
             # 'optimizer': optimizer.state_dict(),
-            # 'scheduler': scheduler.state_dict(),
-        }, os.path.join(conf.save_dir, '{}-{}.tar'.format('motifnet_glat', epoch)))
+        }, os.path.join(conf.save_dir, '{}-{}.tar'.format('stanford_glat', epoch)))
 
-    recall, recall_mp, mean_recall, mean_recall_mp = val_epoch()
+    recall, recall_mp, mean_recall, mean_recall_mp = val_epoch(eval_results, eval_det_ress)
     if use_tb:
         for key, value in recall.items():
             writer.add_scalar('eval_' + conf.mode + '_with_constraint/' + key, value, epoch)

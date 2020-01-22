@@ -297,6 +297,9 @@ class ObjectDetector(nn.Module):
             self.get_boxes(fmap, im_sizes, image_offset, gt_boxes,
                            gt_classes, gt_rels, train_anchor_inds, proposals=proposals)
 
+        # import pdb
+        # pdb.set_trace()
+
         # Now classify them
         obj_fmap = self.obj_feature_map(fmap, rois)
         od_obj_dists = self.score_fc(obj_fmap)

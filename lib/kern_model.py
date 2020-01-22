@@ -445,22 +445,30 @@ class KERN(nn.Module):
                 rel_scores_idx_a_100_all = []
 
                 for i in range(len(rel_ind_per_img)):
+                    # boxes, obj_classes, obj_scores, rels_b_100, pred_scores_sorted_b_100, rels_a_100, \
+                    # pred_scores_sorted_a_100, rel_scores_idx_b_100, rel_scores_idx_a_100 = filter_dets(bboxes, result.obj_scores,
+                    #             result.obj_preds, rel_inds[rel_ind_per_img[i]][:, 1:], rel_rep[rel_ind_per_img[i]][:, 1:], self.return_top100, self.training)
+
                     boxes, obj_classes, obj_scores, rels_b_100, pred_scores_sorted_b_100, rels_a_100, \
                     pred_scores_sorted_a_100, rel_scores_idx_b_100, rel_scores_idx_a_100 = filter_dets(bboxes, result.obj_scores,
-                                result.obj_preds, rel_inds[rel_ind_per_img[i]][:, 1:], rel_rep[rel_ind_per_img[i]][:, 1:], self.return_top100, self.training)
+                                result.obj_preds, rel_inds[rel_ind_per_img[i]][:, 1:], rel_rep[rel_ind_per_img[i]], self.return_top100, self.training)
 
                     # pdb.set_trace()
 
                     rels_b_100_all.append(torch.cat((i*torch.ones(rels_b_100.size(0), 1).type_as(rels_b_100), rels_b_100), dim=1))
                     pred_scores_sorted_b_100_all.append(pred_scores_sorted_b_100)
+                    rel_scores_idx_b_100_all.append(rel_ind_per_img[i][rel_scores_idx_b_100])
+
                     try:
                         rels_a_100_all.append(torch.cat((i*torch.ones(rels_a_100.size(0), 1).type_as(rels_a_100), rels_a_100), dim=1))
                     except:
                         rels_a_100_all.append(torch.Tensor([]).long().cuda())
 
-                    pred_scores_sorted_a_100_all.append(pred_scores_sorted_a_100)
-                    rel_scores_idx_b_100_all.append(rel_ind_per_img[i][rel_scores_idx_b_100])
-                    # pdb.set_trace()
+                    try:
+                        pred_scores_sorted_a_100_all.append(pred_scores_sorted_a_100)
+                    except:
+                        pred_scores_sorted_a_100_all.append(Variable(torch.Tensor([]).long().cuda()))
+
                     try:
                         rel_scores_idx_a_100_all.append(rel_ind_per_img[i][rel_scores_idx_a_100])
                     except:
