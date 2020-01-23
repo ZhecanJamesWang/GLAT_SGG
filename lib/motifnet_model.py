@@ -26,6 +26,7 @@ from lib.surgery import filter_dets
 from lib.word_vectors import obj_edge_vectors
 from lib.fpn.roi_align.functions.roi_align import RoIAlignFunction
 import math
+from lib.glat import GLATNET
 
 
 def _sort_by_score(im_inds, scores):
@@ -394,6 +395,16 @@ class RelModel(nn.Module):
         if self.use_bias:
             self.freq_bias = FrequencyBias()
 
+        self.glat = GLATNET(vocab_num=[52, 153],
+                        feat_dim=300,
+                        nhid_glat_g=300,
+                        nhid_glat_l=300,
+                        nout=300,
+                        dropout=0.1,
+                        nheads=8,
+                        blank=152,
+                        types=[2] * 6)
+
     @property
     def num_classes(self):
         return len(self.classes)
@@ -552,7 +563,9 @@ class RelModel(nn.Module):
 
                 if rel_inds[:, 0].max() - rel_inds[:, 0].min() + 1 == 1:
                     return result, filter_dets(bboxes, result.obj_scores,
-                                   result.obj_preds, rel_inds[:, 1:], rel_rep, self.return_top100, self.training)
+                                   result.obj_preds, rel_inds[:, 1:], rel_rep, rel_rep, rel_dists=result.rel_dists,
+                                               return_top100=self.return_top100,
+                                               training=self.training)
 
                 # -----------------------------------Above: 1 batch_size, Below: Multiple batch_size------------------
                 #  assume rel_inds[:, 0] is from 0 to num_img-1
@@ -618,7 +631,7 @@ class RelModel(nn.Module):
                     rel_scores_idx_a_100_all = torch.Tensor([]).long().cuda()
 
                 return result, [boxes, obj_classes, obj_scores, rels_b_100_all, pred_scores_sorted_b_100_all, rels_a_100_all,
-                                pred_scores_sorted_a_100_all, rel_scores_idx_b_100_all, rel_scores_idx_a_100_all]
+                                pred_scores_sorted_a_100_all, rel_scores_idx_b_100_all, rel_scores_idx_a_100_all, result.rel_dists]
 
             else:
                 return result, []
@@ -638,7 +651,8 @@ class RelModel(nn.Module):
         rel_rep = F.softmax(result.rel_dists, dim=1)
 
         return filter_dets(bboxes, result.obj_scores,
-                           result.obj_preds, rel_inds[:, 1:], rel_rep, self.return_top100)
+                           result.obj_preds, rel_inds[:, 1:], rel_rep, rel_dists=result.rel_dists,
+                           return_top100=self.return_top100, training=False)
 
         # if self.training:
         #     return result

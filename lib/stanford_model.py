@@ -12,6 +12,7 @@ from lib.fpn.proposal_assignments.rel_assignments import rel_assignments
 from lib.pytorch_misc import arange
 from lib.object_detector import filter_det
 from lib.stanford_rel import RelModel
+from lib.glat import GLATNET
 
 MODES = ('sgdet', 'sgcls', 'predcls')
 
@@ -59,6 +60,16 @@ class RelModelStanford(RelModel):
         self.out_edge_w_fc = nn.Sequential(nn.Linear(SIZE*2, 1), nn.Sigmoid())
 
         self.in_edge_w_fc = nn.Sequential(nn.Linear(SIZE*2, 1), nn.Sigmoid())
+
+        # self.glat = GLATNET(vocab_num=[52, 153],
+        #                 feat_dim=300,
+        #                 nhid_glat_g=300,
+        #                 nhid_glat_l=300,
+        #                 nout=300,
+        #                 dropout=0.1,
+        #                 nheads=8,
+        #                 blank=152,
+        #                 types=[2] * 6)
 
     def message_pass(self, rel_rep, obj_rep, rel_inds):
         """
@@ -208,8 +219,9 @@ class RelModelStanford(RelModel):
 
                 if rel_inds[:, 0].max() - rel_inds[:, 0].min() + 1 == 1:
                     return result, filter_dets(bboxes, result.obj_scores,
-                                               result.obj_preds, rel_inds[:, 1:], rel_rep, self.return_top100,
-                                               self.training)
+                                               result.obj_preds, rel_inds[:, 1:], rel_rep, rel_dists=result.rel_dists,
+                                               return_top100=self.return_top100,
+                                               training=self.training)
 
                 # -----------------------------------Above: 1 batch_size, Below: Multiple batch_size------------------
                 #  assume rel_inds[:, 0] is from 0 to num_img-1
@@ -289,11 +301,11 @@ class RelModelStanford(RelModel):
 
                 return result, [boxes, obj_classes, obj_scores, rels_b_100_all, pred_scores_sorted_b_100_all,
                                 rels_a_100_all,
-                                pred_scores_sorted_a_100_all, rel_scores_idx_b_100_all, rel_scores_idx_a_100_all]
+                                pred_scores_sorted_a_100_all, rel_scores_idx_b_100_all, rel_scores_idx_a_100_all, result.rel_dists]
 
             else:
-                # return result, []
-                return result
+                return result, []
+                # return result
 
 
         # Decode here ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -338,4 +350,5 @@ class RelModelStanford(RelModel):
         rel_rep = F.softmax(result.rel_dists)
 
         return filter_dets(bboxes, result.obj_scores,
-                           result.obj_preds, rel_inds[:, 1:], rel_rep, self.return_top100)
+                           result.obj_preds, rel_inds[:, 1:], rel_rep, rel_dists=result.rel_dists,
+                           return_top100=self.return_top100, training=False)

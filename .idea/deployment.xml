@@ -1,11 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="PublishConfigData" autoUpload="Always" serverName="kiwi">
+  <component name="PublishConfigData" autoUpload="Always" serverName="tangtangwzc@coconut.cs.columbia.edu:22">
     <serverData>
       <paths name="kiwi">
         <serverdata>
           <mappings>
             <mapping deploy="/home/tangtangwzc/KERN" local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="pineapple">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/home/tangtangwzc/KERN" local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="tangtangwzc@coconut.cs.columbia.edu:22">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/home/tangtangwzc/KERN" local="$PROJECT_DIR$" />
           </mappings>
         </serverdata>
       </paths>

@@ -277,6 +277,7 @@ class KERN(nn.Module):
         else:
             self.vr_fc_cls = VRFC(self.mode, self.rel_dim, len(self.classes), len(self.rel_classes))
 
+
     @property
     def num_classes(self):
         return len(self.classes)
@@ -420,7 +421,9 @@ class KERN(nn.Module):
 
                 if rel_inds[:, 0].max() - rel_inds[:, 0].min() + 1 == 1:
                     return result, filter_dets(bboxes, result.obj_scores,
-                                   result.obj_preds, rel_inds[:, 1:], rel_rep, self.return_top100, self.training)
+                                               result.obj_preds, rel_inds[:, 1:], rel_rep, rel_dists=result.rel_dists,
+                                               return_top100=self.return_top100,
+                                               training=self.training)
 
                 # -----------------------------------Above: 1 batch_size, Below: Multiple batch_size------------------
                 #  assume rel_inds[:, 0] is from 0 to num_img-1
@@ -485,9 +488,9 @@ class KERN(nn.Module):
                 except:
                     rel_scores_idx_a_100_all = torch.Tensor([]).long().cuda()
 
-                return result, [boxes, obj_classes, obj_scores, rels_b_100_all, pred_scores_sorted_b_100_all, rels_a_100_all,
-                                pred_scores_sorted_a_100_all, rel_scores_idx_b_100_all, rel_scores_idx_a_100_all]
-
+                return result, [boxes, obj_classes, obj_scores, rels_b_100_all, pred_scores_sorted_b_100_all,
+                                rels_a_100_all,
+                                pred_scores_sorted_a_100_all, rel_scores_idx_b_100_all, rel_scores_idx_a_100_all, result.rel_dists]
             else:
                 return result, []
 
@@ -504,7 +507,7 @@ class KERN(nn.Module):
         rel_rep = F.softmax(result.rel_dists, dim=1)
 
         return filter_dets(bboxes, result.obj_scores,
-                           result.obj_preds, rel_inds[:, 1:], rel_rep, self.return_top100, self.training)
+                           result.obj_preds, rel_inds[:, 1:], rel_rep, rel_dists=result.rel_dists, return_top100=self.return_top100, training=False)
 
     def __getitem__(self, batch):
         """ Hack to do multi-GPU training"""

@@ -25,6 +25,8 @@ import pdb
 # from lib.stanford_model import RelModelStanford as RelModel
 from lib.motifnet_model import RelModel
 from lib.glat import GLATNET
+from lib.utils import Counter, save_model
+
 import pdb
 from torch.autograd import Variable
 import copy
@@ -620,6 +622,7 @@ def val_batch(batch_num, b, evaluator, evaluator_multiple_preds, evaluator_list,
 
 print("Training starts now!")
 # optimizer = get_optim(conf.lr * conf.num_gpus * conf.batch_size)
+
 
 for epoch in range(start_epoch + 1, start_epoch + 1 + conf.num_epochs):
     print("start training epoch: ", epoch)

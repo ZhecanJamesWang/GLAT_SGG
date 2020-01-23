@@ -441,11 +441,13 @@ def build_graph_structure(entries, index2name_object, index2name_predicate, if_p
     # total_data['img_id'] = []
     total_data['node_type'] = []
     total_data['node_logit'] = []
+    total_data['node_logit_dists'] = []
 
     entries_minibatch = {}
     entries_minibatch['pred_relations'] = []
     entries_minibatch['pred_classes'] = []
     entries_minibatch['rel_scores'] = []
+    entries_minibatch['rel_dists'] = []
 
     if entries['pred_relations'].size(1) == 4:
         # pdb.set_trace()
@@ -465,6 +467,7 @@ def build_graph_structure(entries, index2name_object, index2name_predicate, if_p
         entries_minibatch['pred_relations'].append(entries['pred_relations'])
         entries_minibatch['pred_classes'].append(entries['pred_classes'])
         entries_minibatch['rel_scores'].append(entries['rel_scores'])
+        entries_minibatch['rel_dists'].append(entries['rel_dists'])
 
     for i in range(len(entries_minibatch['pred_classes'])):
         # if if_predicting:
@@ -477,6 +480,7 @@ def build_graph_structure(entries, index2name_object, index2name_predicate, if_p
         return_relations = entries_minibatch['pred_relations'][i]
 
         return_rel_scores = entries_minibatch['rel_scores'][i]
+        return_rel_dists = entries_minibatch['rel_dists'][i]
 
         entity_num = return_classes.size(0)
         total_node_num = entity_num + return_relations.size(0)
@@ -484,6 +488,7 @@ def build_graph_structure(entries, index2name_object, index2name_predicate, if_p
         nodes_class = torch.cat((return_classes, Variable(return_relations[:, -1])), dim=0)
 
         nodes_logit = torch.cat((Variable(torch.zeros(return_classes.size()[0], return_rel_scores.size()[1]).cuda()), return_rel_scores))
+        nodes_logit_dists = torch.cat((Variable(torch.zeros(return_classes.size()[0], return_rel_dists.size()[1]).cuda()), return_rel_dists))
 
         # pdb.set_trace()
         nodes_type = torch.ones_like(return_classes).data
@@ -499,7 +504,8 @@ def build_graph_structure(entries, index2name_object, index2name_predicate, if_p
                 adj[relation[0]][entity_num+j] = 1
             except Exception as e:
                 print(e)
-                pdb.set_trace()
+                pass
+                # pdb.set_trace()
             # print('position', )
             adj[entity_num+j][relation[1]] = 2
         total_data['adj'].append(adj)
@@ -507,6 +513,8 @@ def build_graph_structure(entries, index2name_object, index2name_predicate, if_p
         total_data['node_class'].append(nodes_class)
         total_data['node_type'].append(nodes_type)
         total_data['node_logit'].append(nodes_logit)
+        total_data['node_logit_dists'].append(nodes_logit_dists)
+
 
 
         # total_node_num = len(return_classes) + return_relations.shape[0]

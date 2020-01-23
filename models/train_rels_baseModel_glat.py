@@ -18,28 +18,42 @@ from lib.pytorch_misc import print_para
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 
 # import KERN model
-from lib.kern_model import KERN
-from lib.glat import GLATNET
+# from lib.kern_model import KERN
+
+#--------updated--------
+from lib.stanford_model import RelModelStanford as RelModel
 # from lib.glat_logit import GLATNET
-# import models.models_kern.GLATNET as GLATNET
-from lib.utils import Counter, save_model
+from lib.glat import GLATNET
+from lib.linear_merge import LinearMerge
 
 import pdb
 from torch.autograd import Variable
 import copy
 from scipy.special import softmax
 import torch.optim.lr_scheduler as lr_scheduler
-import math
+import torch.nn as nn
+from lib.utils import Counter
+
+#--------updated--------
+import sys
+import os
+codebase = '../../'
+sys.path.append(codebase)
+exp_name = 'stanford'
+
+wc_counter = Counter("linear_merge")
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 
+# conf = ModelConfig()
+#--------updated--------
 conf = ModelConfig()
 
 # We use tensorboard to observe results and decrease learning rate manually. If you want to use TB, you need to install TensorFlow fist.
 if conf.tb_log_dir is not None:
     from tensorboardX import SummaryWriter
     if not os.path.exists(conf.tb_log_dir):
-        os.makedirs(conf.tb_log_dir) 
+        os.makedirs(conf.tb_log_dir)
     writer = SummaryWriter(log_dir=conf.tb_log_dir)
     use_tb = True
 else:
@@ -59,15 +73,52 @@ train_loader, val_loader = VGDataLoader.splits(train, val, mode='rel',
                                                num_workers=conf.num_workers,
                                                num_gpus=conf.num_gpus)
 
-detector = KERN(classes=train.ind_to_classes, rel_classes=train.ind_to_predicates,
-                num_gpus=conf.num_gpus, mode=conf.mode, require_overlap_det=True,
-                use_resnet=conf.use_resnet, use_proposals=conf.use_proposals, pooling_dim=conf.pooling_dim,
-                use_ggnn_obj=conf.use_ggnn_obj, ggnn_obj_time_step_num=conf.ggnn_obj_time_step_num,
-                ggnn_obj_hidden_dim=conf.ggnn_obj_hidden_dim, ggnn_obj_output_dim=conf.ggnn_obj_output_dim,
-                use_obj_knowledge=conf.use_obj_knowledge, obj_knowledge=conf.obj_knowledge,
-                use_ggnn_rel=conf.use_ggnn_rel, ggnn_rel_time_step_num=conf.ggnn_rel_time_step_num,
-                ggnn_rel_hidden_dim=conf.ggnn_rel_hidden_dim, ggnn_rel_output_dim=conf.ggnn_rel_output_dim,
-                use_rel_knowledge=conf.use_rel_knowledge, rel_knowledge=conf.rel_knowledge, return_top100=conf.return_top100)
+# detector = KERN(classes=train.ind_to_classes, rel_classes=train.ind_to_predicates,
+#                 num_gpus=conf.num_gpus, mode=conf.mode, require_overlap_det=True,
+#                 use_resnet=conf.use_resnet, use_proposals=conf.use_proposals, pooling_dim=conf.pooling_dim, return_top100=True)s
+
+# python models/train_rels.py -m sgcls -model stanford -b 4 -p 400 -lr 1e-4 -ngpu 1 -ckpt checkpoints/vgdet/vg-24.tar -save_dir checkpoints/stanford -adam
+
+
+order = 'confidence'
+nl_edge = 2
+nl_obj = 1
+hidden_dim = 256
+rec_dropout = 0.1
+
+pass_in_obj_feats_to_decoder = False
+pass_in_obj_feats_to_edge = False
+use_bias = False
+use_tanh = False
+limit_vision = False
+
+# pass_in_obj_feats_to_decoder = True
+# pass_in_obj_feats_to_edge = True
+# use_bias = True
+# use_tanh = True
+# limit_vision = True
+
+logSoftmax_0 = torch.nn.LogSoftmax(dim=0)
+logSoftmax_1 = torch.nn.LogSoftmax(dim=1)
+
+softmax_0 = torch.nn.Softmax(dim=0)
+softmax_1 = torch.nn.Softmax(dim=1)
+
+detector = RelModel(classes=train.ind_to_classes, rel_classes=train.ind_to_predicates,
+                    num_gpus=conf.num_gpus, mode=conf.mode, require_overlap_det=True,
+                    use_resnet=conf.use_resnet, order=order,
+                    nl_edge=nl_edge, nl_obj=nl_obj, hidden_dim=hidden_dim,
+                    use_proposals=conf.use_proposals,
+                    pass_in_obj_feats_to_decoder=pass_in_obj_feats_to_decoder,
+                    pass_in_obj_feats_to_edge=pass_in_obj_feats_to_edge,
+                    pooling_dim=conf.pooling_dim,
+                    rec_dropout=rec_dropout,
+                    use_bias=use_bias,
+                    use_tanh=use_tanh,
+                    limit_vision=limit_vision,
+                    return_top100=True
+                    )
+
 
 model = GLATNET(vocab_num=[52, 153],
                 feat_dim=300,
@@ -79,13 +130,19 @@ model = GLATNET(vocab_num=[52, 153],
                 blank=152,
                 types=[2]*6)
 
+
+lmerge = LinearMerge()
+
+# Freeze all the weights of stanford model
+for n, param in detector.named_parameters():
+    param.requires_grad = False
+# Freeze all the weights of glat model
+for n, param in model.named_parameters():
+    param.requires_grad = False
+
 # Freeze the detector
 # for n, param in detector.detector.named_parameters():
 #     param.requires_grad = False
-
-# Freeze all the kern model detector
-for n, param in detector.named_parameters():
-    param.requires_grad = False
 
 print(print_para(detector), flush=True)
 
@@ -96,7 +153,8 @@ def get_optim(lr):
     # fc_params = [p for n,p in detector.named_parameters() if n.startswith('roi_fmap') and p.requires_grad]
     # non_fc_params = [p for n,p in detector.named_parameters() if not n.startswith('roi_fmap') and p.requires_grad]
     # params = [{'params': fc_params, 'lr': lr / 10.0}, {'params': non_fc_params}]
-    params = model.parameters()
+    # params = model.parameters()
+    params = lmerge.parameters()
     if conf.adam:
         optimizer = optim.Adam(params, weight_decay=conf.adamwd, lr=lr, eps=1e-3)
     else:
@@ -108,10 +166,12 @@ def get_optim(lr):
 
     return optimizer, scheduler
 
-detector.cuda()
 ckpt = torch.load(conf.ckpt)
-print("Loading EVERYTHING")
+print("Loading EVERYTHING from", conf.ckpt)
 optimistic_restore(detector, ckpt['state_dict'])
+detector.cuda()
+# detector = nn.DataParallel(detector)
+
 start_epoch = -1
 
 # if conf.ckpt.split('-')[-2].split('/')[-1] == 'vgrel':
@@ -136,45 +196,42 @@ start_epoch = -1
 #     detector.roi_fmap_obj[3].bias.data.copy_(ckpt['state_dict']['roi_fmap.3.bias'])
 
 
-# # model.load_state_dict(ckpt_glat['model'])
-
 # # ckpt_glat = torch.load('/home/haoxuan/code/GBERT/models/2019-10-31-03-13_2_2_2_2_2_2_concat_no_init_mask/best_test_node_mask_predicate_acc')
 
 # ---------------pretrained model mask ration 0.5
 # ckpt_glat = torch.load('/home/tangtangwzc/Common_sense/models/2019-11-03-17-51_2_2_2_2_2_2_concat_no_init_mask/best_test_node_mask_predicate_acc.pth')
 
-# # ---------------pretrained model mask ration 0.3
+# ---------------pretrained model mask ration 0.3
 # ckpt_glat = torch.load('/home/tangtangwzc/Common_sense/models/2019-11-03-17-28_2_2_2_2_2_2_concat_no_init_mask/best_test_node_mask_predicate_acc.pth')
 
 # ---------------pretrained model mask ration 0.7
 # ckpt_glat = torch.load('/home/tangtangwzc/Common_sense/models/2019-11-07-23-50_2_2_2_2_2_2_concat_no_init_mask/best_test_node_mask_predicate_acc.pth')
 
-# ckpt_glat = torch.load('/home/tangtangwzc/KERN/saved_models/2019-11-19-17-36/with_constrant_mean__R@100.pth')
-# ckpt_glat = torch.load('/home/tangtangwzc/KERN/saved_models/2019-11-19-17-41/with_constrant_mean__R@100.pth')
-# ckpt_glat = torch.load('/home/tangtangwzc/KERN/saved_models/2019-11-19-16-55/with_constrant_mean__R@100.pth')
-# ckpt_glat = torch.load('/home/tangtangwzc/KERN/saved_models/2019-11-19-16-54/with_constrant_mean__R@100.pth')
-# ckpt_glat = torch.load('/home/tangtangwzc/KERN/saved_models/2019-11-20-17-16/with_constrant_mean__R@100.pth')
+# ckpt_glat = torch.load("/home/tangtangwzc/KERN/checkpoints/stanford_glat_1218_1/stanford_glat-0.tar")
 
-# ckpt_glat = torch.load('/home/tangtangwzc/Common_sense/models/2019-11-20-15-18_2_2_2_2_2_2_concat_no_init_mask/best_test_node_mask_predicate_acc.pth')
-# ckpt_glat = torch.load('/home/tangtangwzc/KERN/saved_models/2019-11-18-21-32/with_constrant_mean__R@100.pth')
+ckpt_glat = torch.load('/home/haoxuan/code/KERN/checkpoints/motifnet_glat/motifnet_glat-25.tar')
 
 # optimistic_restore(model, ckpt_glat['model'])
-# print('finish pretrained loading')
-# model.load_state_dict(ckpt_glat['model'])
-model.cuda()
+optimistic_restore(model, ckpt_glat['state_dict'])
 
+
+# print('finish pretrained GLAT loading')
+# # model.load_state_dict(ckpt_glat['model'])
+model.cuda()
+# model = nn.DataParallel(model)
+
+lmerge.cuda()
 
 def train_epoch(epoch_num):
     detector.train()
-    for n, param in detector.named_parameters():
-        param.requires_grad = False
+    # for n, param in detector.named_parameters():
+    #     param.requires_grad = False
     model.train()
+    lmerge.train()
+
     tr = []
     start = time.time()
     for b, batch in enumerate(train_loader):
-        if b >= 500:
-            break
-
         tr.append(train_batch(batch, verbose=b % (conf.print_interval*10) == 0)) #b == 0))
 
         if b % conf.print_interval == 0 and b >= conf.print_interval:
@@ -185,7 +242,7 @@ def train_epoch(epoch_num):
             print(mn)
             print('-----------', flush=True)
             start = time.time()
-    return pd.concat(tr, axis=1), model
+    return pd.concat(tr, axis=1)
 
 
 def train_batch(b, verbose=False):
@@ -213,7 +270,6 @@ def train_batch(b, verbose=False):
     # result.rel_inds(num_predicates, 4)
     # pdb.set_trace()
 
-
     if conf.return_top100 and len(det_res) != 0:
 
         pred_entry = {
@@ -228,8 +284,6 @@ def train_batch(b, verbose=False):
             'pred_rel_inds': result.rel_inds,  # (num_predicates, 3) Tensor Variable
             'rel_dists': result.rel_dists
         }
-    # 'rel_scores': result.rel_dists,  # (num_predicates, 51) Tensor Variable
-
     # pdb.set_trace()
     pred_entry = glat_postprocess(pred_entry, if_predicting=False)
 
@@ -256,7 +310,7 @@ def train_batch(b, verbose=False):
     for i in range(int(b_100_idx.size()[0])):
         # pdb.set_trace()
         idx = b_100_idx[i]
-        result.rel_dists.data[idx] = pred_scores_sorted_b_100.data[i]
+        result.rel_dists.data[idx] = pred_scores_sorted_b_100[i]
         # pdb.set_trace()
         if conf.batch_size != 1:
             result.rel_inds[idx] = rels_b_100[i]
@@ -288,6 +342,7 @@ def train_batch(b, verbose=False):
     loss = sum(losses.values())
 
     loss_v = Variable(loss.data, requires_grad=True)
+
     optimizer.zero_grad()
     loss_v.backward()
     clip_grad_norm(
@@ -303,6 +358,9 @@ def val_epoch():
 
     detector.eval()
     model.eval()
+
+    lmerge.eval()
+
     evaluator_list = [] # for calculating recall of each relationship except no relationship
     evaluator_multiple_preds_list = []
     for index, name in enumerate(ind_to_predicates):
@@ -313,13 +371,11 @@ def val_epoch():
     evaluator = BasicSceneGraphEvaluator.all_modes() # for calculating recall
     evaluator_multiple_preds = BasicSceneGraphEvaluator.all_modes(multiple_preds=True)
     for val_b, batch in enumerate(val_loader):
-        if val_b >= 500:
-            break
         val_batch(conf.num_gpus * val_b, batch, evaluator, evaluator_multiple_preds, evaluator_list, evaluator_multiple_preds_list)
 
     recall = evaluator[conf.mode].print_stats()
     recall_mp = evaluator_multiple_preds[conf.mode].print_stats()
-    
+
     mean_recall = calculate_mR_from_evaluator_list(evaluator_list, conf.mode)
     mean_recall_mp = calculate_mR_from_evaluator_list(evaluator_multiple_preds_list, conf.mode, multiple_preds=True)
 
@@ -337,6 +393,7 @@ def my_collate(total_data):
     adjs = []
     node_types = []
     node_logits = []
+    node_logits_dists = []
 
     for i in range(sample_num):
         input_class = total_data['node_class'][i]
@@ -346,44 +403,93 @@ def my_collate(total_data):
         node_logit_pad = torch.Tensor([0] * node_logit.size()[0]).unsqueeze(-1).t()
         node_logit = torch.cat((node_logit, Variable(node_logit_pad.t().cuda())), dim=1)
 
+        node_logit_dists = total_data['node_logit_dists'][i]
+        node_logit_pad_dists = torch.Tensor([0] * node_logit_dists.size()[0]).unsqueeze(-1).t()
+        node_logit_dists = torch.cat((node_logit_dists, Variable(node_logit_pad_dists.t().cuda())), dim=1)
+
         pad_node_logit = tensor2variable(torch.zeros((max_length - input_class.size(0)), node_logit.size()[1]).cuda())
         node_logits.append(torch.cat((node_logit, pad_node_logit), 0).unsqueeze(0))
+
+        pad_node_logit_dists = tensor2variable(torch.zeros((max_length - input_class.size(0)), node_logit_dists.size()[1]).cuda())
+        node_logits_dists.append(torch.cat((node_logit_dists, pad_node_logit_dists), 0).unsqueeze(0))
 
         pad_input_class = tensor2variable(blank_idx * torch.ones(max_length - input_class.size(0)).long().cuda())
         input_classes.append(torch.cat((input_class, pad_input_class), 0).unsqueeze(0))
         # input_classes.append(torch.cat((input_class, blank_idx*torch.ones(max_length-input_class.size(0)).long().cuda()), 0).unsqueeze(0))
 
-        new_adj = torch.cat((adj, torch.zeros(max_length-adj.size(0), adj.size(1)).long().cuda()), 0)
+        new_adj = torch.cat((adj, torch.zeros(max_length - adj.size(0), adj.size(1)).long().cuda()), 0)
         if max_length != new_adj.size(1):
-            new_adj = torch.cat((new_adj, torch.zeros(new_adj.size(0), max_length-new_adj.size(1)).long().cuda()), 1)
+            new_adj = torch.cat((new_adj, torch.zeros(new_adj.size(0), max_length - new_adj.size(1)).long().cuda()), 1)
         adjs.append(new_adj.unsqueeze(0))
         # pdb.set_trace()
-        node_types.append(torch.cat((node_type, 2 * torch.ones(max_length-node_type.size(0)).long().cuda()), 0).unsqueeze(0))
+        node_types.append(
+            torch.cat((node_type, 2 * torch.ones(max_length - node_type.size(0)).long().cuda()), 0).unsqueeze(0))
 
     input_classes = torch.cat(input_classes, 0)
 
     node_logits = torch.cat(node_logits, 0)
+    node_logits_dists = torch.cat(node_logits_dists, 0)
 
     adjs = torch.cat(adjs, 0)
     adjs_lbl = adjs
     adjs_con = torch.clamp(adjs, 0, 1)
     node_types = torch.cat(node_types, 0)
 
-    return input_classes, adjs_con, adjs_lbl, node_types, node_logits
+    return input_classes, adjs_con, adjs_lbl, node_types, node_logits, node_logits_dists
+    # return input_classes, adjs_con, adjs_lbl, node_types
+
+
+def soft_merge1(logit_base, logit_glat, node_type):
+
+    index = (node_type == 0).squeeze(0).unsqueeze(-1).repeat(1, 52)
+    logit_base_predicate = logit_base.data.squeeze(0)[index].view(-1, 52)
+
+    logit_base_predicate = logSoftmax_1(Variable(logit_base_predicate))
+    logit_glat = logSoftmax_1(logit_glat)
+
+    logit_base_predicate_weight = torch.max(logit_base_predicate[:, 1:], dim=1)[0]
+    logit_glat_predicate_weight = torch.max(logit_glat[:, 1:], dim=1)[0]
+
+    combined_weight = torch.cat((logit_base_predicate_weight.unsqueeze(0),
+                                 Variable(logit_glat_predicate_weight.data.unsqueeze(0))), 0)
+
+    combined_weight = softmax_0(combined_weight)
+
+    logit_base_predicate_weight = combined_weight[0,:].unsqueeze(-1).repeat(1, 52)
+    logit_glat_predicate_weight = combined_weight[1,:].unsqueeze(-1).repeat(1, 52)
+
+    # ones = torch.ones(logit_base_predicate_weight.size()[0], 1)
+
+    # logit_base_predicate_weight = torch.cat((ones.cuda(), logit_base_predicate_weight.data), 1)
+    # logit_glat_predicate_weight = torch.cat((ones.cuda(), logit_glat_predicate_weight.data), 1)
+
+    logit_base_predicate = logit_base_predicate * logit_base_predicate_weight
+    logit_glat = logit_glat.data * logit_glat_predicate_weight.data
+
+    output_logit_predicate = logit_base_predicate.data + logit_glat
+
+    # output_logit_51 = Variable(logit_base_predicate[:, 1:]).clone()
+
+    output_logit_predicate = softmax_1(Variable(output_logit_predicate)).data
+
+    return output_logit_predicate
 
 
 def glat_wrapper(total_data):
     # Batch size assumed to be 1
-    input_class, adjs_con, adjs_lbl, node_type, node_logit = my_collate(total_data)
+    # input_class, adjs_con, adjs_lbl, node_type = my_collate(total_data)
+    input_class, adjs_con, adjs_lbl, node_type, node_logit, node_logit_dists = my_collate(total_data)
+
     if torch.is_tensor(input_class):
         input_class = Variable(input_class)
-    if torch.is_tensor(node_logit):
-        node_logit = Variable(node_logit)
+    # if torch.is_tensor(node_logit):
+    #     node_logit = Variable(node_logit)
     if not torch.is_tensor(node_type):
         node_type = node_type.data
     if torch.is_tensor(adjs_con):
         adj_con = Variable(adjs_con)
 
+    # pred_label, pred_connect = model(input_class, adj_con, node_type, node_logit_dists)
     pred_label, pred_connect = model(input_class, adj_con, node_type)
 
     # pred_label_predicate = input_class[node_type == 0]
@@ -401,13 +507,27 @@ def glat_wrapper(total_data):
     #     for i in range(len(predicate_num_list)):
     #         pred_label_predicate.append()
 
-    # pred_label, pred_connect = model(input_class, adj_con, node_type, node_logit)
-
-    # pred_label_predicate = input_class[node_type == 0]
-    # pred_label_entities = input_class[node_type == 1]
-
-    pred_label_predicate = pred_label[0]  # flatten predicate (B*N, 51)
+    pred_label_predicate = pred_label[0].data  # flatten predicate (B*N, 51)
+    # pred_label_predicate = pred_label[0]  # flatten predicate (B*N, 51)
     pred_label_entities = pred_label[1]  # flatten entities
+
+    # pred_label_predicate = soft_merge1(node_logit_dists, pred_label_predicate, node_type)
+
+    # ==========================
+    input_predicate_size = pred_label_predicate.size()[0]
+    node_logit_dists = node_logit_dists.squeeze(0)[(node_type == 0).view(-1, 1).expand(-1, 52)].view(-1, 52)
+    diff = 100 - node_logit_dists.size()[0]
+    if diff > 0:
+        pad = torch.zeros(diff, node_logit_dists.size()[1])
+        # pdb.set_trace()
+        node_logit_dists = torch.cat((node_logit_dists, Variable(pad).cuda()), dim=0)
+    diff = 100 - pred_label_predicate.size()[0]
+    if diff > 0:
+        pad = torch.zeros(diff, node_logit_dists.size()[1])
+        # pdb.set_trace()
+        pred_label_predicate = torch.cat((pred_label_predicate, pad.cuda()), dim=0)
+    pred_label_predicate = lmerge(node_logit_dists, pred_label_predicate)[:input_predicate_size, :]
+    # ==========================
 
     return pred_label_predicate, pred_label_entities
     # return pred_label_predicate.data.cpu().numpy(), pred_label_entities.data.cpu().numpy()
@@ -454,8 +574,8 @@ def glat_postprocess(pred_entry, if_predicting=False):
     pred_entry['rel_scores'] = tensor2variable(pred_entry['rel_scores'])
     pred_entry['pred_classes'] = tensor2variable(pred_entry['pred_classes'])
 
-    pred_entry['rel_classes'] = torch.max(pred_entry['rel_dists'][:, 1:], dim=1)[1].unsqueeze(1) + 1
-    # pred_entry['rel_classes'] = torch.max(pred_entry['rel_scores'][:, 1:], dim=1)[1].unsqueeze(1) + 1
+    pred_entry['rel_classes'] = torch.max(pred_entry['rel_scores'][:, 1:], dim=1)[1].unsqueeze(1) + 1
+    # pred_entry['rel_classes'] = torch.max(pred_entry['rel_dists'][:, 1:], dim=1)[1].unsqueeze(1) + 1
 
     pred_entry['rel_classes'] = variable2tensor(pred_entry['rel_classes'])
     # pdb.set_trace()
@@ -464,7 +584,8 @@ def glat_postprocess(pred_entry, if_predicting=False):
     total_data = build_graph_structure(pred_entry, ind_to_classes, ind_to_predicates, if_predicting=if_predicting)
 
     pred_label_predicate, pred_label_entities = glat_wrapper(total_data)
-    pred_entry['rel_scores'] = pred_label_predicate
+    # pred_entry['rel_scores'] = pred_label_predicate
+    pred_entry['rel_scores'] = pred_label_predicate.data
 
     # =====================================
     # if if_predicting:
@@ -529,9 +650,9 @@ def val_batch(batch_num, b, evaluator, evaluator_multiple_preds, evaluator_list,
 
         if len(det) == 6 and not conf.return_top100:
             (boxes_i, objs_i, obj_scores_i, rels_i, pred_scores_i, rel_dists) = det
+            rels_i_a100 = np.asarray([])
         else:
-            (boxes_i, objs_i, obj_scores_i, rels_i_b100, pred_scores_i_b100, rels_i_a100, pred_scores_i_a100,
-             rel_scores_idx_b100, rel_scores_idx_a100, rel_dists) = det
+            (boxes_i, objs_i, obj_scores_i, rels_i_b100, pred_scores_i_b100, rels_i_a100, pred_scores_i_a100, rel_scores_idx_b100, rel_scores_idx_a100, rel_dists) = det
 
         gt_entry = {
             'gt_classes': val.gt_classes[batch_num + i].copy(), #(23,) (16,)
@@ -568,24 +689,39 @@ def val_batch(batch_num, b, evaluator, evaluator_multiple_preds, evaluator_list,
         pred_entry = glat_postprocess(pred_entry, if_predicting=True)
         pred_entry = cuda2numpy_dict(pred_entry)
 
-        #
-        # # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
         # rel_scores_one_hot = np.zeros((len(pred_entry['rel_scores']), 51))
+        # for i in range(len(pred_entry['rel_scores'])):
+        #     rel_scores_one_hot[i, pred_entry['rel_scores'][i]] = 0.99 - (i*0.1/100)
+
+        # max_index = pred_entry['rel_scores'][:, 1:].argmax(1) + 1
+        # for i in range(pred_entry_init['rel_scores'].shape[0]):
+        #     # pdb.set_trace()
+        #     pred_entry_init['rel_scores'][i, max_index[i]] = 100 - i
+        #     # for j in range(pred_entry_init['rel_scores'].shape[1]):
+        #     #     if j == max_index[i]:
+        #     #         pred_entry_init['rel_scores'][i, j] = 1
+        #     # pdb.set_trace()
+        # # pdb.set_trace()
+        # pred_entry_init['rel_scores'] = softmax(pred_entry_init['rel_scores'], axis=1)
+                    # pred_entry_init['rel_scores'][i, j] = 0
+
         # rel_scores_one_hot[np.arange(len(pred_entry['rel_scores'])), pred_entry['rel_scores']] = 1
-        # # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-        #
+        # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
         if len(rels_i_a100.shape) == 1:
             # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-            pred_entry['rel_scores'] = pred_entry['rel_scores'][:, :-1]
+            # pred_entry_init['rel_scores'] = pred_entry_init['rel_scores']
             # pred_entry['rel_scores'] = rel_scores_one_hot
+            pred_entry['rel_scores'] = pred_entry['rel_scores'][:, :-1]
             # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
         else:
 
             # pred_entry_init['pred_rel_inds'] = np.concatenate((pred_entry_init['pred_rel_inds'], rels_i_a100), axis=0)
             pred_entry['pred_rel_inds'] = np.concatenate((pred_entry['pred_rel_inds'], rels_i_a100), axis=0)
         # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+        #     pred_entry_init['rel_scores'] = np.concatenate((pred_entry_init['rel_scores'], pred_scores_i_a100), axis=0)
+        #     pred_entry['rel_scores'] = np.concatenate((rel_scores_one_hot, pred_scores_i_a100), axis=0)
             pred_entry['rel_scores'] = np.concatenate((pred_entry['rel_scores'][:, :-1], pred_scores_i_a100), axis=0)
-            # pred_entry['rel_scores'] = np.concatenate((rel_scores_one_hot, pred_scores_i_a100), axis=0)
         # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 
@@ -603,18 +739,12 @@ def val_batch(batch_num, b, evaluator, evaluator_multiple_preds, evaluator_list,
 
 print("Training starts now!")
 # optimizer = get_optim(conf.lr * conf.num_gpus * conf.batch_size)
-# optpred_entry['rel_scores'].shapeimizer = get_optim(conf.lr * conf.num_gpus * conf.batch_size)
 optimizer, scheduler = get_optim(conf.lr)
-
-wc_counter = Counter("with_constrant_")
-wtc_counter = Counter("without_constrant_")
-wcm_counter = Counter("with_constrant_mean_")
-wtcm_counter = Counter("without_constrant_mean_")
 
 for epoch in range(start_epoch + 1, start_epoch + 1 + conf.num_epochs):
     print("start training epoch: ", epoch)
     scheduler.step()
-    rez, model = train_epoch(epoch)
+    rez = train_epoch(epoch)
     print("overall{:2d}: ({:.3f})\n{}".format(epoch, rez.mean(1)['total'], rez.mean(1)), flush=True)
 
     if use_tb:
@@ -625,22 +755,20 @@ for epoch in range(start_epoch + 1, start_epoch + 1 + conf.num_epochs):
     if conf.save_dir is not None:
         torch.save({
             'epoch': epoch,
-            'state_dict': detector.state_dict(), #{k:v for k,v in detector.state_dict().items() if not k.startswith('detector.')},
+            'state_dict': model.state_dict(), #{k:v for k,v in detector.state_dict().items() if not k.startswith('detector.')},
             # 'optimizer': optimizer.state_dict(),
-        }, os.path.join(conf.save_dir, '{}-{}.tar'.format('vgrel', epoch)))
+        }, os.path.join(conf.save_dir, '{}-{}.tar'.format('stanford_glat', epoch)))
 
     recall, recall_mp, mean_recall, mean_recall_mp = val_epoch()
 
     if use_tb:
         for key, value in recall.items():
             writer.add_scalar('eval_' + conf.mode + '_with_constraint/' + key, value, epoch)
-            wc_counter.add(key, value, model, epoch)
         for key, value in recall_mp.items():
             writer.add_scalar('eval_' + conf.mode + '_without_constraint/' + key, value, epoch)
-            wtc_counter.add(key, value, model, epoch)
         for key, value in mean_recall.items():
             writer.add_scalar('eval_' + conf.mode + '_with_constraint/mean ' + key, value, epoch)
-            wcm_counter.add(key, value, model, epoch)
+            wc_counter.add(key, value, lmerge, epoch)
         for key, value in mean_recall_mp.items():
             writer.add_scalar('eval_' + conf.mode + '_without_constraint/mean ' + key, value, epoch)
-            wtcm_counter.add(key, value, model, epoch)
+
