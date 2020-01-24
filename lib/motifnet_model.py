@@ -563,7 +563,7 @@ class RelModel(nn.Module):
 
                 if rel_inds[:, 0].max() - rel_inds[:, 0].min() + 1 == 1:
                     return result, filter_dets(bboxes, result.obj_scores,
-                                   result.obj_preds, rel_inds[:, 1:], rel_rep, rel_rep, rel_dists=result.rel_dists,
+                                   result.obj_preds, rel_inds[:, 1:], rel_rep, rel_dists=result.rel_dists,
                                                return_top100=self.return_top100,
                                                training=self.training)
 
