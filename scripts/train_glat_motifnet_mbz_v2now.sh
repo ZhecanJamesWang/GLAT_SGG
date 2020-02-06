@@ -6,5 +6,4 @@ python models/train_rels_motifnet_save_base.py -m predcls -p 100 \
 -ckpt checkpoints/motifnet/vgrel-motifnet-sgcls.tar \
 -save_dir checkpoints/motifnet_glat_predcls_mbz_v2 \
 -adam \
--b 20 \
-
+-b 20 | tee ./logs/train_rels_stanford_2020_0125_1.txt

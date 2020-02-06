@@ -2,7 +2,9 @@
 Training script for scene graph detection. Integrated with Rowan's faster rcnn setup
 """
 
+# from dataloaders.visual_genome_original import VGDataLoader, VG, build_graph_structure
 from dataloaders.visual_genome import VGDataLoader, VG, build_graph_structure
+
 import numpy as np
 from torch import optim
 import torch
@@ -23,11 +25,10 @@ import pdb
 
 #--------updated--------
 # from lib.stanford_model import RelModelStanford as RelModel
-# from lib.motifnet_model import RelModel
-from lib.motifnet_model_original import RelModel
+# from lib.motifnet_model_original import RelModel
+from lib.motifnet_model import RelModel
 
 from lib.glat import GLATNET
-# from lib.glat_logit import GLATNET
 import pdb
 from torch.autograd import Variable
 import copy
@@ -184,7 +185,6 @@ start_epoch = -1
 print('finish pretrained GLAT loading')
 # # model.load_state_dict(ckpt_glat['model'])
 if conf.resume_training:
-    print("resume training")
     ckpt_glat = torch.load(conf.resume_ckpt)
     optimistic_restore(model, ckpt_glat['state_dict'])
     model.cuda()
@@ -192,14 +192,13 @@ if conf.resume_training:
     optimizer, scheduler = get_optim(conf.lr, last_epoch=start_epoch)
 
 else:
-    print("train from beginning")
     # # ckpt_glat = torch.load('/home/haoxuan/code/GBERT/models/2019-10-31-03-13_2_2_2_2_2_2_concat_no_init_mask/best_test_node_mask_predicate_acc')
     # ---------------pretrained model mask ration 0.5
     # ckpt_glat = torch.load('/home/tangtangwzc/Common_sense/models/2019-11-03-17-51_2_2_2_2_2_2_concat_no_init_mask/best_test_node_mask_predicate_acc.pth')
 
-    # ---------------pretrained model mask ration 0.3
-    ckpt_glat = torch.load(
-        '/home/tangtangwzc/Common_sense/models/2019-12-18-16-08_2_2_2_2_2_2_concat_no_init_mask/best_test_node_mask_predicate_acc.pth')
+    # # ---------------pretrained model mask ration 0.3
+    # ckpt_glat = torch.load(
+    #     '/home/tangtangwzc/Common_sense/models/2019-12-18-16-08_2_2_2_2_2_2_concat_no_init_mask/best_test_node_mask_predicate_acc.pth')
 
     # ckpt_glat = torch.load(
     #     '/home/tangtangwzc/Common_sense/models/2019-11-03-17-28_2_2_2_2_2_2_concat_no_init_mask/best_test_node_mask_predicate_acc.pth')
@@ -207,25 +206,11 @@ else:
     # ---------------pretrained model mask ration 0.7
     # ckpt_glat = torch.load('/home/tangtangwzc/Common_sense/models/2019-11-07-23-50_2_2_2_2_2_2_concat_no_init_mask/best_test_node_mask_predicate_acc.pth')
 
-    # if conf.model_s_m == 'stanford':
-    #     # ckpt_glat = torch.load('/home/haoxuan/code/KERN/checkpoints/motifnet_glat/motifnet_glat-25.tar')
-    #     # ckpt_glat = torch.load('/home/haoxuan/code/KERN/checkpoints/stanford_glat_1/stanford_glat-20.tar')
-    #
-    #     # stanford predcls finetune glat
-    #     ckpt_glat = torch.load('/home/haoxuan/code/KERN/checkpoints/stanford_glat_predcls/stanford_glat-21.tar')
+    # motif predcls finetune glat
+    ckpt_glat = torch.load('/home/haoxuan/code/KERN/checkpoints/motifnet_glat_predcls_mbz/motifnet_glat-27.tar')
 
-    # elif conf.model_s_m == 'motifnet':
-        # ckpt_glat = torch.load('/home/haoxuan/code/KERN/checkpoints/motifnet_glat/motifnet_glat-25.tar')
-        # ckpt_glat = torch.load('/home/haoxuan/code/KERN/checkpoints/stanford_glat_1/stanford_glat-20.tar')
-
-    # # motif predcls finetune glat
-    # ckpt_glat = torch.load('/home/haoxuan/code/KERN/checkpoints/motifnet_glat_predcls_mbz/motifnet_glat-27.tar')
-    # else:
-    #     raise("no ckpt")
-
+    optimistic_restore(model, ckpt_glat['state_dict'])
     # optimistic_restore(model, ckpt_glat['model'])
-    # optimistic_restore(model, ckpt_glat['state_dict'])
-
     model.cuda()
     start_epoch = -1
     optimizer, scheduler = get_optim(conf.lr, last_epoch=start_epoch)
@@ -236,8 +221,6 @@ def train_epoch(epoch_num, train_results, train_det_ress):
     for n, param in detector.named_parameters():
         param.requires_grad = False
     model.train()
-    # for n, param in model.named_parameters():
-    #     param.requires_grad = True
     tr = []
     start = time.time()
     for b, batch in enumerate(train_loader):
@@ -342,20 +325,20 @@ result, det_res = detec
             'pred_classes': result.obj_preds,  # (num_entities) Tensor Variable
             'pred_rel_inds': det_res[3],  # (num_predicates, 3) Tensor Variable
             'rel_scores': det_res[4],  # (num_predicates, 51) Tensor Variable
-            # 'rel_dists': det_res[-2]
+            'rel_dists': det_res[-2]
         }
     else:
         pred_entry = {
             'pred_classes': result.obj_preds,   # (num_entities) Tensor Variable
             'pred_rel_inds': result.rel_inds,  # (num_predicates, 3) Tensor Variable
             'rel_scores': result.rel_dists,   # (num_predicates, 51) Tensor Variable
-            # 'rel_dists': det_res[-1]
+            'rel_dists': det_res[-1]
         }
     # pdb.set_trace()
     pred_entry = glat_postprocess(pred_entry, if_predicting=False)
 
-    # b_100_idx = det_res[-4]
-    b_100_idx = det_res[-2]
+    b_100_idx = det_res[-4]
+    # b_100_idx = det_res[-2]
 
     # a_100_idx = det_res[-1]
     # totla_idx = b_100_idx + a_100_idx
@@ -418,12 +401,8 @@ result, det_res = detec
     losses['rel_loss'] = F.cross_entropy(result.rel_dists, result.rel_labels[:, -1])
     loss = sum(losses.values())
 
-    # loss_v = Variable(loss.data, requires_grad=True)
-
     optimizer.zero_grad()
     loss.backward()
-    # loss_v.backward()
-
     clip_grad_norm(
         [(n, p) for n, p in detector.named_parameters() if p.grad is not None],
         max_norm=conf.clip, verbose=verbose, clip=True)
@@ -465,42 +444,6 @@ def val_epoch(epoch, eval_results, eval_det_ress):
     return recall, recall_mp, mean_recall, mean_recall_mp
 
 
-# def my_collate(total_data):
-#     blank_idx = 152
-#     max_length = 0
-#     sample_num = len(total_data['node_class'])
-#     for i in range(sample_num):
-#         max_length = max(max_length, total_data['node_class'][i].size(0))
-#
-#     input_classes = []
-#     adjs = []
-#     node_types = []
-#     node_logits = []
-#     node_logits_dists = []
-#
-#     for i in range(sample_num):
-#         input_class = total_data['node_class'][i]
-#         adj = total_data['adj'][i]
-#         node_type = total_data['node_type'][i]
-#         pad_input_class = tensor2variable(blank_idx * torch.ones(max_length - input_class.size(0)).long().cuda())
-#         input_classes.append(torch.cat((input_class, pad_input_class), 0).unsqueeze(0))
-#         # input_classes.append(torch.cat((input_class, blank_idx*torch.ones(max_length-input_class.size(0)).long().cuda()), 0).unsqueeze(0))
-#         new_adj = torch.cat((adj, torch.zeros(max_length-adj.size(0), adj.size(1)).long().cuda()), 0)
-#         if max_length != new_adj.size(1):
-#             new_adj = torch.cat((new_adj, torch.zeros(new_adj.size(0), max_length-new_adj.size(1)).long().cuda()), 1)
-#         adjs.append(new_adj.unsqueeze(0))
-#         # pdb.set_trace()
-#         node_types.append(torch.cat((node_type, 2 * torch.ones(max_length-node_type.size(0)).long().cuda()), 0).unsqueeze(0))
-#
-#     input_classes = torch.cat(input_classes, 0)
-#     adjs = torch.cat(adjs, 0)
-#     adjs_lbl = adjs
-#     adjs_con = torch.clamp(adjs, 0, 1)
-#     node_types = torch.cat(node_types, 0)
-#
-#     return input_classes, adjs_con, adjs_lbl, node_types
-
-
 def my_collate(total_data):
     blank_idx = 152
     max_length = 0
@@ -511,51 +454,79 @@ def my_collate(total_data):
     input_classes = []
     adjs = []
     node_types = []
-    # node_logits = []
-    # node_logits_dists = []
+
+    node_logits = []
+    node_logits_dists = []
 
     for i in range(sample_num):
         input_class = total_data['node_class'][i]
         adj = total_data['adj'][i]
         node_type = total_data['node_type'][i]
-        # node_logit = total_data['node_logit'][i]
-        # node_logit_pad = torch.Tensor([0] * node_logit.size()[0]).unsqueeze(-1).t()
-        # node_logit = torch.cat((node_logit, Variable(node_logit_pad.t().cuda())), dim=1)
 
-        # node_logit_dists = total_data['node_logit_dists'][i]
-        # node_logit_pad_dists = torch.Tensor([0] * node_logit_dists.size()[0]).unsqueeze(-1).t()
-        # node_logit_dists = torch.cat((node_logit_dists, Variable(node_logit_pad_dists.t().cuda())), dim=1)
+        # vvvvvvvvvvvvvvvvvvvvvvvvvv
 
-        # pad_node_logit = tensor2variable(torch.zeros((max_length - input_class.size(0)), node_logit.size()[1]).cuda())
-        # node_logits.append(torch.cat((node_logit, pad_node_logit), 0).unsqueeze(0))
+        node_logit = total_data['node_logit'][i]
+        node_logit_pad = torch.Tensor([0] * node_logit.size()[0]).unsqueeze(-1).t()
+        node_logit = torch.cat((node_logit, Variable(node_logit_pad.t().cuda())), dim=1)
 
-        # pad_node_logit_dists = tensor2variable(torch.zeros((max_length - input_class.size(0)), node_logit_dists.size()[1]).cuda())
-        # node_logits_dists.append(torch.cat((node_logit_dists, pad_node_logit_dists), 0).unsqueeze(0))
+        node_logit_dists = total_data['node_logit_dists'][i]
+        node_logit_pad_dists = torch.Tensor([0] * node_logit_dists.size()[0]).unsqueeze(-1).t()
+        node_logit_dists = torch.cat((node_logit_dists, Variable(node_logit_pad_dists.t().cuda())), dim=1)
+
+        if max_length - input_class.size(0) != 0:
+            pad_node_logit = tensor2variable(torch.zeros((max_length - input_class.size(0)), node_logit.size()[1]).cuda())
+            node_logit = torch.cat((node_logit, pad_node_logit), 0).unsqueeze(0)
+        else:
+            node_logit = node_logit.unsqueeze(0)
+
+        node_logits.append(node_logit)
+
+        # try:
+        #     pad_node_logit = tensor2variable(torch.zeros((max_length - input_class.size(0)), node_logit.size()[1]).cuda())
+        #     node_logit = torch.cat((node_logit, pad_node_logit), 0).unsqueeze(0)
+        #     node_logits.append(node_logit)
+        # except Exception as e:
+        #     print(e)
+        #     print("")
+
+        if max_length - input_class.size(0) != 0:
+                pad_node_logit_dists = tensor2variable(torch.zeros((max_length - input_class.size(0)), node_logit_dists.size()[1]).cuda())
+                node_logit_dists = torch.cat((node_logit_dists, pad_node_logit_dists), 0).unsqueeze(0)
+        else:
+            node_logit_dists = node_logit_dists.unsqueeze(0)
+        node_logits_dists.append(node_logit_dists)
+
+        # try:
+        #     pad_node_logit_dists = tensor2variable(torch.zeros((max_length - input_class.size(0)), node_logit_dists.size()[1]).cuda())
+        #     node_logit_dists = torch.cat((node_logit_dists, pad_node_logit_dists), 0).unsqueeze(0)
+        #     node_logits_dists.append(node_logit_dists)
+        # except Exception as e:
+        #     print(e)
+        #     print("")
+        # ^^^^^^^^^^^^^^^^^^^^^^^^^
 
         pad_input_class = tensor2variable(blank_idx * torch.ones(max_length - input_class.size(0)).long().cuda())
         input_classes.append(torch.cat((input_class, pad_input_class), 0).unsqueeze(0))
         # input_classes.append(torch.cat((input_class, blank_idx*torch.ones(max_length-input_class.size(0)).long().cuda()), 0).unsqueeze(0))
 
-        new_adj = torch.cat((adj, torch.zeros(max_length - adj.size(0), adj.size(1)).long().cuda()), 0)
+        new_adj = torch.cat((adj, torch.zeros(max_length-adj.size(0), adj.size(1)).long().cuda()), 0)
         if max_length != new_adj.size(1):
-            new_adj = torch.cat((new_adj, torch.zeros(new_adj.size(0), max_length - new_adj.size(1)).long().cuda()), 1)
+            new_adj = torch.cat((new_adj, torch.zeros(new_adj.size(0), max_length-new_adj.size(1)).long().cuda()), 1)
         adjs.append(new_adj.unsqueeze(0))
-        # pdb.set_trace()
-        node_types.append(
-            torch.cat((node_type, 2 * torch.ones(max_length - node_type.size(0)).long().cuda()), 0).unsqueeze(0))
+        node_types.append(torch.cat((node_type, 2 * torch.ones(max_length-node_type.size(0)).long().cuda()), 0).unsqueeze(0))
 
     input_classes = torch.cat(input_classes, 0)
 
-    # node_logits = torch.cat(node_logits, 0)
-    # node_logits_dists = torch.cat(node_logits_dists, 0)
+    node_logits = torch.cat(node_logits, 0)
+    node_logits_dists = torch.cat(node_logits_dists, 0)
 
     adjs = torch.cat(adjs, 0)
     adjs_lbl = adjs
     adjs_con = torch.clamp(adjs, 0, 1)
     node_types = torch.cat(node_types, 0)
 
-    # return input_classes, adjs_con, adjs_lbl, node_types, node_logits, node_logits_dists
-    return input_classes, adjs_con, adjs_lbl, node_types
+    return input_classes, adjs_con, adjs_lbl, node_types, node_logits, node_logits_dists
+    # return input_classes, adjs_con, adjs_lbl, node_types
 
 
 # def soft_merge2(logit_base, logit_glat, node_type):
@@ -592,56 +563,57 @@ def my_collate(total_data):
 #     return output_logit_predicate
 #
 #
-# def soft_merge3(logit_base, logit_glat, node_type):
-#
-#     # index = (node_type == 0).squeeze(0).unsqueeze(-1).repeat(1, 52)
-#     index = (node_type == 0).unsqueeze(-1).repeat(1, 1, 52)
-#
-#     # logit_base_predicate = logit_base.data.squeeze(0)[index].view(-1, 52)
-#     logit_base_predicate = logit_base.data[index].view(-1, 52)
-#
-#     # logit_base_predicate = softmax_1(Variable(logit_base_predicate, requires_grad=True)).data
-#     logit_base_predicate = softmax_1(Variable(logit_base_predicate)).data
-#     logit_glat_predicate = softmax_1(logit_glat).data
-#
-#     logit_base_predicate_weight = torch.max(logit_base_predicate, dim=1)[0]
-#     logit_glat_predicate_weight = torch.max(logit_glat_predicate, dim=1)[0]
-#
-#     combined_weight = torch.cat((logit_base_predicate_weight.unsqueeze(0), logit_glat_predicate_weight.unsqueeze(0)), 0)
-#
-#     combined_weight = combined_weight/torch.sum(combined_weight, dim=0, keepdim=True)
-#
-#     logit_base_predicate_weight = combined_weight[0,:].unsqueeze(-1).repeat(1, 52)
-#     logit_glat_predicate_weight = combined_weight[1,:].unsqueeze(-1).repeat(1, 52)
-#
-#     logit_base_predicate = logit_base_predicate * logit_base_predicate_weight
-#     logit_glat = logit_glat.data * logit_glat_predicate_weight
-#
-#     output_logit_predicate = logit_base_predicate + logit_glat
-#
-#     # output_logit_predicate = output_logit_predicate/torch.sum(output_logit_predicate, dim=1, keepdim=True)
-#     # output_logit_predicate = softmax_1(Variable(output_logit_predicate, requires_grad=True))
-#     output_logit_predicate = softmax_1(Variable(output_logit_predicate))
-#
-#     return output_logit_predicate
+def soft_merge3(logit_base, logit_glat, node_type):
+
+    # index = (node_type == 0).squeeze(0).unsqueeze(-1).repeat(1, 52)
+    index = (node_type == 0).unsqueeze(-1).repeat(1, 1, 52)
+
+    # logit_base_predicate = logit_base.data.squeeze(0)[index].view(-1, 52)
+    # logit_base_predicate = logit_base.data[index].view(-1, 52)
+    logit_base_predicate = logit_base[index].view(-1, 52)
+
+    # logit_base_predicate = softmax_1(Variable(logit_base_predicate, requires_grad=True)).data
+    # logit_base_predicate = softmax_1(Variable(logit_base_predicate)).data
+    logit_base_predicate = softmax_1(logit_base_predicate).data
+    logit_glat_predicate = softmax_1(logit_glat).data
+
+    logit_base_predicate_weight = torch.max(logit_base_predicate, dim=1)[0]
+    logit_glat_predicate_weight = torch.max(logit_glat_predicate, dim=1)[0]
+
+    combined_weight = torch.cat((logit_base_predicate_weight.unsqueeze(0), logit_glat_predicate_weight.unsqueeze(0)), 0)
+
+    combined_weight = combined_weight/torch.sum(combined_weight, dim=0, keepdim=True)
+
+    logit_base_predicate_weight = combined_weight[0,:].unsqueeze(-1).repeat(1, 52)
+    logit_glat_predicate_weight = combined_weight[1,:].unsqueeze(-1).repeat(1, 52)
+
+    logit_base_predicate = logit_base_predicate * logit_base_predicate_weight
+    logit_glat = logit_glat.data * logit_glat_predicate_weight
+
+    output_logit_predicate = logit_base_predicate + logit_glat
+
+    # output_logit_predicate = output_logit_predicate/torch.sum(output_logit_predicate, dim=1, keepdim=True)
+
+    output_logit_predicate = softmax_1(Variable(output_logit_predicate, requires_grad=True))
+    # output_logit_predicate = softmax_1(Variable(output_logit_predicate))
+    # output_logit_predicate = softmax_1(output_logit_predicate)
+
+    return output_logit_predicate
 
 
 def glat_wrapper(total_data):
     # Batch size assumed to be 1
-    input_class, adjs_con, adjs_lbl, node_type = my_collate(total_data)
-    # input_class, adjs_con, adjs_lbl, node_type, node_logit, node_logit_dists = my_collate(total_data)
+    # input_class, adjs_con, adjs_lbl, node_type = my_collate(total_data)
+    input_class, adjs_con, adjs_lbl, node_type, node_logit, node_logit_dists = my_collate(total_data)
 
     if torch.is_tensor(input_class):
-        # input_class = Variable(input_class, requires_grad=True)
         input_class = Variable(input_class)
     if not torch.is_tensor(node_type):
         node_type = node_type.data
     if torch.is_tensor(adjs_con):
-        # adj_con = Variable(adjs_con, requires_grad=True)
         adj_con = Variable(adjs_con)
 
     pred_label, pred_connect = model(input_class, adj_con, node_type)
-    # pred_label, pred_connect = model(input_class, adj_con, node_type, node_logit_dists)
 
     # pred_label_predicate = input_class[node_type == 0]
     # pred_label_entities = input_class[node_type == 1]
@@ -658,11 +630,10 @@ def glat_wrapper(total_data):
     #     for i in range(len(predicate_num_list)):
     #         pred_label_predicate.append()
 
-    # pred_label_predicate = pred_label[0].data  # flatten predicate (B*N, 51)
     pred_label_predicate = pred_label[0]  # flatten predicate (B*N, 51)
     pred_label_entities = pred_label[1]  # flatten entities
 
-    # pred_label_predicate = soft_merge3(node_logit_dists, pred_label_predicate, node_type)
+    pred_label_predicate = soft_merge3(node_logit_dists, pred_label_predicate, node_type)
 
     return pred_label_predicate, pred_label_entities
     # return pred_label_predicate.data.cpu().numpy(), pred_label_entities.data.cpu().numpy()
@@ -684,7 +655,6 @@ def cuda2numpy_dict(dict):
 
 def tensor2variable(input):
     if torch.is_tensor(input):
-        # input = Variable(input, requires_grad=True)
         input = Variable(input)
     return input
 
@@ -705,7 +675,7 @@ def glat_postprocess(pred_entry, if_predicting=False):
     if if_predicting:
         pred_entry = numpy2cuda_dict(pred_entry)
 
-    # pred_entry['rel_dists'] = tensor2variable(pred_entry['rel_dists'])
+    pred_entry['rel_dists'] = tensor2variable(pred_entry['rel_dists'])
 
     pred_entry['rel_scores'] = tensor2variable(pred_entry['rel_scores'])
     pred_entry['pred_classes'] = tensor2variable(pred_entry['pred_classes'])
@@ -715,11 +685,10 @@ def glat_postprocess(pred_entry, if_predicting=False):
     # pdb.set_trace()
     pred_entry['pred_relations'] = torch.cat((pred_entry['pred_rel_inds'], pred_entry['rel_classes']), dim=1)
 
-    # total_data = build_graph_structure(pred_entry, ind_to_classes, ind_to_predicates, if_predicting=if_predicting)
-    #
-    # pred_label_predicate, pred_label_entities = glat_wrapper(total_data)
-    # # pred_entry['rel_scores'] = pred_label_predicate
-    # pred_entry['rel_scores'] = pred_label_predicate.data
+    total_data = build_graph_structure(pred_entry, ind_to_classes, ind_to_predicates, if_predicting=if_predicting)
+
+    pred_label_predicate, pred_label_entities = glat_wrapper(total_data)
+    pred_entry['rel_scores'] = pred_label_predicate
 
     # =====================================
     # if if_predicting:
@@ -793,14 +762,13 @@ def val_batch(batch_num, b, evaluator, evaluator_multiple_preds, evaluator_list,
     for i, det in enumerate(det_res):
 
         if len(det) == 5 and not conf.return_top100:
-            # (boxes_i, objs_i, obj_scores_i, rels_i, pred_scores_i, rel_dists) = det
-            (boxes_i, objs_i, obj_scores_i, rels_i, pred_scores_i) = det
-
+            (boxes_i, objs_i, obj_scores_i, rels_i, pred_scores_i, rel_dists) = det
+            # (boxes_i, objs_i, obj_scores_i, rels_i, pred_scores_i) = det
         else:
-            # (boxes_i, objs_i, obj_scores_i, rels_i_b100, pred_scores_i_b100, rels_i_a100, pred_scores_i_a100,
-            # rel_scores_idx_b100, rel_scores_idx_a100, rel_b_dists, rel_a_dists) = det
             (boxes_i, objs_i, obj_scores_i, rels_i_b100, pred_scores_i_b100, rels_i_a100, pred_scores_i_a100,
-             rel_scores_idx_b100, rel_scores_idx_a100) = det
+            rel_scores_idx_b100, rel_scores_idx_a100, rel_b_dists, rel_a_dists) = det
+            # (boxes_i, objs_i, obj_scores_i, rels_i_b100, pred_scores_i_b100, rels_i_a100, pred_scores_i_a100,
+            #  rel_scores_idx_b100, rel_scores_idx_a100) = det
 
         gt_entry = {
             'gt_classes': val.gt_classes[batch_num + i].copy(), #(23,) (16,)
@@ -819,7 +787,7 @@ def val_batch(batch_num, b, evaluator, evaluator_multiple_preds, evaluator_list,
                 'pred_rel_inds': rels_i_b100, #(506, 2) (240, 2)
                 'obj_scores': obj_scores_i, #(23,) (16,)
                 'rel_scores': pred_scores_i_b100,  # hack for now. (506, 51) (240, 51)
-                # 'rel_dists': rel_b_dists.data.cpu().numpy()
+                'rel_dists': rel_b_dists.data.cpu().numpy()
             }
         else:
             pred_entry = {
@@ -828,7 +796,7 @@ def val_batch(batch_num, b, evaluator, evaluator_multiple_preds, evaluator_list,
                 'pred_rel_inds': rels_i, #(506, 2) (240, 2)
                 'obj_scores': obj_scores_i, #(23,) (16,)
                 'rel_scores': pred_scores_i,  # hack for now. (506, 51) (240, 51)
-                # 'rel_dists': rel_dists.data.cpu().numpy()
+                'rel_dists': rel_dists.data.cpu().numpy()
             }
 
         # pred_entry_init = copy.deepcopy(pred_entry)
@@ -923,4 +891,3 @@ for epoch in range(start_epoch + 1, start_epoch + 1 + conf.num_epochs):
             writer.add_scalar('eval_' + conf.mode + '_with_constraint/mean ' + key, value, epoch)
         for key, value in mean_recall_mp.items():
             writer.add_scalar('eval_' + conf.mode + '_without_constraint/mean ' + key, value, epoch)
-

@@ -23,8 +23,7 @@ from torch.autograd import Variable
 # return filter_dets(bboxes, result.obj_scores,
 #                    result.obj_preds, rel_inds[:, 1:], rel_rep, self.return_top100)
 
-def filter_dets(boxes, obj_scores, obj_classes, rel_inds, pred_scores, rel_dists=None, return_top100=False, training=False):
-# def filter_dets(boxes, obj_scores, obj_classes, rel_inds, pred_scores, return_top100=False, training=False):
+def filter_dets(boxes, obj_scores, obj_classes, rel_inds, pred_scores, return_top100=False, training=False):
     """
     Filters detections....
     :param boxes: [num_box, topk, 4] if bbox regression else [num_box, 4]
@@ -59,12 +58,6 @@ def filter_dets(boxes, obj_scores, obj_classes, rel_inds, pred_scores, rel_dists
     # obj_scores_np = obj_scores.data.cpu().numpy()
     # objs_np = obj_classes.data.cpu().numpy()
     # boxes_out = boxes.data.cpu().numpy()
-    # try:
-    rel_dists_sorted = rel_dists[rel_scores_idx]
-    # except Exception as e:
-    #     print(e)
-    #     print("")
-    split = 100
 
     if return_top100:
         # rels_b_100 = rel_inds[rel_scores_idx[:100]].cpu().numpy()
@@ -72,14 +65,11 @@ def filter_dets(boxes, obj_scores, obj_classes, rel_inds, pred_scores, rel_dists
         # rels_a_100 = rel_inds[rel_scores_idx[100:]].cpu().numpy()
         # pred_scores_sorted_a_100 = pred_scores[rel_scores_idx[100:]].data.cpu().numpy()
 
-        rel_b_dists = rel_dists_sorted[:split]
-
         rels_b_100 = rel_inds[rel_scores_idx[:100]]
         pred_scores_sorted_b_100 = pred_scores[rel_scores_idx[:100]]
         rel_scores_idx_b_100 = rel_scores_idx[:100]
 
         if rel_scores_idx.size()[0] <= 100:
-            rel_a_dists = torch.Tensor([]).long().cuda()
             rels_a_100 = torch.Tensor([]).long().cuda()
             pred_scores_sorted_a_100 = Variable(torch.Tensor([]).long().cuda())
             rel_scores_idx_a_100 = torch.Tensor([]).long().cuda()
@@ -87,11 +77,10 @@ def filter_dets(boxes, obj_scores, obj_classes, rel_inds, pred_scores, rel_dists
             rels_a_100 = rel_inds[rel_scores_idx[100:]]
             pred_scores_sorted_a_100 = pred_scores[rel_scores_idx[100:]]
             rel_scores_idx_a_100 = rel_scores_idx[100:]
-            rel_a_dists = rel_dists_sorted[split:]
 
         if training:
             return boxes, obj_classes, obj_scores, rels_b_100, pred_scores_sorted_b_100, rels_a_100, \
-               pred_scores_sorted_a_100, rel_scores_idx_b_100, rel_scores_idx_a_100, rel_b_dists, rel_a_dists
+               pred_scores_sorted_a_100, rel_scores_idx_b_100, rel_scores_idx_a_100
         else:
             # return boxes.data.cpu().numpy(), obj_classes.data.cpu().numpy(), obj_scores.data.cpu().numpy(), \
             #        rels_b_100.cpu().numpy(), pred_scores_sorted_b_100.data.cpu().numpy(), rels_a_100.cpu().numpy(), \
@@ -99,16 +88,16 @@ def filter_dets(boxes, obj_scores, obj_classes, rel_inds, pred_scores, rel_dists
 
            return boxes.data.cpu().numpy(), obj_classes.data.cpu().numpy(), obj_scores.data.cpu().numpy(), \
                    rels_b_100.cpu().numpy(), pred_scores_sorted_b_100.data.cpu().numpy(), rels_a_100.cpu().numpy(), \
-               pred_scores_sorted_a_100.data.cpu().numpy(), rel_scores_idx_b_100.cpu().numpy(), rel_scores_idx_a_100.cpu().numpy()\
-               , rel_b_dists, rel_a_dists
+               pred_scores_sorted_a_100.data.cpu().numpy(), rel_scores_idx_b_100.cpu().numpy(), rel_scores_idx_a_100.cpu().numpy()
     else:
         rels = rel_inds[rel_scores_idx]
         pred_scores_sorted = pred_scores[rel_scores_idx]
 
         if training:
-            return boxes, obj_classes, obj_scores, rels, pred_scores_sorted, rel_dists_sorted
+            return boxes, obj_classes, obj_scores, rels, pred_scores_sorted
         else:
-            return boxes.data.cpu().numpy(), obj_classes.data.cpu().numpy(), obj_scores.data.cpu().numpy(), rels.cpu().numpy(), pred_scores_sorted.data.cpu().numpy(), rel_dists_sorted
+            return boxes.data.cpu().numpy(), obj_classes.data.cpu().numpy(), \
+                   obj_scores.data.cpu().numpy(), rels.cpu().numpy(), pred_scores_sorted.data.cpu().numpy()
 
 # def _get_similar_boxes(boxes, obj_classes_topk, nms_thresh=0.3):
 #     """

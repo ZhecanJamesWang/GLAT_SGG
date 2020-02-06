@@ -37,7 +37,7 @@ sys.path.append(codebase)
 exp_name = 'stanford'
 
 
-# os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
 # conf = ModelConfig()
 #--------updated--------
@@ -92,6 +92,11 @@ limit_vision = False
 # use_tanh = True
 # limit_vision = True
 
+logSoftmax_0 = torch.nn.LogSoftmax(dim=0)
+logSoftmax_1 = torch.nn.LogSoftmax(dim=1)
+
+softmax_0 = torch.nn.Softmax(dim=0)
+softmax_1 = torch.nn.Softmax(dim=1)
 
 detector = RelModel(classes=train.ind_to_classes, rel_classes=train.ind_to_predicates,
                     num_gpus=conf.num_gpus, mode=conf.mode, require_overlap_det=True,
@@ -177,18 +182,33 @@ start_epoch = -1
 #     detector.roi_fmap_obj[3].bias.data.copy_(ckpt['state_dict']['roi_fmap.3.bias'])
 
 
+if conf.model_s_m == 'stanford':
+    # ckpt_glat = torch.load('/home/haoxuan/code/KERN/checkpoints/motifnet_glat/motifnet_glat-25.tar')
+    # ckpt_glat = torch.load('/home/haoxuan/code/KERN/checkpoints/stanford_glat_1/stanford_glat-20.tar')
+
+    # stanford predcls finetune glat
+    ckpt_glat = torch.load('/home/haoxuan/code/KERN/checkpoints/stanford_glat_predcls/stanford_glat-21.tar')
+
+elif conf.model_s_m == 'motifnet':
+    # ckpt_glat = torch.load('/home/haoxuan/code/KERN/checkpoints/motifnet_glat/motifnet_glat-25.tar')
+    # ckpt_glat = torch.load('/home/haoxuan/code/KERN/checkpoints/stanford_glat_1/stanford_glat-20.tar')
+
+    # motif predcls finetune glat
+    ckpt_glat = torch.load('/home/haoxuan/code/KERN/checkpoints/motifnet_glat_predcls_mbz/motifnet_glat-27.tar')
+
 # # ckpt_glat = torch.load('/home/haoxuan/code/GBERT/models/2019-10-31-03-13_2_2_2_2_2_2_concat_no_init_mask/best_test_node_mask_predicate_acc')
 
 # ---------------pretrained model mask ration 0.5
 # ckpt_glat = torch.load('/home/tangtangwzc/Common_sense/models/2019-11-03-17-51_2_2_2_2_2_2_concat_no_init_mask/best_test_node_mask_predicate_acc.pth')
 
 # ---------------pretrained model mask ration 0.3
-ckpt_glat = torch.load('/home/tangtangwzc/Common_sense/models/2019-11-03-17-28_2_2_2_2_2_2_concat_no_init_mask/best_test_node_mask_predicate_acc.pth')
+# ckpt_glat = torch.load('/home/tangtangwzc/Common_sense/models/2019-11-03-17-28_2_2_2_2_2_2_concat_no_init_mask/best_test_node_mask_predicate_acc.pth')
 
 # ---------------pretrained model mask ration 0.7
 # ckpt_glat = torch.load('/home/tangtangwzc/Common_sense/models/2019-11-07-23-50_2_2_2_2_2_2_concat_no_init_mask/best_test_node_mask_predicate_acc.pth')
 
-optimistic_restore(model, ckpt_glat['model'])
+# optimistic_restore(model, ckpt_glat['model'])
+optimistic_restore(model, ckpt_glat['state_dict'])
 
 print('finish pretrained GLAT loading')
 # # model.load_state_dict(ckpt_glat['model'])
@@ -256,17 +276,19 @@ def train_batch(b, train_results, train_det_ress, epoch_num, batch_num, verbose=
             'pred_classes': result.obj_preds,  # (num_entities) Tensor Variable
             'pred_rel_inds': det_res[3],  # (num_predicates, 3) Tensor Variable
             'rel_scores': det_res[4],  # (num_predicates, 51) Tensor Variable
+            'rel_dists': det_res[-2]
         }
     else:
         pred_entry = {
             'pred_classes': result.obj_preds,   # (num_entities) Tensor Variable
             'pred_rel_inds': result.rel_inds,  # (num_predicates, 3) Tensor Variable
             'rel_scores': result.rel_dists,   # (num_predicates, 51) Tensor Variable
+            'rel_dists': det_res[-2]
         }
     # pdb.set_trace()
     pred_entry = glat_postprocess(pred_entry, if_predicting=False)
 
-    b_100_idx = det_res[-2]
+    b_100_idx = det_res[-4]
     # a_100_idx = det_res[-1]
     # totla_idx = b_100_idx + a_100_idx
     # totla_idx = torch.cat((b_100_idx, a_100_idx), dim=0)
@@ -320,8 +342,12 @@ def train_batch(b, train_results, train_det_ress, epoch_num, batch_num, verbose=
     losses['rel_loss'] = F.cross_entropy(result.rel_dists, result.rel_labels[:, -1])
     loss = sum(losses.values())
 
+    loss_v = Variable(loss.data, requires_grad=True)
+
     optimizer.zero_grad()
-    loss.backward()
+    # loss.backward()
+    loss_v.backward()
+
     clip_grad_norm(
         [(n, p) for n, p in detector.named_parameters() if p.grad is not None],
         max_norm=conf.clip, verbose=verbose, clip=True)
@@ -391,9 +417,69 @@ def my_collate(total_data):
     return input_classes, adjs_con, adjs_lbl, node_types
 
 
+def soft_merge2(logit_base, logit_glat, node_type):
+
+    index = (node_type == 0).squeeze(0).unsqueeze(-1).repeat(1, 52)
+    logit_base_predicate = logit_base.data.squeeze(0)[index].view(-1, 52)
+
+    logit_base_predicate_51 = Variable(logit_base_predicate[:, 1:]).clone()
+    logit_glat_predicate_51 = logit_glat[:, 1:].clone()
+    logit_base_predicate_51 = softmax_1(logit_base_predicate_51).data
+    logit_glat_predicate_51 = softmax_1(logit_glat_predicate_51).data
+
+    logit_base_predicate_weight = torch.max(logit_base_predicate_51, dim=1)[0]
+    logit_glat_predicate_weight = torch.max(logit_glat_predicate_51, dim=1)[0]
+
+    combined_weight = torch.cat((logit_base_predicate_weight.unsqueeze(0), logit_glat_predicate_weight.unsqueeze(0)), 0)
+
+    combined_weight = combined_weight/torch.sum(combined_weight, dim=0, keepdim=True)
+
+    logit_base_predicate_weight = combined_weight[0,:].unsqueeze(-1).repeat(1, 52)
+    logit_glat_predicate_weight = combined_weight[1,:].unsqueeze(-1).repeat(1, 52)
+
+    logit_base_predicate = logit_base_predicate * logit_base_predicate_weight
+    logit_glat = logit_glat.data * logit_glat_predicate_weight
+
+    output_logit_predicate = logit_base_predicate + logit_glat
+
+    # output_logit_predicate = output_logit_predicate/torch.sum(output_logit_predicate, dim=1, keepdim=True)
+    output_logit_predicate = softmax_1(Variable(output_logit_predicate))
+
+    return output_logit_predicate
+
+
+def soft_merge3(logit_base, logit_glat, node_type):
+
+    index = (node_type == 0).squeeze(0).unsqueeze(-1).repeat(1, 52)
+    logit_base_predicate = logit_base.data.squeeze(0)[index].view(-1, 52)
+
+    logit_base_predicate = softmax_1(Variable(logit_base_predicate)).data
+    logit_glat_predicate = softmax_1(logit_glat).data
+
+    logit_base_predicate_weight = torch.max(logit_base_predicate, dim=1)[0]
+    logit_glat_predicate_weight = torch.max(logit_glat_predicate, dim=1)[0]
+
+    combined_weight = torch.cat((logit_base_predicate_weight.unsqueeze(0), logit_glat_predicate_weight.unsqueeze(0)), 0)
+
+    combined_weight = combined_weight/torch.sum(combined_weight, dim=0, keepdim=True)
+
+    logit_base_predicate_weight = combined_weight[0,:].unsqueeze(-1).repeat(1, 52)
+    logit_glat_predicate_weight = combined_weight[1,:].unsqueeze(-1).repeat(1, 52)
+
+    logit_base_predicate = logit_base_predicate * logit_base_predicate_weight
+    logit_glat = logit_glat.data * logit_glat_predicate_weight
+
+    output_logit_predicate = logit_base_predicate + logit_glat
+
+    # output_logit_predicate = output_logit_predicate/torch.sum(output_logit_predicate, dim=1, keepdim=True)
+    output_logit_predicate = softmax_1(Variable(output_logit_predicate))
+
+    return output_logit_predicate
+
+
 def glat_wrapper(total_data):
     # Batch size assumed to be 1
-    input_class, adjs_con, adjs_lbl, node_type = my_collate(total_data)
+    input_class, adjs_con, adjs_lbl, node_type, node_logit, node_logit_dists = my_collate(total_data)
     if torch.is_tensor(input_class):
         input_class = Variable(input_class)
     if not torch.is_tensor(node_type):
@@ -418,9 +504,11 @@ def glat_wrapper(total_data):
     #     for i in range(len(predicate_num_list)):
     #         pred_label_predicate.append()
 
+    # pred_label_predicate = pred_label[0].data  # flatten predicate (B*N, 51)
     pred_label_predicate = pred_label[0]  # flatten predicate (B*N, 51)
     pred_label_entities = pred_label[1]  # flatten entities
 
+    pred_label_predicate = soft_merge3(node_logit_dists, pred_label_predicate, node_type)
 
     return pred_label_predicate, pred_label_entities
     # return pred_label_predicate.data.cpu().numpy(), pred_label_entities.data.cpu().numpy()
@@ -462,6 +550,8 @@ def glat_postprocess(pred_entry, if_predicting=False):
     if if_predicting:
         pred_entry = numpy2cuda_dict(pred_entry)
 
+    pred_entry['rel_dists'] = tensor2variable(pred_entry['rel_dists'])
+
     pred_entry['rel_scores'] = tensor2variable(pred_entry['rel_scores'])
     pred_entry['pred_classes'] = tensor2variable(pred_entry['pred_classes'])
 
@@ -473,7 +563,8 @@ def glat_postprocess(pred_entry, if_predicting=False):
     total_data = build_graph_structure(pred_entry, ind_to_classes, ind_to_predicates, if_predicting=if_predicting)
 
     pred_label_predicate, pred_label_entities = glat_wrapper(total_data)
-    pred_entry['rel_scores'] = pred_label_predicate
+    # pred_entry['rel_scores'] = pred_label_predicate
+    pred_entry['rel_scores'] = pred_label_predicate.data
 
     # =====================================
     # if if_predicting:
@@ -546,10 +637,10 @@ def val_batch(batch_num, b, evaluator, evaluator_multiple_preds, evaluator_list,
     for i, det in enumerate(det_res):
 
         if len(det) == 5 and not conf.return_top100:
-            (boxes_i, objs_i, obj_scores_i, rels_i, pred_scores_i) = det
+            (boxes_i, objs_i, obj_scores_i, rels_i, pred_scores_i, rel_dists) = det
         else:
             (boxes_i, objs_i, obj_scores_i, rels_i_b100, pred_scores_i_b100, rels_i_a100, pred_scores_i_a100,
-             rel_scores_idx_b100, rel_scores_idx_a100) = det
+             rel_scores_idx_b100, rel_scores_idx_a100, rel_dists) = det
 
         gt_entry = {
             'gt_classes': val.gt_classes[batch_num + i].copy(), #(23,) (16,)
@@ -568,6 +659,7 @@ def val_batch(batch_num, b, evaluator, evaluator_multiple_preds, evaluator_list,
                 'pred_rel_inds': rels_i_b100, #(506, 2) (240, 2)
                 'obj_scores': obj_scores_i, #(23,) (16,)
                 'rel_scores': pred_scores_i_b100,  # hack for now. (506, 51) (240, 51)
+                'rel_dists': rel_dists.data.cpu().numpy()
             }
         else:
             pred_entry = {
@@ -576,6 +668,7 @@ def val_batch(batch_num, b, evaluator, evaluator_multiple_preds, evaluator_list,
                 'pred_rel_inds': rels_i, #(506, 2) (240, 2)
                 'obj_scores': obj_scores_i, #(23,) (16,)
                 'rel_scores': pred_scores_i,  # hack for now. (506, 51) (240, 51)
+                'rel_dists': rel_dists.data.cpu().numpy()
             }
 
         # pred_entry_init = copy.deepcopy(pred_entry)

@@ -278,10 +278,10 @@ def load_graphs(graphs_file, mode='train', num_im=-1, num_val_im=0, filter_empty
     :param filter_empty_rels: (will be filtered otherwise.)
     :param filter_non_overlap: If training, filter images that dont overlap.
     :return: image_index: numpy array corresponding to the index of images we're using
-             boxes: List where each element is a [num_gt, 4] array of ground 
+             boxes: List where each element is a [num_gt, 4] array of ground
                     truth boxes (x1, y1, x2, y2)
              gt_classes: List where each element is a [num_gt] array of classes
-             relationships: List where each element is a [num_r, 3] array of 
+             relationships: List where each element is a [num_r, 3] array of
                     (box_ind_1, box_ind_2, predicate) relationships
     """
     if mode not in ('train', 'val', 'test'):
@@ -441,15 +441,9 @@ def build_graph_structure(entries, index2name_object, index2name_predicate, if_p
     # total_data['img_id'] = []
     total_data['node_type'] = []
 
-    total_data['node_logit'] = []
-    total_data['node_logit_dists'] = []
-
     entries_minibatch = {}
     entries_minibatch['pred_relations'] = []
     entries_minibatch['pred_classes'] = []
-
-    entries_minibatch['rel_scores'] = []
-    entries_minibatch['rel_dists'] = []
 
     if entries['pred_relations'].size(1) == 4:
         # pdb.set_trace()
@@ -458,11 +452,6 @@ def build_graph_structure(entries, index2name_object, index2name_predicate, if_p
         for i in range(entries['pred_relations'][:, 0].max()+1):
             rel_idx_cur_img = (entries['pred_relations'][:, 0] == i).view(-1, 1).expand(-1, 4)
             entries_minibatch['pred_relations'].append(entries['pred_relations'][rel_idx_cur_img].view(-1, 4)[:, 1:])
-
-            rel_dists_idx_cur_img = (entries['pred_relations'][:, 0] == i).view(-1, 1).expand(-1, 51)
-            entries_minibatch['rel_dists'].append(entries['rel_dists'][rel_dists_idx_cur_img].view(-1, 51))
-            entries_minibatch['rel_scores'].append(entries['rel_scores'][rel_dists_idx_cur_img].view(-1, 51))
-
             entity_idx_cur_img = entries_minibatch['pred_relations'][i][:, :2]
             entries_minibatch['pred_classes'].append(entries['pred_classes'][entity_idx_cur_img.min():entity_idx_cur_img.max()+1])
             # pdb.set_trace()
@@ -474,9 +463,6 @@ def build_graph_structure(entries, index2name_object, index2name_predicate, if_p
         entries_minibatch['pred_relations'].append(entries['pred_relations'])
         entries_minibatch['pred_classes'].append(entries['pred_classes'])
 
-        entries_minibatch['rel_scores'].append(entries['rel_scores'])
-        entries_minibatch['rel_dists'].append(entries['rel_dists'])
-
     for i in range(len(entries_minibatch['pred_classes'])):
         # if if_predicting:
         #     return_classes = entry['pred_classes']
@@ -486,18 +472,10 @@ def build_graph_structure(entries, index2name_object, index2name_predicate, if_p
         #     return_relations = entry['gt_relations']
         return_classes = entries_minibatch['pred_classes'][i]
         return_relations = entries_minibatch['pred_relations'][i]
-
-        return_rel_scores = entries_minibatch['rel_scores'][i]
-        return_rel_dists = entries_minibatch['rel_dists'][i]
-
         entity_num = return_classes.size(0)
         total_node_num = entity_num + return_relations.size(0)
-
+        # pdb.set_trace()
         nodes_class = torch.cat((return_classes, Variable(return_relations[:, -1])), dim=0)
-
-        nodes_logit = torch.cat((Variable(torch.zeros(return_classes.size()[0], return_rel_scores.size()[1]).cuda(), requires_grad=True), return_rel_scores))
-        nodes_logit_dists = torch.cat((Variable(torch.zeros(return_classes.size()[0], return_rel_dists.size()[1]).cuda(), requires_grad=True), return_rel_dists))
-
         # pdb.set_trace()
         nodes_type = torch.ones_like(return_classes).data
         nodes_type = torch.cat((nodes_type, torch.zeros_like(return_relations[:,0])), dim=0)
@@ -519,9 +497,6 @@ def build_graph_structure(entries, index2name_object, index2name_predicate, if_p
         # total_data['node_name'].append(nodes_name)
         total_data['node_class'].append(nodes_class)
         total_data['node_type'].append(nodes_type)
-
-        total_data['node_logit'].append(nodes_logit)
-        total_data['node_logit_dists'].append(nodes_logit_dists)
 
         # total_node_num = len(return_classes) + return_relations.shape[0]
         # nodes_class = [] + list(return_classes)

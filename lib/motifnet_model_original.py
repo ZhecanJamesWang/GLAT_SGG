@@ -22,9 +22,10 @@ from lib.fpn.proposal_assignments.rel_assignments import rel_assignments
 from lib.object_detector import ObjectDetector, gather_res, load_vgg
 from lib.fpn.proposal_assignments.proposal_assignments_gtbox import proposal_assignments_gtbox_test
 
-from lib.pytorch_misc import transpose_packed_sequence_inds, to_onehot, arange, enumerate_by_image, diagonal_inds, Flattener
+from lib.pytorch_misc import transpose_packed_sequence_inds, to_onehot, arange, enumerate_by_image, diagonal_inds, \
+    Flattener
 from lib.sparse_targets import FrequencyBias
-from lib.surgery import filter_dets
+from lib.surgery_original import filter_dets
 from lib.word_vectors import obj_edge_vectors
 from lib.fpn.roi_align.functions.roi_align import RoIAlignFunction
 import math
@@ -63,6 +64,7 @@ def _sort_by_score(im_inds, scores):
 
     return perm, inv_perm, ls_transposed
 
+
 MODES = ('sgdet', 'sgcls', 'predcls')
 
 
@@ -70,6 +72,7 @@ class LinearizedContext(nn.Module):
     """
     Module for computing the object contexts and edge contexts
     """
+
     def __init__(self, classes, rel_classes, mode='sgdet',
                  embed_dim=200, hidden_dim=256, obj_dim=2048,
                  nl_obj=2, nl_edge=2, dropout_rate=0.2, order='confidence',
@@ -112,7 +115,7 @@ class LinearizedContext(nn.Module):
 
         if self.nl_obj > 0:
             self.obj_ctx_rnn = AlternatingHighwayLSTM(
-                input_size=self.obj_dim+self.embed_dim+128,
+                input_size=self.obj_dim + self.embed_dim + 128,
                 hidden_size=self.hidden_dim,
                 num_layers=self.nl_obj,
                 recurrent_dropout_probability=dropout_rate)
@@ -148,7 +151,7 @@ class LinearizedContext(nn.Module):
         """
         cxcywh = center_size(box_priors)
         if self.order == 'size':
-            sizes = cxcywh[:,2] * cxcywh[:, 3]
+            sizes = cxcywh[:, 2] * cxcywh[:, 3]
             # sizes = (box_priors[:, 2] - box_priors[:, 0] + 1) * (box_priors[:, 3] - box_priors[:, 1] + 1)
             assert sizes.min() > 0.0
             scores = sizes / (sizes.max() + 1)
@@ -157,7 +160,7 @@ class LinearizedContext(nn.Module):
         elif self.order == 'random':
             scores = torch.FloatTensor(np.random.rand(batch_idx.size(0))).cuda(batch_idx.get_device())
         elif self.order == 'leftright':
-            centers = cxcywh[:,0]
+            centers = cxcywh[:, 0]
             scores = centers / (centers.max() + 1)
         else:
             raise ValueError("invalid mode {}".format(self.order))
@@ -219,13 +222,14 @@ class LinearizedContext(nn.Module):
         encoder_rep = self.obj_ctx_rnn(input_packed)[0][0]
         # Decode in order
         if self.mode != 'predcls':
-            decoder_inp = PackedSequence(torch.cat((obj_inp_rep, encoder_rep), 1) if self.pass_in_obj_feats_to_decoder else encoder_rep,
-                                         ls_transposed)
+            decoder_inp = PackedSequence(
+                torch.cat((obj_inp_rep, encoder_rep), 1) if self.pass_in_obj_feats_to_decoder else encoder_rep,
+                ls_transposed)
             obj_dists, obj_preds = self.decoder_rnn(
-                decoder_inp, #obj_dists[perm],
+                decoder_inp,  # obj_dists[perm],
                 labels=obj_labels[perm] if obj_labels is not None else None,
                 boxes_for_nms=boxes_per_cls[perm] if boxes_per_cls is not None else None,
-                )
+            )
             obj_preds = obj_preds[inv_perm]
             obj_dists = obj_dists[inv_perm]
         else:
@@ -281,9 +285,9 @@ class LinearizedContext(nn.Module):
                                      nms_thresh=0.3)
                     nms_mask[:, c_i][keep] = 1
 
-                obj_preds = Variable(nms_mask * probs.data, volatile=True)[:,1:].max(1)[1] + 1
+                obj_preds = Variable(nms_mask * probs.data, volatile=True)[:, 1:].max(1)[1] + 1
             else:
-                obj_preds = obj_labels if obj_labels is not None else obj_dists2[:,1:].max(1)[1] + 1
+                obj_preds = obj_labels if obj_labels is not None else obj_dists2[:, 1:].max(1)[1] + 1
             obj_ctx = obj_pre_rep
 
         edge_ctx = None
@@ -303,6 +307,7 @@ class RelModel(nn.Module):
     """
     RELATIONSHIPS
     """
+
     def __init__(self, classes, rel_classes, mode='sgdet', num_gpus=1, use_vision=True, require_overlap_det=True,
                  embed_dim=200, hidden_dim=256, pooling_dim=2048,
                  nl_obj=1, nl_edge=2, use_resnet=False, order='confidence', thresh=0.01,
@@ -340,7 +345,7 @@ class RelModel(nn.Module):
         self.use_bias = use_bias
         self.use_vision = use_vision
         self.use_tanh = use_tanh
-        self.limit_vision=limit_vision
+        self.limit_vision = limit_vision
         self.require_overlap = require_overlap_det and self.mode == 'sgdet'
 
         self.detector = ObjectDetector(
@@ -372,7 +377,8 @@ class RelModel(nn.Module):
         else:
             roi_fmap = [
                 Flattener(),
-                load_vgg(use_dropout=False, use_relu=False, use_linear=pooling_dim == 4096, pretrained=False).classifier,
+                load_vgg(use_dropout=False, use_relu=False, use_linear=pooling_dim == 4096,
+                         pretrained=False).classifier,
             ]
             if pooling_dim != 4096:
                 roi_fmap.append(nn.Linear(4096, pooling_dim))
@@ -390,7 +396,7 @@ class RelModel(nn.Module):
         self.post_lstm.bias.data.zero_()
 
         if nl_edge == 0:
-            self.post_emb = nn.Embedding(self.num_classes, self.pooling_dim*2)
+            self.post_emb = nn.Embedding(self.num_classes, self.pooling_dim * 2)
             self.post_emb.weight.data.normal_(0, math.sqrt(1.0))
 
         self.rel_compress = nn.Linear(self.pooling_dim, self.num_rels, bias=True)
@@ -470,10 +476,10 @@ class RelModel(nn.Module):
                                   be used to compute the training loss. Each (img_ind, fpn_idx)
         :return: If train:
             scores, boxdeltas, labels, boxes, boxtargets, rpnscores, rpnboxes, rellabels
-            
+
             if test:
             prob dists, boxes, img inds, maxscores, classes
-            
+
         """
         result = self.detector(x, im_sizes, image_offset, gt_boxes, gt_classes, gt_rels, proposals,
                                train_anchor_inds, return_fmap=True)
@@ -520,7 +526,7 @@ class RelModel(nn.Module):
             vr = self.visual_rep(result.fmap.detach(), rois, rel_inds[:, 1:])
             if self.limit_vision:
                 # exact value TBD
-                prod_rep = torch.cat((prod_rep[:,:2048] * vr[:,:2048], prod_rep[:,2048:]), 1)
+                prod_rep = torch.cat((prod_rep[:, :2048] * vr[:, :2048], prod_rep[:, 2048:]), 1)
             else:
                 prod_rep = prod_rep * vr
 
@@ -537,9 +543,7 @@ class RelModel(nn.Module):
                 result.obj_preds[rel_inds[:, 2]],
             ), 1))
 
-
         result.rel_inds = rel_inds
-
 
         if self.training:
             if self.return_top100:
@@ -558,19 +562,14 @@ class RelModel(nn.Module):
 
                 if rel_inds[:, 0].max() - rel_inds[:, 0].min() + 1 == 1:
                     if self.inter_fea:
-                        # return result, prod_rep, filter_dets(bboxes, result.obj_scores,
-                        #                                      result.obj_preds, rel_inds[:, 1:], rel_rep,
-                        #                                      return_top100=self.return_top100, training=self.training)
                         return result, prod_rep, filter_dets(bboxes, result.obj_scores,
-                                   result.obj_preds, rel_inds[:, 1:], rel_rep, rel_dists=result.rel_dists,
-                                                             return_top100=self.return_top100, training=self.training)
+                                                             result.obj_preds, rel_inds[:, 1:], rel_rep,
+                                                             self.return_top100, self.training)
                     else:
                         return result, filter_dets(bboxes, result.obj_scores,
-                                   result.obj_preds, rel_inds[:, 1:], rel_rep, rel_dists=result.rel_dists,
-                                                             return_top100=self.return_top100, training=self.training)
-                        # return result, filter_dets(bboxes, result.obj_scores,
-                        #                            result.obj_preds, rel_inds[:, 1:], rel_rep,
-                        #                            return_top100=self.return_top100, training=self.training)
+                                                   result.obj_preds, rel_inds[:, 1:], rel_rep, self.return_top100,
+                                                   self.training)
+
                 # -----------------------------------Above: 1 batch_size, Below: Multiple batch_size------------------
                 #  assume rel_inds[:, 0] is from 0 to num_img-1
                 num_img = rel_inds[:, 0].max() - rel_inds[:, 0].min() + 1
@@ -582,60 +581,58 @@ class RelModel(nn.Module):
                     obj_ind_cur_img = rel_inds[rel_ind_cur_img][:, 1]
                     obj_ind_cur_img_norepeat = []
                     for j in range(obj_ind_cur_img.size(0)):
-                        obj_ind_cur_img_norepeat += [obj_ind_cur_img[j]] if obj_ind_cur_img[j] not in obj_ind_cur_img_norepeat else []
+                        obj_ind_cur_img_norepeat += [obj_ind_cur_img[j]] if obj_ind_cur_img[
+                                                                                j] not in obj_ind_cur_img_norepeat else []
                     obj_ind_per_img.append(torch.Tensor(obj_ind_cur_img_norepeat).type_as(rel_ind_cur_img))
 
                 rels_b_100_all = []
-                rels_a_100_all = []
                 pred_scores_sorted_b_100_all = []
+                rels_a_100_all = []
                 pred_scores_sorted_a_100_all = []
                 rel_scores_idx_b_100_all = []
                 rel_scores_idx_a_100_all = []
-                rel_dists_b_all = []
-                rel_dists_a_all = []
 
                 for i in range(len(rel_ind_per_img)):
                     # boxes, obj_classes, obj_scores, rels_b_100, pred_scores_sorted_b_100, rels_a_100, \
                     # pred_scores_sorted_a_100, rel_scores_idx_b_100, rel_scores_idx_a_100 = filter_dets(bboxes, result.obj_scores,
-                    #             result.obj_preds, rel_inds[rel_ind_per_img[i]][:, 1:], rel_rep[rel_ind_per_img[i]][:, 1:], return_top100=self.return_top100, training=self.training)
+                    #             result.obj_preds, rel_inds[rel_ind_per_img[i]][:, 1:], rel_rep[rel_ind_per_img[i]][:, 1:], self.return_top100, self.training)
 
-                    (boxes, obj_classes, obj_scores, rels_b_100, pred_scores_sorted_b_100, rels_a_100, \
-                    pred_scores_sorted_a_100, rel_scores_idx_b_100, rel_scores_idx_a_100, rel_dists_b, rel_dists_a) = filter_dets(bboxes, result.obj_scores,
-                                result.obj_preds, rel_inds[rel_ind_per_img[i]][:, 1:], rel_rep[rel_ind_per_img[i]],
-                                                                                        rel_dists=result.rel_dists,
-                                                                                        return_top100=self.return_top100,
-                                                                                        training=self.training)
+                    boxes, obj_classes, obj_scores, rels_b_100, pred_scores_sorted_b_100, rels_a_100, \
+                    pred_scores_sorted_a_100, rel_scores_idx_b_100, rel_scores_idx_a_100 = filter_dets(bboxes,
+                                                                                                       result.obj_scores,
+                                                                                                       result.obj_preds,
+                                                                                                       rel_inds[
+                                                                                                           rel_ind_per_img[
+                                                                                                               i]][:,
+                                                                                                       1:], rel_rep[
+                                                                                                           rel_ind_per_img[
+                                                                                                               i]],
+                                                                                                       self.return_top100,
+                                                                                                       self.training)
 
-                    # (boxes, obj_classes, obj_scores, rels_b_100, pred_scores_sorted_b_100, rels_a_100, \
-                    # pred_scores_sorted_a_100, rel_scores_idx_b_100, rel_scores_idx_a_100) = filter_dets(bboxes, result.obj_scores,
-                    #             result.obj_preds, rel_inds[rel_ind_per_img[i]][:, 1:], rel_rep[rel_ind_per_img[i]],
-                    #                                                                     rel_dists=result.rel_dists,
-                    #                                                                     return_top100=self.return_top100,
-                    #                                                                     training=self.training)
+                    # pdb.set_trace()
 
-                    rels_b_100_all.append(torch.cat((i*torch.ones(rels_b_100.size(0), 1).type_as(rels_b_100), rels_b_100), dim=1))
-
+                    rels_b_100_all.append(
+                        torch.cat((i * torch.ones(rels_b_100.size(0), 1).type_as(rels_b_100), rels_b_100), dim=1))
                     pred_scores_sorted_b_100_all.append(pred_scores_sorted_b_100)
-                    rel_dists_b_all.append(rel_dists_b)
-
                     try:
-                        rels_a_100_all.append(torch.cat((i*torch.ones(rels_a_100.size(0), 1).type_as(rels_a_100), rels_a_100), dim=1))
+                        rels_a_100_all.append(
+                            torch.cat((i * torch.ones(rels_a_100.size(0), 1).type_as(rels_a_100), rels_a_100), dim=1))
                     except:
                         rels_a_100_all.append(torch.Tensor([]).long().cuda())
 
                     pred_scores_sorted_a_100_all.append(pred_scores_sorted_a_100)
-                    rel_dists_a_all.append(rel_dists_a)
                     rel_scores_idx_b_100_all.append(rel_ind_per_img[i][rel_scores_idx_b_100])
-
+                    # pdb.set_trace()
                     try:
                         rel_scores_idx_a_100_all.append(rel_ind_per_img[i][rel_scores_idx_a_100])
                     except:
                         rel_scores_idx_a_100_all.append(torch.Tensor([]).long().cuda())
 
+                # pdb.set_trace()
                 rels_b_100_all = torch.cat(rels_b_100_all, dim=0)
                 pred_scores_sorted_b_100_all = torch.cat(pred_scores_sorted_b_100_all, dim=0)
                 rel_scores_idx_b_100_all = torch.cat(rel_scores_idx_b_100_all, 0)
-                rel_dists_b_all = torch.cat(rel_dists_b_all, dim=0)
 
                 try:
                     rels_a_100_all = torch.cat(rels_a_100_all, 0)
@@ -652,28 +649,21 @@ class RelModel(nn.Module):
                 except:
                     rel_scores_idx_a_100_all = torch.Tensor([]).long().cuda()
 
-                try:
-                    rel_dists_a_all = torch.cat(rel_dists_a_all, dim=0)
-                except:
-                    rel_dists_a_all = torch.Tensor([]).long().cuda()
-
                 if self.inter_fea:
-                    # return result, prod_rep, [boxes, obj_classes, obj_scores, rels_b_100_all, pred_scores_sorted_b_100_all, rels_a_100_all, pred_scores_sorted_a_100_all, rel_scores_idx_b_100_all, rel_scores_idx_a_100_all]
-                    return result, prod_rep, [boxes, obj_classes, obj_scores, rels_b_100_all, pred_scores_sorted_b_100_all,
-                                    rels_a_100_all,
-                                    pred_scores_sorted_a_100_all, rel_scores_idx_b_100_all, rel_scores_idx_a_100_all,
-                                              rel_dists_b_all, rel_dists_a_all]
+                    return result, prod_rep, [boxes, obj_classes, obj_scores, rels_b_100_all,
+                                              pred_scores_sorted_b_100_all,
+                                              rels_a_100_all,
+                                              pred_scores_sorted_a_100_all, rel_scores_idx_b_100_all,
+                                              rel_scores_idx_a_100_all]
                 else:
-                    # return result, [boxes, obj_classes, obj_scores, rels_b_100_all, pred_scores_sorted_b_100_all, rels_a_100_all, pred_scores_sorted_a_100_all, rel_scores_idx_b_100_all, rel_scores_idx_a_100_all]
-                    return result, [boxes, obj_classes, obj_scores, rels_b_100_all, pred_scores_sorted_b_100_all, rels_a_100_all,
-                                pred_scores_sorted_a_100_all, rel_scores_idx_b_100_all, rel_scores_idx_a_100_all,
-                                    rel_dists_b_all, rel_dists_a_all]
+                    return result, [boxes, obj_classes, obj_scores, rels_b_100_all, pred_scores_sorted_b_100_all,
+                                    rels_a_100_all,
+                                    pred_scores_sorted_a_100_all, rel_scores_idx_b_100_all, rel_scores_idx_a_100_all]
 
             else:
                 return result, []
 
-
-        #validation here~~~~~~~~~~~~~~~~
+        # validation here~~~~~~~~~~~~~~~~
         twod_inds = arange(result.obj_preds.data) * self.num_classes + result.obj_preds.data
         result.obj_scores = F.softmax(result.rm_obj_dists, dim=1).view(-1)[twod_inds]
 
@@ -698,27 +688,14 @@ class RelModel(nn.Module):
             else:
                 dict_gt[(int(gt_rels[i, 1]), int(gt_rels[i, 2]))] = [int(gt_rels[i, 3])]
 
-        # pred_scores_sorted_a_100, rel_scores_idx_b_100, rel_scores_idx_a_100, rel_dists_b, rel_dists_a) =
-        # filter_dets(bboxes, result.obj_scores,result.obj_preds, rel_inds[rel_ind_per_img[i]][:, 1:], rel_rep[rel_ind_per_img[i]],
-        # rel_dists = result.rel_dists,
-        # return_top100 = self.return_top100,
-        # training = self.training)
-
-    # filter_dets(bboxes, result.obj_scores,result.obj_preds, rel_inds[:, 1:], rel_rep, rel_dists = result.rel_dists,return_top100 = self.return_top100, training = False)
-
         # pdb.set_trace()
         if self.inter_fea:
-            # return dict_gt, prod_rep, filter_dets(bboxes, result.obj_scores,
-            #                result.obj_preds, rel_inds[:, 1:], rel_rep,  return_top100 = self.return_top100, training = False)
-            return dict_gt, prod_rep, filter_dets(bboxes, result.obj_scores,result.obj_preds, rel_inds[:, 1:],
-                                                  rel_rep, rel_dists = result.rel_dists,
-                                                  return_top100 = self.return_top100, training = False)
+            return dict_gt, prod_rep, filter_dets(bboxes, result.obj_scores,
+                                                  result.obj_preds, rel_inds[:, 1:], rel_rep, self.return_top100)
         else:
-            # return dict_gt, filter_dets(bboxes, result.obj_scores,
-            #                result.obj_preds, rel_inds[:, 1:], rel_rep, return_top100 = self.return_top100, training = False)
-            return dict_gt, filter_dets(bboxes, result.obj_scores,result.obj_preds, rel_inds[:, 1:],
-                                                  rel_rep, rel_dists = result.rel_dists,
-                                                  return_top100 = self.return_top100, training = False)
+            return dict_gt, filter_dets(bboxes, result.obj_scores,
+                                        result.obj_preds, rel_inds[:, 1:], rel_rep, self.return_top100)
+
         # if self.training:
         #     return result
         #
