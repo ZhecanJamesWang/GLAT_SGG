@@ -2,21 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="11066203-4164-4413-bd1b-0e742342911b" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/dataloaders/visual_genome_original.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/glat_logit.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/linear_merge.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/motifnet_model_original.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/models/train_rels_motifnet_save_base_modified.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/models/train_rels_motifnet_save_base_original.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/models/train_rels_motifnet_save_base_original_modified_lm.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/models/train_rels_motifnet_save_base_original_modified_logit.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/dataloaders/visual_genome.py" beforeDir="false" afterPath="$PROJECT_DIR$/dataloaders/visual_genome.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/motifnet_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/lib/motifnet_model.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/surgery.py" beforeDir="false" afterPath="$PROJECT_DIR$/lib/surgery.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/models/train_rels_motifnet_save_base.py" beforeDir="false" afterPath="$PROJECT_DIR$/models/train_rels_motifnet_save_base.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/models/train_rels_stanford_save_base.py" beforeDir="false" afterPath="$PROJECT_DIR$/models/train_rels_stanford_save_base.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/train_glat_motifnet_mbz_v2now.sh" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/train_glat_motifnet_mbz_v2now.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/train_rels_motifnet_save_base_original_modified.py" beforeDir="false" afterPath="$PROJECT_DIR$/models/train_rels_motifnet_save_base_original_modified.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -62,14 +48,14 @@
       </usages-collector>
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
-          <entry key="py" value="8571" />
+          <entry key="py" value="8591" />
           <entry key="sh" value="22" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
           <entry key="PLAIN_TEXT" value="22" />
-          <entry key="Python" value="8571" />
+          <entry key="Python" value="8591" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.lifecycle.project">
@@ -113,22 +99,10 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/models/train_rels_motifnet_save_base_original_modified.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="375">
-              <caret line="49" column="20" lean-forward="true" selection-start-line="49" selection-start-column="20" selection-end-line="49" selection-end-column="20" />
+            <state relative-caret-position="30">
+              <caret line="602" selection-start-line="602" selection-end-line="602" />
               <folding>
                 <element signature="e#183#260#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/lib/linear_merge.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="172">
-              <caret line="31" column="18" lean-forward="true" selection-start-line="31" selection-start-column="18" selection-end-line="31" selection-end-column="18" />
-              <folding>
-                <element signature="e#28#40#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -244,8 +218,9 @@
     <sorting>DEFINITION_ORDER</sorting>
   </component>
   <component name="ProjectFrameBounds" fullScreen="true">
-    <option name="width" value="1440" />
-    <option name="height" value="900" />
+    <option name="x" value="-1280" />
+    <option name="width" value="1280" />
+    <option name="height" value="720" />
   </component>
   <component name="ProjectView">
     <navigator proportions="" version="1">
@@ -502,16 +477,16 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="0" y="0" width="1440" height="900" extended-state="0" />
+    <frame x="-1280" y="0" width="1280" height="720" extended-state="0" />
     <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.8193277" visible="true" weight="0.3505007" />
+      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.8193277" visible="true" weight="0.21728595" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" sideWeight="0.18067227" side_tool="true" weight="0.13136457" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.32807016" />
       <window_info anchor="bottom" id="Run" order="2" weight="0.3987952" />
-      <window_info active="true" anchor="bottom" id="Debug" order="3" visible="true" weight="0.3" />
+      <window_info active="true" anchor="bottom" id="Debug" order="3" visible="true" weight="0.18769231" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" />
@@ -671,11 +646,6 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/models/train_rels_motifnet_save_base_original_modified.py</url>
-          <line>571</line>
-          <option name="timeStamp" value="133" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/models/train_rels_motifnet_save_base_original_modified.py</url>
           <line>635</line>
           <option name="timeStamp" value="134" />
         </line-breakpoint>
@@ -686,8 +656,23 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/models/train_rels_motifnet_save_base_original_modified.py</url>
-          <line>596</line>
-          <option name="timeStamp" value="137" />
+          <line>572</line>
+          <option name="timeStamp" value="138" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/train_rels_motifnet_save_base_original_modified.py</url>
+          <line>576</line>
+          <option name="timeStamp" value="139" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/train_rels_motifnet_save_base_original_modified.py</url>
+          <line>577</line>
+          <option name="timeStamp" value="140" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/train_rels_motifnet_save_base_original_modified.py</url>
+          <line>600</line>
+          <option name="timeStamp" value="141" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>
@@ -701,6 +686,26 @@
   </component>
   <component name="debuggerHistoryManager">
     <expressions id="evaluateCodeFragment">
+      <expression>
+        <expression-string>logit_glat</expression-string>
+        <language-id>Python</language-id>
+        <evaluation-mode>CODE_FRAGMENT</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>logit_glat.backward()</expression-string>
+        <language-id>Python</language-id>
+        <evaluation-mode>CODE_FRAGMENT</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>logit_base</expression-string>
+        <language-id>Python</language-id>
+        <evaluation-mode>CODE_FRAGMENT</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>output_logit_predicate</expression-string>
+        <language-id>Python</language-id>
+        <evaluation-mode>CODE_FRAGMENT</evaluation-mode>
+      </expression>
       <expression>
         <expression-string>logit_base[index].view(-1, 52)</expression-string>
         <language-id>Python</language-id>
@@ -723,26 +728,6 @@
       </expression>
       <expression>
         <expression-string>pad_input_class</expression-string>
-        <language-id>Python</language-id>
-        <evaluation-mode>CODE_FRAGMENT</evaluation-mode>
-      </expression>
-      <expression>
-        <expression-string>pad_node_logit.size()</expression-string>
-        <language-id>Python</language-id>
-        <evaluation-mode>CODE_FRAGMENT</evaluation-mode>
-      </expression>
-      <expression>
-        <expression-string>node_logit.size()</expression-string>
-        <language-id>Python</language-id>
-        <evaluation-mode>CODE_FRAGMENT</evaluation-mode>
-      </expression>
-      <expression>
-        <expression-string>torch.cat((node_logit.long(), pad_node_logit.long()), 0).unsqueeze(0)</expression-string>
-        <language-id>Python</language-id>
-        <evaluation-mode>CODE_FRAGMENT</evaluation-mode>
-      </expression>
-      <expression>
-        <expression-string>pad_node_logit</expression-string>
         <language-id>Python</language-id>
         <evaluation-mode>CODE_FRAGMENT</evaluation-mode>
       </expression>
@@ -1167,8 +1152,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/models/train_rels_motifnet_save_base_original_modified.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="375">
-          <caret line="49" column="20" lean-forward="true" selection-start-line="49" selection-start-column="20" selection-end-line="49" selection-end-column="20" />
+        <state relative-caret-position="30">
+          <caret line="602" selection-start-line="602" selection-end-line="602" />
           <folding>
             <element signature="e#183#260#0" expanded="true" />
           </folding>

@@ -633,7 +633,7 @@ def glat_wrapper(total_data):
     pred_label_predicate = pred_label[0]  # flatten predicate (B*N, 51)
     pred_label_entities = pred_label[1]  # flatten entities
 
-    pred_label_predicate = soft_merge3(node_logit_dists, pred_label_predicate, node_type)
+    # pred_label_predicate = soft_merge3(node_logit_dists, pred_label_predicate, node_type)
 
     return pred_label_predicate, pred_label_entities
     # return pred_label_predicate.data.cpu().numpy(), pred_label_entities.data.cpu().numpy()
