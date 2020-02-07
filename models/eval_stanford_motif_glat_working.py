@@ -10,17 +10,17 @@ from tqdm import tqdm
 from config import BOX_SCALE, IM_SCALE
 import dill as pkl
 import os
-# from lib.glat_logit import GLATNET
-from lib.glat import GLATNET
+from lib.glat_logit import GLATNET
+# from lib.glat import GLATNET
 from torch.autograd import Variable
 import pdb
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "2"
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
 
 conf = ModelConfig()
 if conf.model_s_m == 'motifnet':
-    from lib.motifnet_model import RelModel
+    from lib.motifnet_model_working import RelModel
 elif conf.model_s_m == 'stanford':
     from lib.stanford_model import RelModelStanford as RelModel
 else:
@@ -121,7 +121,12 @@ elif conf.model_s_m == 'motifnet':
     # # motif predcls finetune glat
     # ckpt_glat = torch.load('/home/haoxuan/code/KERN/checkpoints/motifnet_glat_predcls_mbz/motifnet_glat-27.tar')
 
-    ckpt_glat = torch.load('/home/tangtangwzc/KERN/checkpoints/motifnet_glat_predcls_mbz_v2_2020_0202_2121/motifnet_glat-9.tar')
+    # # self finetune predcls motif glat weight
+    # ckpt_glat=torch.load('/home/tangtangwzc/KERN/checkpoints/motifnet_glat_predcls_mbz_v2_2020_0202_2121/motifnet_glat-9.tar')
+
+    # # self finetune predcls motif glat LOGIT weight
+    ckpt_glat = torch.load('/home/tangtangwzc/KERN/checkpoints/motifnet_glat_predcls_mbz_v2_2020_0204_1738//motifnet_glat-20.tar')
+
 # # ---------------pretrained model mask ratio 0.5
 # ckpt_glat = torch.load('/home/tangtangwzc/Common_sense/models/2019-11-03-17-51_2_2_2_2_2_2_concat_no_init_mask/best_test_node_mask_predicate_acc.pth')
 
@@ -199,11 +204,27 @@ def my_collate(total_data):
         node_logit_pad_dists = torch.Tensor([0] * node_logit_dists.size()[0]).unsqueeze(-1).t()
         node_logit_dists = torch.cat((node_logit_dists, Variable(node_logit_pad_dists.t().cuda())), dim=1)
 
-        pad_node_logit = tensor2variable(torch.zeros((max_length - input_class.size(0)), node_logit.size()[1]).cuda())
-        node_logits.append(torch.cat((node_logit, pad_node_logit), 0).unsqueeze(0))
+        # pad_node_logit = tensor2variable(torch.zeros((max_length - input_class.size(0)), node_logit.size()[1]).cuda())
+        # node_logits.append(torch.cat((node_logit, pad_node_logit), 0).unsqueeze(0))
+        #
+        # pad_node_logit_dists = tensor2variable(torch.zeros((max_length - input_class.size(0)), node_logit_dists.size()[1]).cuda())
+        # node_logits_dists.append(torch.cat((node_logit_dists, pad_node_logit_dists), 0).unsqueeze(0))
 
-        pad_node_logit_dists = tensor2variable(torch.zeros((max_length - input_class.size(0)), node_logit_dists.size()[1]).cuda())
-        node_logits_dists.append(torch.cat((node_logit_dists, pad_node_logit_dists), 0).unsqueeze(0))
+        if max_length - input_class.size(0) != 0:
+            pad_node_logit = tensor2variable(torch.zeros((max_length - input_class.size(0)), node_logit.size()[1]).cuda())
+            node_logit = torch.cat((node_logit, pad_node_logit), 0).unsqueeze(0)
+        else:
+            node_logit = node_logit.unsqueeze(0)
+
+        node_logits.append(node_logit)
+
+        if max_length - input_class.size(0) != 0:
+                pad_node_logit_dists = tensor2variable(torch.zeros((max_length - input_class.size(0)), node_logit_dists.size()[1]).cuda())
+                node_logit_dists = torch.cat((node_logit_dists, pad_node_logit_dists), 0).unsqueeze(0)
+        else:
+            node_logit_dists = node_logit_dists.unsqueeze(0)
+
+        node_logits_dists.append(node_logit_dists)
 
         pad_input_class = tensor2variable(blank_idx * torch.ones(max_length - input_class.size(0)).long().cuda())
         input_classes.append(torch.cat((input_class, pad_input_class), 0).unsqueeze(0))
@@ -603,8 +624,8 @@ def glat_wrapper(total_data):
     if torch.is_tensor(adjs_con):
         adj_con = Variable(adjs_con)
 
-    pred_label, pred_connect = model(input_class, adj_con, node_type)
-    # pred_label, pred_connect = model(input_class, adj_con, node_type, node_logit_dists)
+    # pred_label, pred_connect = model(input_class, adj_con, node_type)
+    pred_label, pred_connect = model(input_class, adj_con, node_type, node_logit_dists)
     # pred_label, pred_connect = model(input_class, adj_con, node_type, node_logit)
 
     # pred_label_predicate = input_class[node_type == 0]
@@ -683,7 +704,8 @@ def val_batch(batch_num, b, evaluator, evaluator_multiple_preds, evaluator_list,
             (boxes_i, objs_i, obj_scores_i, rels_i, pred_scores_i, rel_dists) = det
             rels_i_a100 = np.asarray([])
         else:
-            (boxes_i, objs_i, obj_scores_i, rels_i_b100, pred_scores_i_b100, rels_i_a100, pred_scores_i_a100, rel_scores_idx_b100, rel_scores_idx_a100, rel_dists) = det[1]
+            (boxes_i, objs_i, obj_scores_i, rels_i_b100, pred_scores_i_b100, rels_i_a100, pred_scores_i_a100,
+             rel_scores_idx_b100, rel_scores_idx_a100, rel_dists) = det
 
     # det_res_list.append(list(det_res))
     # counter, det_res_list = check_n_save(counter, det_res_list)
