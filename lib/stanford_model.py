@@ -12,6 +12,7 @@ from lib.fpn.proposal_assignments.rel_assignments import rel_assignments
 from lib.pytorch_misc import arange
 from lib.object_detector import filter_det
 from lib.stanford_rel import RelModel
+import pdb
 
 MODES = ('sgdet', 'sgcls', 'predcls')
 
@@ -23,7 +24,7 @@ class RelModelStanford(RelModel):
     """
 
     def __init__(self, classes, rel_classes, mode='sgdet', num_gpus=1, require_overlap_det=True,
-                 use_resnet=False, use_proposals=False, return_top100=False, **kwargs):
+                 use_resnet=False, use_proposals=False, return_top100=False, return_unbias_logit=False, **kwargs):
         """
         :param classes: Object classes
         :param rel_classes: Relationship classes. None if were not using rel mode
@@ -53,6 +54,7 @@ class RelModelStanford(RelModel):
         self.node_gru = nn.GRUCell(input_size=SIZE, hidden_size=SIZE)
 
         self.n_iter = 3
+        self.return_unbias_logit = return_unbias_logit
 
         self.sub_vert_w_fc = nn.Sequential(nn.Linear(SIZE*2, 1), nn.Sigmoid())
         self.obj_vert_w_fc = nn.Sequential(nn.Linear(SIZE*2, 1), nn.Sigmoid())
@@ -159,6 +161,10 @@ class RelModelStanford(RelModel):
 
         # result.box_deltas_update = box_deltas
 
+        # pdb.set_trace()
+
+        bias_logit = result.rel_dists
+
         result.rel_inds = rel_inds
 
         # if self.training:
@@ -207,7 +213,12 @@ class RelModelStanford(RelModel):
                 rel_rep = F.softmax(result.rel_dists)
 
                 if rel_inds[:, 0].max() - rel_inds[:, 0].min() + 1 == 1:
-                    return result, filter_dets(bboxes, result.obj_scores,
+                    if self.return_unbias_logit:
+                        return result, bias_logit, filter_dets(bboxes, result.obj_scores,
+                                               result.obj_preds, rel_inds[:, 1:], rel_rep, self.return_top100,
+                                               self.training)
+                    else:
+                        return result, filter_dets(bboxes, result.obj_scores,
                                                result.obj_preds, rel_inds[:, 1:], rel_rep, self.return_top100,
                                                self.training)
 
@@ -293,7 +304,12 @@ class RelModelStanford(RelModel):
                 except:
                     rel_scores_idx_a_100_all = torch.Tensor([]).long().cuda()
 
-                return result, [boxes, obj_classes, obj_scores, rels_b_100_all, pred_scores_sorted_b_100_all,
+                if self.return_unbias_logit:
+                    return result, bias_logit, [boxes, obj_classes, obj_scores, rels_b_100_all, pred_scores_sorted_b_100_all,
+                                rels_a_100_all,
+                                pred_scores_sorted_a_100_all, rel_scores_idx_b_100_all, rel_scores_idx_a_100_all]
+                else:
+                    return result, [boxes, obj_classes, obj_scores, rels_b_100_all, pred_scores_sorted_b_100_all,
                                 rels_a_100_all,
                                 pred_scores_sorted_a_100_all, rel_scores_idx_b_100_all, rel_scores_idx_a_100_all]
 
@@ -353,5 +369,9 @@ class RelModelStanford(RelModel):
             else:
                 dict_gt[(int(gt_rels[i, 1]), int(gt_rels[i, 2]))] = [int(gt_rels[i, 3])]
 
-        return dict_gt, filter_dets(bboxes, result.obj_scores,
+        if self.return_unbias_logit:
+            return dict_gt, bias_logit, filter_dets(bboxes, result.obj_scores,
+                                    result.obj_preds, rel_inds[:, 1:], rel_rep, self.return_top100)
+        else:
+            return dict_gt, filter_dets(bboxes, result.obj_scores,
                                     result.obj_preds, rel_inds[:, 1:], rel_rep, self.return_top100)

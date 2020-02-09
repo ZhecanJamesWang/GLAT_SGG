@@ -308,7 +308,7 @@ class RelModel(nn.Module):
                  nl_obj=1, nl_edge=2, use_resnet=False, order='confidence', thresh=0.01,
                  use_proposals=False, pass_in_obj_feats_to_decoder=True,
                  pass_in_obj_feats_to_edge=True, rec_dropout=0.0, use_bias=True, use_tanh=True,
-                 limit_vision=True, return_top100=False, inter_fea=False):
+                 limit_vision=True, return_top100=False, inter_fea=False, return_unbias_logit=False):
 
         """
         :param classes: Object classes
@@ -330,6 +330,7 @@ class RelModel(nn.Module):
 
         self.return_top100 = return_top100
         self.inter_fea = inter_fea
+        self.return_unbias_logit = return_unbias_logit
 
         self.pooling_size = 7
         self.embed_dim = embed_dim
@@ -531,12 +532,15 @@ class RelModel(nn.Module):
 
         result.rel_dists = self.rel_compress(prod_rep)
 
+        # pdb.set_trace()
+
         if self.use_bias:
             result.rel_dists = result.rel_dists + self.freq_bias.index_with_labels(torch.stack((
                 result.obj_preds[rel_inds[:, 1]],
                 result.obj_preds[rel_inds[:, 2]],
             ), 1))
 
+        bias_logit = result.rel_dists
 
         result.rel_inds = rel_inds
 
@@ -558,10 +562,20 @@ class RelModel(nn.Module):
 
                 if rel_inds[:, 0].max() - rel_inds[:, 0].min() + 1 == 1:
                     if self.inter_fea:
-                        return result, prod_rep, filter_dets(bboxes, result.obj_scores,
+                        if self.return_unbias_logit:
+                            return result, prod_rep, bias_logit, filter_dets(bboxes, result.obj_scores,
+                                                                 result.obj_preds, rel_inds[:, 1:], rel_rep,
+                                                                 self.return_top100, self.training)
+                        else:
+                            return result, prod_rep, filter_dets(bboxes, result.obj_scores,
                                    result.obj_preds, rel_inds[:, 1:], rel_rep, self.return_top100, self.training)
                     else:
-                        return result, filter_dets(bboxes, result.obj_scores,
+                        if self.return_unbias_logit:
+                            return result, bias_logit, filter_dets(bboxes, result.obj_scores,
+                                                       result.obj_preds, rel_inds[:, 1:], rel_rep, self.return_top100,
+                                                       self.training)
+                        else:
+                            return result, filter_dets(bboxes, result.obj_scores,
                                    result.obj_preds, rel_inds[:, 1:], rel_rep, self.return_top100, self.training)
 
                 # -----------------------------------Above: 1 batch_size, Below: Multiple batch_size------------------
@@ -632,13 +646,24 @@ class RelModel(nn.Module):
                     rel_scores_idx_a_100_all = torch.Tensor([]).long().cuda()
 
                 if self.inter_fea:
-                    return result, prod_rep, [boxes, obj_classes, obj_scores, rels_b_100_all, pred_scores_sorted_b_100_all,
+                    if self.return_unbias_logit:
+                        return result, prod_rep, bias_logit,\
+                               [boxes, obj_classes, obj_scores, rels_b_100_all,
+                                                  pred_scores_sorted_b_100_all,
+                                                  rels_a_100_all,
+                                                  pred_scores_sorted_a_100_all, rel_scores_idx_b_100_all,
+                                                  rel_scores_idx_a_100_all]
+                    else:
+                        return result, prod_rep, [boxes, obj_classes, obj_scores, rels_b_100_all, pred_scores_sorted_b_100_all,
                                     rels_a_100_all,
                                     pred_scores_sorted_a_100_all, rel_scores_idx_b_100_all, rel_scores_idx_a_100_all]
                 else:
-                    return result, [boxes, obj_classes, obj_scores, rels_b_100_all, pred_scores_sorted_b_100_all, rels_a_100_all,
+                    if self.return_unbias_logit:
+                        return result, bias_logit, [boxes, obj_classes, obj_scores, rels_b_100_all, pred_scores_sorted_b_100_all, rels_a_100_all,
                                 pred_scores_sorted_a_100_all, rel_scores_idx_b_100_all, rel_scores_idx_a_100_all]
-
+                    else:
+                        return result, [boxes, obj_classes, obj_scores, rels_b_100_all, pred_scores_sorted_b_100_all, rels_a_100_all,
+                                pred_scores_sorted_a_100_all, rel_scores_idx_b_100_all, rel_scores_idx_a_100_all]
             else:
                 return result, []
 
@@ -670,10 +695,18 @@ class RelModel(nn.Module):
 
         # pdb.set_trace()
         if self.inter_fea:
-            return dict_gt, prod_rep, filter_dets(bboxes, result.obj_scores,
+            if self.return_unbias_logit:
+                return dict_gt, prod_rep, bias_logit, filter_dets(bboxes, result.obj_scores,
+                                                      result.obj_preds, rel_inds[:, 1:], rel_rep, self.return_top100)
+            else:
+                return dict_gt, prod_rep, filter_dets(bboxes, result.obj_scores,
                            result.obj_preds, rel_inds[:, 1:], rel_rep, self.return_top100)
         else:
-            return dict_gt, filter_dets(bboxes, result.obj_scores,
+            if self.return_unbias_logit:
+                return dict_gt, bias_logit, filter_dets(bboxes, result.obj_scores,
+                           result.obj_preds, rel_inds[:, 1:], rel_rep, self.return_top100)
+            else:
+                return dict_gt, filter_dets(bboxes, result.obj_scores,
                            result.obj_preds, rel_inds[:, 1:], rel_rep, self.return_top100)
 
         # if self.training:

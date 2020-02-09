@@ -34,10 +34,12 @@ import torch.optim.lr_scheduler as lr_scheduler
 #--------updated--------
 import sys
 import os
+import math
+
+
 codebase = '../../'
 sys.path.append(codebase)
 exp_name = 'motif'
-import torch.nn as nn
 
 
 # os.environ["CUDA_VISIBLE_DEVICES"] = "0"
@@ -102,7 +104,7 @@ detector = RelModel(classes=train.ind_to_classes, rel_classes=train.ind_to_predi
                     use_tanh=use_tanh,
                     limit_vision=limit_vision,
                     return_top100=True,
-                    inter_fea=True
+                    return_unbias_logit=True
                     )
 
 
@@ -117,68 +119,126 @@ model = GLATNET(vocab_num=[52, 153],
                 types=[2]*6)
 
 
-class bg_classifier(nn.Module):
-    def __init__(self, in_dim, out_dim):
-        super(bg_classifier, self).__init__()
-        self.in_dim = in_dim
-        self.out_dim = out_dim
-        self.fc1 = nn.Linear(self.in_dim, 128, bias=True)
-        self.relu1 = nn.ReLU()
-        self.fc2 = nn.Linear(128, self.out_dim, bias=True)
-    def forward(self, x):
-        x = self.relu1(self.fc1(x))
-        x = self.fc2(x)
-        return x
-
-
-
 # Freeze all the motif model
 for n, param in detector.named_parameters():
     param.requires_grad = False
+
+# Freeze the detector
+# for n, param in detector.detector.named_parameters():
+#     param.requires_grad = False
+
 print(print_para(detector), flush=True)
+
+
+def get_optim(lr, last_epoch=-1):
+    # Lower the learning rate on the VGG fully connected layers by 1/10th. It's a hack, but it helps
+    # stabilize the models.
+    # fc_params = [p for n,p in detector.named_parameters() if n.startswith('roi_fmap') and p.requires_grad]
+    # non_fc_params = [p for n,p in detector.named_parameters() if not n.startswith('roi_fmap') and p.requires_grad]
+    # params = [{'params': fc_params, 'lr': lr / 10.0}, {'params': non_fc_params}]
+    params = model.parameters()
+    if conf.adam:
+        optimizer = optim.Adam(params, weight_decay=conf.adamwd, lr=lr)
+        # optimizer = optim.Adam(params, weight_decay=5e-4, lr=lr, eps=1e-3)
+    else:
+        optimizer = optim.SGD(params, weight_decay=conf.l2, lr=lr, momentum=0.9)
+
+    # scheduler = ReduceLROnPlateau(optimizer, 'max', patience=3, factor=0.1,
+    #                               verbose=True, threshold=0.0001, threshold_mode='abs', cooldown=1)
+    # scheduler = lr_scheduler.StepLR(optimizer, step_size=5, gamma=0.3, last_epoch=last_epoch)
+    scheduler = lr_scheduler.StepLR(optimizer, step_size=15, gamma=0.5, last_epoch=last_epoch)
+
+    return optimizer, scheduler
+
 ckpt = torch.load(conf.ckpt)
 print("Loading EVERYTHING from motifnet", conf.ckpt)
 optimistic_restore(detector, ckpt['state_dict'])
 detector.cuda()
 start_epoch = -1
 
+# if conf.ckpt.split('-')[-2].split('/')[-1] == 'vgrel':
+#     print("Loading EVERYTHING")
+#     start_epoch = ckpt['epoch']
+#
+#     if not optimistic_restore(detector, ckpt['state_dict']):
+#         start_epoch = -1
+#         # optimistic_restore(detector.detector, torch.load('checkpoints/vgdet/vg-28.tar')['state_dict'])
+# else:
+#     start_epoch = -1
+#     optimistic_restore(detector.detector, ckpt['state_dict'])
+#
+#     detector.roi_fmap[1][0].weight.data.copy_(ckpt['state_dict']['roi_fmap.0.weight'])
+#     detector.roi_fmap[1][3].weight.data.copy_(ckpt['state_dict']['roi_fmap.3.weight'])
+#     detector.roi_fmap[1][0].bias.data.copy_(ckpt['state_dict']['roi_fmap.0.bias'])
+#     detector.roi_fmap[1][3].bias.data.copy_(ckpt['state_dict']['roi_fmap.3.bias'])
+#
+#     detector.roi_fmap_obj[0].weight.data.copy_(ckpt['state_dict']['roi_fmap.0.weight'])
+#     detector.roi_fmap_obj[3].weight.data.copy_(ckpt['state_dict']['roi_fmap.3.weight'])
+#     detector.roi_fmap_obj[0].bias.data.copy_(ckpt['state_dict']['roi_fmap.0.bias'])
+#     detector.roi_fmap_obj[3].bias.data.copy_(ckpt['state_dict']['roi_fmap.3.bias'])
 
-model_bgc = bg_classifier(in_dim=4147, out_dim=2)
-model_bgc.cuda()
-optimizer_bgc = optim.Adam(model_bgc.parameters(), weight_decay=conf.adamwd, lr=conf.lr, eps=1e-3)
-scheduler_bgc = lr_scheduler.StepLR(optimizer_bgc, step_size=5, gamma=0.3, last_epoch=start_epoch)
 
 
-def train_epoch(epoch_num, train_results, train_inter_fea, train_det_ress):
+print('finish pretrained GLAT loading')
+# # model.load_state_dict(ckpt_glat['model'])
+if conf.resume_training:
+    ckpt_glat = torch.load(conf.resume_ckpt)
+    optimistic_restore(model, ckpt_glat['state_dict'])
+    model.cuda()
+    start_epoch = ckpt_glat['epoch']
+    optimizer, scheduler = get_optim(conf.lr, last_epoch=start_epoch)
+
+else:
+    # # ckpt_glat = torch.load('/home/haoxuan/code/GBERT/models/2019-10-31-03-13_2_2_2_2_2_2_concat_no_init_mask/best_test_node_mask_predicate_acc')
+    # ---------------pretrained model mask ration 0.5
+    # ckpt_glat = torch.load('/home/tangtangwzc/Common_sense/models/2019-11-03-17-51_2_2_2_2_2_2_concat_no_init_mask/best_test_node_mask_predicate_acc.pth')
+
+    # ---------------pretrained model mask ration 0.3
+    ckpt_glat = torch.load(
+        '/home/tangtangwzc/Common_sense/models/2019-12-18-16-08_2_2_2_2_2_2_concat_no_init_mask/best_test_node_mask_predicate_acc.pth')
+
+    # ckpt_glat = torch.load(
+    #     '/home/tangtangwzc/Common_sense/models/2019-11-03-17-28_2_2_2_2_2_2_concat_no_init_mask/best_test_node_mask_predicate_acc.pth')
+
+    # ---------------pretrained model mask ration 0.7
+    # ckpt_glat = torch.load('/home/tangtangwzc/Common_sense/models/2019-11-07-23-50_2_2_2_2_2_2_concat_no_init_mask/best_test_node_mask_predicate_acc.pth')
+
+    optimistic_restore(model, ckpt_glat['model'])
+    model.cuda()
+    start_epoch = -1
+    optimizer, scheduler = get_optim(conf.lr, last_epoch=start_epoch)
+
+
+def train_epoch(epoch_num, train_results, train_bias_logits, train_det_ress):
     detector.train()
     for n, param in detector.named_parameters():
         param.requires_grad = False
     model.train()
-    model_bgc.train()
     tr = []
     start = time.time()
     accs = [0, 0]
+
     for b, batch in enumerate(train_loader):
-        # res = train_batch(batch, accs=accs, verbose=b % (conf.print_interval*10) == 0)
-        loss = train_batch(batch, train_results, train_inter_fea, train_det_ress, epoch_num=epoch_num, accs=accs, batch_num=b,
-                           verbose=b % (conf.print_interval*10) == 0)
+        tr.append(train_batch(batch, train_results, train_bias_logits, train_det_ress, epoch_num=epoch_num, batch_num=b, accs=accs,
+                              verbose=b % (conf.print_interval*10) == 0)) #b == 0))
 
         if b % conf.print_interval == 0 and b >= conf.print_interval:
+            mn = pd.concat(tr[-conf.print_interval:], axis=1).mean(1)
             time_per_batch = (time.time() - start) / conf.print_interval
             print("\ne{:2d}b{:5d}/{:5d} {:.3f}s/batch, {:.1f}m/epoch".format(
                 epoch_num, b, len(train_loader), time_per_batch, len(train_loader) * time_per_batch / 60))
-            print('loss of mask:{:.3f}', loss)
-            print('acc of mask:{:.3f}', accs[0]*1.0 / accs[1])
-            print('num of right:', accs[0])
+            print(mn)
+            print('acc of mask:', accs[0]*1.0 / accs[1])
+            print('num of mask:', accs[1])
             print('-----------', flush=True)
             start = time.time()
+
             # break
 
-    print("overall{:2d}: ({:.3f})\n".format(epoch, accs[0]*1.0 / accs[1]), flush=True)
+    writer.add_scalar('mask acc/train acc of mask', accs[0] * 1.0 / accs[1], epoch_num)
 
-    if use_tb:
-        writer.add_scalar('loss/train_loss', loss, epoch)
-        writer.add_scalar('acc/train_acc', accs[0]*1.0 / accs[1], epoch)
+
+    return pd.concat(tr, axis=1)
 
 
 def transfer_result_cpu(result):
@@ -194,6 +254,8 @@ def transfer_result_cpu(result):
     result_cpu.rm_obj_labels = result.rm_obj_labels.cpu()
     return result_cpu
 
+def transfer_logit_cpu(bias_logit):
+    return bias_logit.cpu()
 
 def transfer_det_cpu(det_res):
     det_res_cpu = []
@@ -215,14 +277,16 @@ def transfer_result_gpu(result):
     result_gpu.rm_obj_labels = result.rm_obj_labels.cuda()
     return result_gpu
 
+def transfer_logit_gpu(bias_logit):
+    return bias_logit.cuda()
+
 def transfer_det_gpu(det_res):
     det_res_gpu = []
     for i in det_res:
         det_res_gpu.append(i.cuda())
     return det_res_gpu
 
-
-def train_batch(b, train_results, train_inter_fea, train_det_ress, epoch_num, accs, batch_num, verbose=False):
+def train_batch(b, train_results, train_bias_logits, train_det_ress, epoch_num, batch_num, accs, verbose=False):
     """
     :param b: contains:
           :param imgs: the image, [batch_size, 3, IM_SIZE, IM_SIZE]
@@ -241,22 +305,26 @@ def train_batch(b, train_results, train_inter_fea, train_det_ress, epoch_num, ac
           :param gt_classes: [num_gt, 2] gt boxes where each one is (img_id, class)
     :return:
     """
-    # result, inter_fea, det_res = detector[b]
-    # result.rm_obj_dists(num_entities, 151)  result.obj_preds(num_entities)  result.rm_obj_labels(num_entities)
-    # result.rel_dists(num_predicates, 51)  result.rel_labels(num_predicates)
-    # result.rel_inds(num_predicates, 4)
-    # pdb.set_trace()
-
+    # t0 = time.time()
     if epoch_num == 0:
-        result, inter_fea, det_res = detector[b]
+        result, bias_logit, det_res = detector[b]
         train_results.append(transfer_result_cpu(result))
-        train_inter_fea.append(inter_fea.cpu())
+        train_bias_logits.append(transfer_logit_cpu(bias_logit))
         train_det_ress.append(transfer_det_cpu(det_res))
     else:
         result = transfer_result_gpu(train_results[batch_num])
-        inter_fea = train_inter_fea[batch_num].cuda()
+        bias_logit = transfer_logit_gpu(train_bias_logits[batch_num])
         det_res = transfer_det_gpu(train_det_ress[batch_num])
 
+    # pdb.set_trace()
+    # result.rm_obj_dists(num_entities, 151)  result.obj_preds(num_entities)  result.rm_obj_labels(num_entities)
+    # result.rel_dists(num_predicates, 51)  result.rel_labels(num_predicates)
+    # result.rel_inds(num_predicates, 3) 3
+    # pdb.set_trace()
+    # rel_inds obj_idx?-> global idx
+
+    # t1 = time.time()
+    # print('base model time', t1-t0)
 
     if conf.return_top100 and len(det_res) != 0:
 
@@ -271,49 +339,103 @@ def train_batch(b, train_results, train_inter_fea, train_det_ress, epoch_num, ac
             'pred_rel_inds': result.rel_inds,  # (num_predicates, 3) Tensor Variable
             'rel_scores': result.rel_dists,   # (num_predicates, 51) Tensor Variable
         }
-    # pdb.set_trace()
+
+    threshold = 0.35
     b_100_idx = det_res[-2]
+    bias_logit_norm = F.softmax(bias_logit[:, 1:], dim=1)
+    bias_logit_norm_inalltop = bias_logit_norm[b_100_idx]
 
-    inter_fea = inter_fea[b_100_idx]
-    gt_label = result.rel_labels[:, -1][b_100_idx]
-    fg_idx = torch.nonzero(gt_label)
-    if len(fg_idx) == 0:
-        loss = -1
-        return loss
-    fg_idx = fg_idx[:, 0].data
-    fg_number = len(fg_idx)
-    bg_number = fg_number
-    bg_idx = torch.nonzero(gt_label==0)[:bg_number, 0].data
+    mask_idxs_ininput = torch.nonzero(bias_logit_norm_inalltop[:, :].max(1)[0] < threshold)[:, 0].data
 
-    fg_rel_inds = det_res[3][fg_idx]
-    fg_rel_scores = det_res[4][fg_idx]
-    fg_rel_fea = inter_fea[fg_idx]
+    pred_entry = glat_postprocess(pred_entry, if_predicting=False, mask_idx=mask_idxs_ininput)
 
-    bg_rel_inds = det_res[3][bg_idx]
-    bg_rel_scores = det_res[4][bg_idx]
-    bg_rel_fea = inter_fea[bg_idx]
+    rels_b_100 = pred_entry['pred_rel_inds']
+    pred_scores_sorted_b_100 = pred_entry['rel_scores'][:, :-1]
 
-    fg_rel_fea = torch.cat([fg_rel_fea, fg_rel_scores], dim=1)
-    bg_rel_fea = torch.cat([bg_rel_fea, bg_rel_scores], dim=1)
-    all_rel_fea = torch.cat([fg_rel_fea, bg_rel_fea], dim=0)
+    for i in range(int(b_100_idx.size()[0])):
+        # pdb.set_trace()
+        idx = b_100_idx[i]
+        result.rel_dists[idx] = pred_scores_sorted_b_100[i]
+        # pdb.set_trace()
+        assert (result.rel_inds[idx] == rels_b_100[i]).all()
 
-    all_rel_pred = model_bgc(all_rel_fea)
+        # if conf.batch_size != 1:
+        #     result.rel_inds[idx] = rels_b_100[i]
+        # else:
+        #     result.rel_inds[idx, 1:] = rels_b_100[i]
 
-    gt_label = torch.zeros_like(result.rel_labels[:, -1])
-    gt_label = gt_label[:(fg_number+bg_number)]
-    gt_label[:fg_number] = 1
+    result.obj_preds = pred_entry['pred_classes']
 
-    loss = F.cross_entropy(all_rel_pred, gt_label)
-    optimizer_bgc.zero_grad()
+    losses = {}
+    if conf.use_ggnn_obj: # if not use ggnn obj, we just use scores of faster rcnn as their scores, there is no need to train
+        losses['class_loss'] = F.cross_entropy(result.rm_obj_dists, result.rm_obj_labels)
+    losses['rel_loss'] = F.cross_entropy(result.rel_dists, result.rel_labels[:, -1])
+    loss = sum(losses.values())
+
+    optimizer.zero_grad()
     loss.backward()
-    optimizer_bgc.step()
+    clip_grad_norm(
+        [(n, p) for n, p in detector.named_parameters() if p.grad is not None],
+        max_norm=conf.clip, verbose=verbose, clip=True)
+    losses['total'] = loss
+    optimizer.step()
 
-    right_num = torch.sum(all_rel_pred.max(1)[1] == gt_label).data.cpu()[0]
-    total_num = gt_label.size(0)
-    accs[0] += right_num
-    accs[1] += total_num
-    # res = pd.Series({x: y.data[0] for x, y in loss.items()})
-    return sum(loss)
+    # pdb.set_trace()
+
+    if mask_idxs_ininput is not None:
+        abs_mask_idx = b_100_idx[mask_idxs_ininput]
+        gt = result.rel_labels.data[abs_mask_idx][:, -1]
+        pred = pred_scores_sorted_b_100[mask_idxs_ininput][:, 1:].max(1)[1].data + 1
+        # pred = pred.type_as(gt)
+
+        correct = int((pred == gt).sum())
+        total = torch.nonzero(result.rel_labels.data[abs_mask_idx][:, -1])
+        if len(total) == 0:
+            total = 0
+        else:
+            total = total.size(0)
+        accs[0] = accs[0] + correct
+        accs[1] = accs[1] + total
+
+    res = pd.Series({x: y.data[0] for x, y in losses.items()})
+    return res
+
+
+def val_epoch(epoch, eval_results, eval_logits, eval_det_ress):
+
+    detector.eval()
+    model.eval()
+    evaluator_list = [] # for calculating recall of each relationship except no relationship
+    evaluator_multiple_preds_list = []
+    # eval_logits = []
+    accs = [0, 0]
+
+    for index, name in enumerate(ind_to_predicates):
+        if index == 0:
+            continue
+        evaluator_list.append((index, name, BasicSceneGraphEvaluator.all_modes()))
+        evaluator_multiple_preds_list.append((index, name, BasicSceneGraphEvaluator.all_modes(multiple_preds=True)))
+    evaluator = BasicSceneGraphEvaluator.all_modes() # for calculating recall
+    evaluator_multiple_preds = BasicSceneGraphEvaluator.all_modes(multiple_preds=True)
+    # print(len(val_loader))
+    for val_b, batch in enumerate(val_loader):
+        # val_batch(conf.num_gpus * val_b, batch, evaluator, evaluator_multiple_preds, evaluator_list, evaluator_multiple_preds_list)
+        val_batch(val_b, batch, evaluator, evaluator_multiple_preds, evaluator_list, evaluator_multiple_preds_list,
+                  epoch, eval_results, eval_logits, eval_det_ress, accs)
+
+        # if val_b == 100:
+        #     break
+
+
+    recall = evaluator[conf.mode].print_stats()
+    recall_mp = evaluator_multiple_preds[conf.mode].print_stats()
+
+    mean_recall = calculate_mR_from_evaluator_list(evaluator_list, conf.mode)
+    mean_recall_mp = calculate_mR_from_evaluator_list(evaluator_multiple_preds_list, conf.mode, multiple_preds=True)
+    print('test acc of mask:', accs[0] * 1.0 / accs[1])
+    writer.add_scalar('mask acc/test acc of mask', accs[0] * 1.0 / accs[1], epoch)
+
+    return recall, recall_mp, mean_recall, mean_recall_mp
 
 
 def my_collate(total_data):
@@ -408,7 +530,15 @@ def variable2tensor(input):
         input = input.data
     return input
 
+
 def glat_postprocess(pred_entry, mask_idx, if_predicting=False):
+    # pred_entry = {
+    #     'pred_boxes': boxes_i * BOX_SCALE / IM_SCALE,  # (23, 4) (16, 4)
+    #     'pred_classes': objs_i,  # (23,) (16,)
+    #     'pred_rel_inds': rels_i,  # (506, 2) (240, 2)
+    #     'obj_scores': obj_scores_i,  # (23,) (16,)
+    #     'rel_scores': pred_scores_i,  # hack for now. (506, 51) (240, 51)
+    # }
 
     if if_predicting:
         pred_entry = numpy2cuda_dict(pred_entry)
@@ -428,7 +558,6 @@ def glat_postprocess(pred_entry, mask_idx, if_predicting=False):
     pred_label_predicate, pred_label_entities = glat_wrapper(total_data)
     pred_entry['rel_scores'] = pred_label_predicate
 
-
     return pred_entry
 
 
@@ -447,39 +576,19 @@ def rank_predicate(pred_entry):
     return pred_entry
 
 
-
-def val_epoch(epoch, eval_results, eval_inter_fea, eval_det_ress):
-
-    detector.eval()
-    model.eval()
-    model_bgc.eval()
-
-    right_num_test = [0]*2
-    total_num_test = [0]*2
-    for val_b, batch in enumerate(val_loader):
-        val_batch(conf.num_gpus * val_b, batch, right_num_test, total_num_test, epoch, eval_results, eval_inter_fea,
-                  eval_det_ress)
-        # if val_b == 100:
-        #     break
-    print('-----------Finish testing epoch {}-----------'.format(epoch))
-    print('test acc of mask bg:', right_num_test[0] * 1.0 / total_num_test[0])
-    print('test acc of mask fg:', right_num_test[1] * 1.0 / total_num_test[1])
-    if use_tb:
-        writer.add_scalar('acc/test_acc_fg', right_num_test[1] * 1.0 / total_num_test[1], epoch)
-        writer.add_scalar('acc/test_acc_bg', right_num_test[0] * 1.0 / total_num_test[0], epoch)
-
-
-def val_batch(batch_num, b, right_num_test, total_num_test, epoch_num, eval_results, eval_inter_fea, eval_det_ress):
-    # dict_gt, inter_fea, det_res = detector[b]
+def val_batch(batch_num, b, evaluator, evaluator_multiple_preds, evaluator_list,
+              evaluator_multiple_preds_list, epoch_num, eval_results, eval_logits, eval_det_ress, accs):
+    # det_res = detector[b]
+    # dict_gt, det_res = detector[b]
 
     if epoch_num == 0:
-        dict_gt, inter_fea, det_res = detector[b]
+        dict_gt, bias_logit, det_res = detector[b]
         eval_results.append(dict_gt)
-        eval_inter_fea.append(inter_fea.cpu())
+        eval_logits.append(bias_logit)
         eval_det_ress.append(det_res)
     else:
         dict_gt = eval_results[batch_num]
-        inter_fea = eval_inter_fea[batch_num].cuda()
+        bias_logit = eval_logits[batch_num]
         det_res = eval_det_ress[batch_num]
 
 
@@ -500,6 +609,10 @@ def val_batch(batch_num, b, right_num_test, total_num_test, epoch_num, eval_resu
             'gt_boxes': val.gt_boxes[batch_num + i].copy(), #(23, 4) (16, 4)
         }
 
+        # val.relationships[batch_num + i]
+        # np.argmax(pred_scores_i_b100[:, 1:], axis=1)
+        # assert np.all(objs_i[rels_i[:, 0]] > 0) and np.all(objs_i[rels_i[:, 1]] > 0)
+
         if conf.return_top100:
             pred_entry = {
                 'pred_boxes': boxes_i * BOX_SCALE/IM_SCALE, #(23, 4) (16, 4)
@@ -516,62 +629,78 @@ def val_batch(batch_num, b, right_num_test, total_num_test, epoch_num, eval_resu
                 'obj_scores': obj_scores_i, #(23,) (16,)
                 'rel_scores': pred_scores_i,  # hack for now. (506, 51) (240, 51)
             }
+        # pdb.set_trace()
+        threshold = 0.35
+        num_predicate = rel_scores_idx_b100.shape[0]
 
-        # pred_entry_init = copy.deepcopy(pred_entry)
+        bias_logit_norm = F.softmax(bias_logit[:, 1:], dim=1).data.cpu().numpy()
+        mask_idxs_intop100 = np.nonzero(bias_logit_norm[rel_scores_idx_b100, :].max(1) < threshold)[0]
+        mask_idxs_intop100 = mask_idxs_intop100.tolist()
+
+        if len(mask_idxs_intop100) == 0:
+            mask_idxs_intop100 = None
+
+        pred_entry = glat_postprocess(pred_entry, if_predicting=True, mask_idx=mask_idxs_intop100)
+        pred_entry = cuda2numpy_dict(pred_entry)
 
         # pdb.set_trace()
-        b_100_idx = torch.from_numpy(rel_scores_idx_b100).cuda()
-        inter_fea = inter_fea[b_100_idx]
-        all_rel_fea = torch.cat((inter_fea, Variable(torch.from_numpy(pred_scores_i_b100).cuda())), 1)
-        all_rel_pred = model_bgc(all_rel_fea).data.cpu().numpy()
-        gt_label = np.zeros(all_rel_pred.shape[0])
+        if len(rels_i_a100.shape) == 1:
+            pred_entry['rel_scores'] = pred_entry['rel_scores'][:, :-1]
+        else:
+            pred_entry['pred_rel_inds'] = np.concatenate((pred_entry['pred_rel_inds'], rels_i_a100), axis=0)
+            pred_entry['rel_scores'] = np.concatenate((pred_entry['rel_scores'][:, :-1], pred_scores_i_a100), axis=0)
 
-        # pdb.set_trace()
+        if mask_idxs_intop100 is not None:
+            for idx in range(len(mask_idxs_intop100)):
+                sub = rels_i_b100.data[mask_idxs_intop100[idx], 0]
+                obj = rels_i_b100.data[mask_idxs_intop100[idx], 1]
+                pred_class = pred_entry['rel_scores'][mask_idxs_intop100[idx], 1:].argmax()+1
+                if (int(sub), int(obj)) in dict_gt.keys():
+                    accs[1] += 1
+                    if int(pred_class) in dict_gt[(int(sub), int(obj))]:
+                        accs[0] += 1
 
-        for key, value in dict_gt.items():
-            sub_idx = np.where(rels_i_b100[:, 0] == key[0])[0].tolist()
-            obj_idx = np.where(rels_i_b100[:, 1] == key[1])[0].tolist()
-
-            fg_idx = set(sub_idx) & set(obj_idx)
-            if len(fg_idx) == 0:
-                continue
-            fg_idx = fg_idx.pop()
-            gt_label[fg_idx] = 1
-
-        num_class = 2
-        # pdb.set_trace()
-        for i in range(num_class):
-            i_idx = np.where(gt_label==i)
-            right_num_test[i] += np.sum(all_rel_pred[i_idx].argmax(1) == i)
-            total_num_test[i] += len(i_idx)
-
+        eval_entry(conf.mode, gt_entry, pred_entry, evaluator, evaluator_multiple_preds,
+                   evaluator_list, evaluator_multiple_preds_list)
 
 print("Training starts now!")
 # optimizer = get_optim(conf.lr * conf.num_gpus * conf.batch_size)
 
 train_results = []
-train_inter_fea = []
+train_bias_logits = []
 train_det_ress = []
 
 eval_results = []
-eval_inter_fea = []
+eval_logits = []
 eval_det_ress = []
-
 
 for epoch in range(start_epoch + 1, start_epoch + 1 + conf.num_epochs):
     print("start training epoch: ", epoch)
-    scheduler_bgc.step()
-    train_epoch(epoch, train_results, train_inter_fea, train_det_ress)
+    scheduler.step()
+    rez = train_epoch(epoch, train_results, train_bias_logits, train_det_ress)
+    print("overall{:2d}: ({:.3f})\n{}".format(epoch, rez.mean(1)['total'], rez.mean(1)), flush=True)
 
-    print("start validation epoch: ", epoch)
-    val_epoch(epoch, eval_results, eval_inter_fea, eval_det_ress)
-    # if use_tb:
-    #     for key, value in recall.items():
-    #         writer.add_scalar('eval_' + conf.mode + '_with_constraint/' + key, value, epoch)
-    #     for key, value in recall_mp.items():
-    #         writer.add_scalar('eval_' + conf.mode + '_without_constraint/' + key, value, epoch)
-    #     for key, value in mean_recall.items():
-    #         writer.add_scalar('eval_' + conf.mode + '_with_constraint/mean ' + key, value, epoch)
-    #     for key, value in mean_recall_mp.items():
-    #         writer.add_scalar('eval_' + conf.mode + '_without_constraint/mean ' + key, value, epoch)
+    if use_tb:
+        writer.add_scalar('loss/rel_loss', rez.mean(1)['rel_loss'], epoch)
+        if conf.use_ggnn_obj:
+            writer.add_scalar('loss/class_loss', rez.mean(1)['class_loss'], epoch)
+        writer.add_scalar('loss/total', rez.mean(1)['total'], epoch)
+    if conf.save_dir is not None:
+        torch.save({
+            'epoch': epoch,
+            'state_dict': model.state_dict(), #{k:v for k,v in detector.state_dict().items() if not k.startswith('detector.')},
+            # 'optimizer': optimizer.state_dict(),
+            # 'scheduler': scheduler.state_dict(),
+        }, os.path.join(conf.save_dir, '{}-{}.tar'.format('motifnet_glat', epoch)))
+
+    recall, recall_mp, mean_recall, mean_recall_mp = val_epoch(epoch, eval_results, eval_logits, eval_det_ress)
+    if use_tb:
+        for key, value in recall.items():
+            writer.add_scalar('eval_' + conf.mode + '_with_constraint/' + key, value, epoch)
+        for key, value in recall_mp.items():
+            writer.add_scalar('eval_' + conf.mode + '_without_constraint/' + key, value, epoch)
+        for key, value in mean_recall.items():
+            writer.add_scalar('eval_' + conf.mode + '_with_constraint/mean ' + key, value, epoch)
+        for key, value in mean_recall_mp.items():
+            writer.add_scalar('eval_' + conf.mode + '_without_constraint/mean ' + key, value, epoch)
 

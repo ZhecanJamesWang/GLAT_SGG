@@ -197,7 +197,8 @@ class KERN(nn.Module):
                  use_rel_knowledge=True,
                  obj_knowledge='',
                  rel_knowledge='',
-                 return_top100=False):
+                 return_top100=False,
+                 return_unbias_logit=False):
 
         """
         :param classes: Object classes
@@ -222,6 +223,9 @@ class KERN(nn.Module):
 
         self.use_ggnn_obj=use_ggnn_obj
         self.use_ggnn_rel = use_ggnn_rel
+
+        self.return_unbias_logit = return_unbias_logit
+
 
         self.require_overlap = require_overlap_det and self.mode == 'sgdet'
 
@@ -401,6 +405,8 @@ class KERN(nn.Module):
                 obj_labels=result.rm_obj_labels if self.training or self.mode == 'predcls' else None,
                 boxes_per_cls=result.boxes_all)
 
+        bias_logit = result.rel_dists
+
         result.rel_inds = rel_inds
         # pdb.set_trace()
 
@@ -420,7 +426,11 @@ class KERN(nn.Module):
                 rel_rep = F.softmax(result.rel_dists, dim=1)
 
                 if rel_inds[:, 0].max() - rel_inds[:, 0].min() + 1 == 1:
-                    return result, filter_dets(bboxes, result.obj_scores,
+                    if self.return_unbias_logit:
+                        return result, bias_logit, filter_dets(bboxes, result.obj_scores,
+                                   result.obj_preds, rel_inds[:, 1:], rel_rep, self.return_top100, self.training)
+                    else:
+                        return result, filter_dets(bboxes, result.obj_scores,
                                    result.obj_preds, rel_inds[:, 1:], rel_rep, self.return_top100, self.training)
 
                 # -----------------------------------Above: 1 batch_size, Below: Multiple batch_size------------------
@@ -494,7 +504,12 @@ class KERN(nn.Module):
                 except:
                     rel_scores_idx_a_100_all = torch.Tensor([]).long().cuda()
 
-                return result, [boxes, obj_classes, obj_scores, rels_b_100_all, pred_scores_sorted_b_100_all, rels_a_100_all,
+                if self.return_unbias_logit:
+                    return result, bias_logit, [boxes, obj_classes, obj_scores, rels_b_100_all, pred_scores_sorted_b_100_all,
+                                    rels_a_100_all,
+                                    pred_scores_sorted_a_100_all, rel_scores_idx_b_100_all, rel_scores_idx_a_100_all]
+                else:
+                    return result, [boxes, obj_classes, obj_scores, rels_b_100_all, pred_scores_sorted_b_100_all, rels_a_100_all,
                                 pred_scores_sorted_a_100_all, rel_scores_idx_b_100_all, rel_scores_idx_a_100_all]
 
             else:
@@ -512,7 +527,18 @@ class KERN(nn.Module):
 
         rel_rep = F.softmax(result.rel_dists, dim=1)
 
-        return filter_dets(bboxes, result.obj_scores,
+        dict_gt = {}
+        for i in range(gt_rels.size(0)):
+            if (int(gt_rels[i, 1]), int(gt_rels[i, 2])) in dict_gt:
+                dict_gt[(int(gt_rels[i, 1]), int(gt_rels[i, 2]))].append(int(gt_rels[i, 3]))
+            else:
+                dict_gt[(int(gt_rels[i, 1]), int(gt_rels[i, 2]))] = [int(gt_rels[i, 3])]
+
+        if self.return_unbias_logit:
+            return dict_gt, bias_logit, filter_dets(bboxes, result.obj_scores,
+                           result.obj_preds, rel_inds[:, 1:], rel_rep, self.return_top100, self.training)
+        else:
+            return dict_gt, filter_dets(bboxes, result.obj_scores,
                            result.obj_preds, rel_inds[:, 1:], rel_rep, self.return_top100, self.training)
 
     def __getitem__(self, batch):

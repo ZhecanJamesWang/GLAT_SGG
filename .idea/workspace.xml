@@ -2,58 +2,43 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="11066203-4164-4413-bd1b-0e742342911b" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/lib/utils_hy.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/models/eval_stanford_motif_glat_mask.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/models/eval_stanford_motif_glat_mask_mat.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/models/eval_stanford_motif_glat_mask_rank.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/models/eval_stanford_motif_glat_mask_threshold.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/models/eval_stat_stanford_motif_glat_mask.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/models/save_base_result.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/models/train_rels_motifnet_aemask.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/models/train_rels_motifnet_mask_mat_mbz.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/models/train_rels_motifnet_mask_rank_mbz.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/models/train_rels_motifnet_save_base.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/models/train_rels_stanford_save_base.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scripts/eval_motifnet_predcls.sh" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scripts/eval_motifnet_predcls_mask.sh" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scripts/eval_motifnet_predcls_mask_mat.sh" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scripts/eval_motifnet_predcls_mask_rank.sh" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scripts/eval_motifnet_predcls_mask_threshold.sh" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scripts/eval_stanford_predcls.sh" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scripts/eval_stanford_predcls_mask.sh" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scripts/eval_stanford_predcls_mask_rank.sh" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scripts/eval_stat_motifnet_predcls_mask.sh" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scripts/save_motifnet_result.sh" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scripts/train_glat_motifnet_aemask.sh" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scripts/train_glat_motifnet_mask.sh" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scripts/train_glat_motifnet_mask_mat_mbz.sh" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scripts/train_glat_motifnet_mask_rank_mbz.sh" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scripts/train_glat_motifnet_mask_rank_mbz_1.sh" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scripts/train_glat_motifnet_mask_sgcls.sh" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scripts/train_glat_motifnet_mbz_sgcls.sh" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scripts/train_glat_motifnet_mbz_v1.sh" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scripts/train_glat_motifnet_mbz_v2now.sh" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scripts/train_glat_stanford_sgcls.sh" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scripts/vis_glat_motifnet_mask_sgcls.sh" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/visualization/visualize_motifnet_mask.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/visualization/visualize_predcls_mask.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/models/eval_kern_mask_logit_thres.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/models/eval_stanford_motif_glat_mask_logit_thres_sgcls_v3.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/models/eval_stanford_motif_glat_mask_logit_thres_v01.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/models/eval_stanford_motif_glat_mask_logit_thres_v2.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/models/train_rels_kern_mask_logit_thres_train_v2mbz.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/models/train_rels_kern_mask_logit_thres_train_v2mbz_sgcls.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/models/train_rels_motifnet_mask_logit_thres_mbz.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/models/train_rels_motifnet_mask_logit_thres_train_v1mbz.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/models/train_rels_motifnet_mask_logit_thres_train_v2mbz.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/models/train_rels_motifnet_mask_logit_thres_train_v3.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/models/train_rels_motifnet_mask_logit_thres_train_v3_sgcls.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/models/train_rels_motifnet_mask_top_gt.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/scripts/eval_kern_predcls_mask_logit_thres_top30_multithres.sh" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/scripts/eval_motifnet_predcls_mask_logit_thres_top100_multithres.sh" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/scripts/eval_motifnet_predcls_mask_logit_thres_top30_multithres.sh" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/scripts/eval_motifnet_predcls_mask_logit_thres_v01.sh" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/scripts/eval_motifnet_predcls_mask_logit_thres_v2.sh" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/scripts/eval_motifnet_sgcls_mask_logit_thres_v3.sh" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/scripts/eval_stanford_predcls_mask_logit_thres_top30_multithres.sh" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/scripts/train_glat_motifnet_mask_logit_thres_mbz.sh" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/scripts/train_glat_motifnet_mask_logit_thres_trainv1mbz.sh" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/scripts/train_glat_motifnet_mask_logit_thres_trainv2mbz.sh" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/scripts/train_glat_motifnet_mask_logit_thres_trainv3.sh" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/scripts/train_glat_motifnet_mask_logit_thres_trainv3_sgcls.sh" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/scripts/train_glat_motifnet_mask_top_gt.sh" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/scripts/train_kern_predcls_mask_logit_thres_trainv2.sh" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/scripts/train_kern_sgcls_mask_logit_thres_trainv2.sh" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config.py" beforeDir="false" afterPath="$PROJECT_DIR$/config.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/dataloaders/visual_genome.py" beforeDir="false" afterPath="$PROJECT_DIR$/dataloaders/visual_genome.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/fpn/proposal_assignments/proposal_assignments_gtbox.py" beforeDir="false" afterPath="$PROJECT_DIR$/lib/fpn/proposal_assignments/proposal_assignments_gtbox.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/lib/kern_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/lib/kern_model.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/lib/motifnet_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/lib/motifnet_model.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/object_detector.py" beforeDir="false" afterPath="$PROJECT_DIR$/lib/object_detector.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/lib/stanford_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/lib/stanford_model.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/surgery.py" beforeDir="false" afterPath="$PROJECT_DIR$/lib/surgery.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/models/eval_stanford_motif.py" beforeDir="false" afterPath="$PROJECT_DIR$/models/eval_stanford_motif.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/models/eval_stanford_motif_glat.py" beforeDir="false" afterPath="$PROJECT_DIR$/models/eval_stanford_motif_glat.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/models/train_rels_motifnet.py" beforeDir="false" afterPath="$PROJECT_DIR$/models/train_rels_motifnet.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/models/train_rels_motifnet_mask.py" beforeDir="false" afterPath="$PROJECT_DIR$/models/train_rels_motifnet_mask.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/models/train_rels_stanford.py" beforeDir="false" afterPath="$PROJECT_DIR$/models/train_rels_stanford.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/train_kern_motifnet.sh" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/train_glat_motifnet.sh" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/train_kern_motifnet_mask.sh" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/train_kern_stanford.sh" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/train_glat_stanford_predcls.sh" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/train_kern_stanford_mask.sh" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/train_glat_stanford_mask.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/eval_stat_stanford_motif_glat_mask.py" beforeDir="false" afterPath="$PROJECT_DIR$/models/eval_stat_stanford_motif_glat_mask.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/train_rels_motifnet_aemask.py" beforeDir="false" afterPath="$PROJECT_DIR$/models/train_rels_motifnet_aemask.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/eval_stat_motifnet_predcls_mask.sh" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/eval_stat_motifnet_predcls_mask.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/visualization/visualize_predcls_mask.py" beforeDir="false" afterPath="$PROJECT_DIR$/visualization/visualize_predcls_mask.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -118,44 +103,14 @@
     <favorites_list name="KERN" />
   </component>
   <component name="FileEditorManager">
-    <splitter split-orientation="horizontal" split-proportion="0.5">
+    <splitter split-orientation="horizontal" split-proportion="0.51279">
       <split-first>
         <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-          <file leaf-file-name="eval_motifnet_predcls_mask.sh" pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/scripts/eval_motifnet_predcls_mask.sh">
-              <provider selected="true" editor-type-id="text-editor">
-                <state>
-                  <caret column="19" selection-start-column="19" selection-end-column="19" />
-                </state>
-              </provider>
-            </entry>
-          </file>
-          <file leaf-file-name="eval_stanford_motif_glat_mask.py" pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/models/eval_stanford_motif_glat_mask.py">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="2805">
-                  <caret line="178" column="54" selection-start-line="178" selection-start-column="54" selection-end-line="178" selection-end-column="54" />
-                  <folding>
-                    <element signature="e#1#78#0" expanded="true" />
-                  </folding>
-                </state>
-              </provider>
-            </entry>
-          </file>
-          <file leaf-file-name="train_rels_motifnet_aemask.py" pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/models/train_rels_motifnet_aemask.py">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="4541">
-                  <caret line="470" column="24" selection-start-line="470" selection-start-column="24" selection-end-line="470" selection-end-column="24" />
-                </state>
-              </provider>
-            </entry>
-          </file>
           <file leaf-file-name="motifnet_model.py" pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/lib/motifnet_model.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="995">
-                  <caret line="395" column="81" selection-start-line="395" selection-start-column="28" selection-end-line="395" selection-end-column="81" />
+                <state relative-caret-position="7646">
+                  <caret line="542" column="37" lean-forward="true" selection-start-line="542" selection-start-column="37" selection-end-line="542" selection-end-column="37" />
                   <folding>
                     <element signature="e#40#58#0" expanded="true" />
                   </folding>
@@ -163,52 +118,40 @@
               </provider>
             </entry>
           </file>
-          <file leaf-file-name="train_glat_motifnet_aemask.sh" pinned="false" current-in-tab="true">
-            <entry file="file://$PROJECT_DIR$/scripts/train_glat_motifnet_aemask.sh">
+          <file leaf-file-name="glat.py" pinned="false" current-in-tab="false">
+            <entry file="file://$PROJECT_DIR$/lib/glat.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="204">
-                  <caret line="12" lean-forward="true" selection-start-line="12" selection-end-line="12" />
+                <state relative-caret-position="180">
+                  <caret line="299" column="58" lean-forward="true" selection-start-line="299" selection-start-column="58" selection-end-line="299" selection-end-column="58" />
                 </state>
               </provider>
             </entry>
           </file>
-          <file leaf-file-name="get_union_boxes.py" pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/lib/get_union_boxes.py">
+          <file leaf-file-name="eval_motifnet_sgcls_mask_logit_thres_v3.sh" pinned="false" current-in-tab="false">
+            <entry file="file://$PROJECT_DIR$/scripts/eval_motifnet_sgcls_mask_logit_thres_v3.sh">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="102">
-                  <caret line="14" column="24" selection-start-line="14" selection-start-column="6" selection-end-line="14" selection-end-column="24" />
+                <state relative-caret-position="187">
+                  <caret line="11" column="11" selection-start-line="11" selection-start-column="11" selection-end-line="11" selection-end-column="11" />
                 </state>
               </provider>
             </entry>
           </file>
-          <file leaf-file-name="sparse_targets.py" pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/lib/sparse_targets.py">
+          <file leaf-file-name="train_rels_motifnet_mask_logit_thres_train_v3_sgcls.py" pinned="false" current-in-tab="false">
+            <entry file="file://$PROJECT_DIR$/models/train_rels_motifnet_mask_logit_thres_train_v3_sgcls.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="306">
-                  <caret line="25" column="42" selection-start-line="25" selection-start-column="42" selection-end-line="25" selection-end-column="42" />
+                <state relative-caret-position="-2848">
+                  <caret line="479" lean-forward="true" selection-start-line="479" selection-end-line="479" />
+                </state>
+              </provider>
+            </entry>
+          </file>
+          <file leaf-file-name="train_rels_kern_mask_logit_thres_train_v2mbz_sgcls.py" pinned="false" current-in-tab="true">
+            <entry file="file://$PROJECT_DIR$/models/train_rels_kern_mask_logit_thres_train_v2mbz_sgcls.py">
+              <provider selected="true" editor-type-id="text-editor">
+                <state relative-caret-position="259">
+                  <caret line="354" column="15" selection-start-line="354" selection-start-column="15" selection-end-line="354" selection-end-column="15" />
                   <folding>
-                    <element signature="e#0#45#0" expanded="true" />
-                  </folding>
-                </state>
-              </provider>
-            </entry>
-          </file>
-          <file leaf-file-name="get_dataset_counts.py" pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/lib/get_dataset_counts.py">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="136">
-                  <caret line="11" column="4" selection-start-line="11" selection-start-column="4" selection-end-line="11" selection-end-column="4" />
-                </state>
-              </provider>
-            </entry>
-          </file>
-          <file leaf-file-name="visualize_predcls_mask.py" pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/visualization/visualize_predcls_mask.py">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="4063">
-                  <caret line="254" selection-start-line="254" selection-end-line="254" />
-                  <folding>
-                    <element signature="e#186#240#0" expanded="true" />
+                    <element signature="e#94#171#0" expanded="true" />
                   </folding>
                 </state>
               </provider>
@@ -218,89 +161,45 @@
       </split-first>
       <split-second>
         <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-          <file leaf-file-name="train_rels_motifnet_aemask.py" pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/models/train_rels_motifnet_aemask.py">
+          <file leaf-file-name="train_kern_sgcls.sh" pinned="false" current-in-tab="false">
+            <entry file="file://$PROJECT_DIR$/scripts/train_kern_sgcls.sh">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="830">
-                  <caret line="174" lean-forward="true" selection-start-line="174" selection-end-line="174" />
+                <state relative-caret-position="340">
+                  <caret line="20" column="40" lean-forward="true" selection-start-line="20" selection-start-column="40" selection-end-line="20" selection-end-column="40" />
                 </state>
               </provider>
             </entry>
           </file>
-          <file leaf-file-name="eval_stat_stanford_motif_glat_mask.py" pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/models/eval_stat_stanford_motif_glat_mask.py">
+          <file leaf-file-name="eval_stanford_motif_glat_mask_logit_thres_sgcls_v3.py" pinned="false" current-in-tab="false">
+            <entry file="file://$PROJECT_DIR$/models/eval_stanford_motif_glat_mask_logit_thres_sgcls_v3.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="2155">
-                  <caret line="451" column="15" selection-start-line="451" selection-start-column="15" selection-end-line="451" selection-end-column="15" />
-                  <folding>
-                    <element signature="e#1#78#0" expanded="true" />
-                  </folding>
+                <state relative-caret-position="502">
+                  <caret line="269" column="55" selection-start-line="269" selection-start-column="55" selection-end-line="269" selection-end-column="55" />
                 </state>
               </provider>
             </entry>
           </file>
-          <file leaf-file-name="train_rels_motifnet_mask_mat_mbz.py" pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/models/train_rels_motifnet_mask_mat_mbz.py">
+          <file leaf-file-name="train_glat_motifnet_mask_logit_thres_trainv3_sgcls.sh" pinned="false" current-in-tab="false">
+            <entry file="file://$PROJECT_DIR$/scripts/train_glat_motifnet_mask_logit_thres_trainv3_sgcls.sh">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="439">
-                  <caret line="106" column="13" lean-forward="true" selection-start-line="106" selection-start-column="13" selection-end-line="106" selection-end-column="13" />
+                <state relative-caret-position="187">
+                  <caret line="11" lean-forward="true" selection-start-line="11" selection-end-line="11" />
                 </state>
               </provider>
             </entry>
           </file>
-          <file leaf-file-name="glat.py" pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/lib/glat.py">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="439">
-                  <caret line="357" column="4" selection-start-line="357" selection-start-column="4" selection-end-line="357" selection-end-column="4" />
-                </state>
-              </provider>
-            </entry>
-          </file>
-          <file leaf-file-name="visual_genome.py" pinned="false" current-in-tab="false">
+          <file leaf-file-name="visual_genome.py" pinned="false" current-in-tab="true">
             <entry file="file://$PROJECT_DIR$/dataloaders/visual_genome.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="-173">
-                  <caret line="433" column="4" selection-start-line="433" selection-start-column="4" selection-end-line="433" selection-end-column="4" />
-                </state>
-              </provider>
-            </entry>
-          </file>
-          <file leaf-file-name="train_rels_motifnet_mask.py" pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/models/train_rels_motifnet_mask.py">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="-3919">
-                  <caret line="343" column="21" selection-start-line="343" selection-start-column="15" selection-end-line="343" selection-end-column="21" />
-                  <folding>
-                    <element signature="e#94#171#0" expanded="true" />
-                    <marker date="1576262334547" expanded="true" signature="29007:29874" ph="..." />
-                  </folding>
+                <state relative-caret-position="460">
+                  <caret line="469" lean-forward="true" selection-start-line="469" selection-end-line="469" />
                 </state>
               </provider>
             </entry>
           </file>
           <file leaf-file-name="train_rels_motifnet.py" pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/models/train_rels_motifnet.py">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="-4326">
-                  <caret line="90" selection-start-line="90" selection-end-line="90" />
-                  <folding>
-                    <element signature="e#94#171#0" expanded="true" />
-                  </folding>
-                </state>
-              </provider>
-            </entry>
-          </file>
-          <file leaf-file-name="train_rels_motifnet_save_base.py" pinned="false" current-in-tab="true">
-            <entry file="file://$PROJECT_DIR$/models/train_rels_motifnet_save_base.py">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="-2999">
-                  <caret line="418" lean-forward="true" selection-start-line="418" selection-end-line="418" />
-                  <folding>
-                    <element signature="e#94#171#0" expanded="true" />
-                  </folding>
-                </state>
-              </provider>
+              <provider selected="true" editor-type-id="text-editor" />
             </entry>
           </file>
         </leaf>
@@ -316,36 +215,36 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>result</find>
-      <find>dict_gt</find>
-      <find>det_res</find>
-      <find>det</find>
-      <find>Tensor</find>
-      <find>.long</find>
-      <find>lr</find>
-      <find>assert</find>
-      <find>.shape</find>
-      <find>mask_idx</find>
-      <find>range</find>
-      <find>for</find>
-      <find>accs</find>
-      <find>num</find>
-      <find>number of</find>
-      <find>num of mask</find>
-      <find>nonzero</find>
-      <find>\</find>
-      <find>pred_entry</find>
+      <find>eps</find>
+      <find>numpy</find>
+      <find>5e-</find>
+      <find>number of mask</find>
       <find>break</find>
-      <find>total_gt</find>
-      <find>i</find>
-      <find>total_correct</find>
-      <find>Digraph</find>
-      <find>use_vision</find>
-      <find>class</find>
-      <find>bg_classifier</find>
+      <find>epoch</find>
+      <find>epoch_num</find>
+      <find>num_epochs</find>
+      <find>adamwd</find>
+      <find>conf.num_epochs</find>
+      <find>return_unbias_logit</find>
+      <find>save_rel_recall</find>
+      <find>.size</find>
+      <find>return</find>
+      <find>RelModel</find>
+      <find>exp_name</find>
+      <find>gpu</find>
+      <find>conf.mode</find>
+      <find>rel_classes</find>
+      <find>pred_relations</find>
+      <find>mode</find>
+      <find>sgcls</find>
+      <find>rel_dists</find>
+      <find>pred_classes</find>
       <find>pdb</find>
-      <find>variable</find>
-      <find>keys</find>
+      <find>rm_obj_dists</find>
+      <find>pooling</find>
+      <find>pooling_dim</find>
+      <find>threshold</find>
+      <find>obj_preds</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -354,57 +253,57 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/models/eval_stanford_motif_glat.py" />
-        <option value="$PROJECT_DIR$/scripts/train_kern_stanford_mask.sh" />
-        <option value="$PROJECT_DIR$/scripts/train_kern_motifnet_mask_sgcls.sh" />
-        <option value="$PROJECT_DIR$/scripts/train_kern_motifnet_mask.sh" />
-        <option value="$PROJECT_DIR$/scripts/train_glat_motifnet_mask.sh" />
-        <option value="$PROJECT_DIR$/scripts/vis_glat_motifnet_mask_sgcls.sh" />
-        <option value="$PROJECT_DIR$/models/eval_stanford_motif.py" />
-        <option value="$PROJECT_DIR$/lib/kern_model.py" />
-        <option value="$PROJECT_DIR$/scripts/train_glat_stanford_predcls.sh" />
-        <option value="$PROJECT_DIR$/models/train_rels_stanford.py" />
-        <option value="$PROJECT_DIR$/dataloaders/visual_genome.py" />
-        <option value="$PROJECT_DIR$/scripts/train_glat_motifnet_mbz.sh" />
-        <option value="$PROJECT_DIR$/scripts/train_glat_motifnet_mbz_sgcls.sh" />
-        <option value="$PROJECT_DIR$/lib/stanford_model.py" />
-        <option value="$PROJECT_DIR$/scripts/save_motifnet_result.sh" />
-        <option value="$PROJECT_DIR$/models/train_rels_motifnet.py" />
-        <option value="$PROJECT_DIR$/models/save_base_result.py" />
-        <option value="$PROJECT_DIR$/visualization/visualize_motifnet_mask.py" />
-        <option value="$PROJECT_DIR$/models/eval_stanford_motif_mask.py" />
-        <option value="$PROJECT_DIR$/scripts/eval_motifnet_mask.sh" />
-        <option value="$PROJECT_DIR$/scripts/eval_motifnet_predcls.sh" />
-        <option value="$PROJECT_DIR$/scripts/eval_stanford_predcls.sh" />
-        <option value="$PROJECT_DIR$/models/train_rels_stanford_save_base.py" />
-        <option value="$PROJECT_DIR$/scripts/eval_stanford_predcls_mask.sh" />
-        <option value="$PROJECT_DIR$/scripts/train_glat_motifnet_mbz_saveb.sh" />
-        <option value="$PROJECT_DIR$/models/train_rels_motifnet_save_base.py" />
-        <option value="$PROJECT_DIR$/models/train_rels_motifnet_mask_mbz.py" />
-        <option value="$PROJECT_DIR$/scripts/train_glat_motifnet_mask_mbz.sh" />
-        <option value="$PROJECT_DIR$/scripts/train_glat_motifnet_mask_rank_mbz.sh" />
-        <option value="$PROJECT_DIR$/scripts/train_glat_motifnet_mbz_v2now.sh" />
-        <option value="$PROJECT_DIR$/scripts/train_glat_motifnet_mask_rank_mbz_1.sh" />
-        <option value="$PROJECT_DIR$/models/train_rels_motifnet_mask_rank_mbz.py" />
-        <option value="$PROJECT_DIR$/scripts/eval_stanford_predcls_mask_rank.sh" />
-        <option value="$PROJECT_DIR$/models/eval_hint_stanford_motif_glat_mask.py" />
-        <option value="$PROJECT_DIR$/models/eval_stanford_motif_glat_mask_rank.py" />
-        <option value="$PROJECT_DIR$/scripts/eval_motifnet_predcls_mask_rank.sh" />
-        <option value="$PROJECT_DIR$/scripts/train_glat_motifnet_mask_mat_mbz.sh" />
-        <option value="$PROJECT_DIR$/scripts/eval_motifnet_predcls_mask_threshold.sh" />
-        <option value="$PROJECT_DIR$/models/eval_stanford_motif_glat_mask_threshold.py" />
-        <option value="$PROJECT_DIR$/models/train_rels_motifnet_mask_mat_mbz.py" />
         <option value="$PROJECT_DIR$/scripts/eval_motifnet_predcls_mask_mat.sh" />
         <option value="$PROJECT_DIR$/models/eval_stanford_motif_glat_mask_mat.py" />
-        <option value="$PROJECT_DIR$/scripts/eval_stat_motifnet_predcls_mask.sh" />
-        <option value="$PROJECT_DIR$/models/eval_stat_stanford_motif_glat_mask.py" />
-        <option value="$PROJECT_DIR$/visualization/visualize_predcls_mask.py" />
         <option value="$PROJECT_DIR$/models/eval_stanford_motif_glat_mask.py" />
         <option value="$PROJECT_DIR$/scripts/eval_motifnet_predcls_mask.sh" />
         <option value="$PROJECT_DIR$/scripts/train_glat_motifnet_armask.sh" />
-        <option value="$PROJECT_DIR$/lib/motifnet_model.py" />
         <option value="$PROJECT_DIR$/scripts/train_glat_motifnet_aemask.sh" />
         <option value="$PROJECT_DIR$/models/train_rels_motifnet_aemask.py" />
+        <option value="$PROJECT_DIR$/visualization/visualize_predcls_mask.py" />
+        <option value="$PROJECT_DIR$/lib/motifnet_model.py" />
+        <option value="$PROJECT_DIR$/scripts/eval_stat_motifnet_predcls_mask.sh" />
+        <option value="$PROJECT_DIR$/models/eval_stat_stanford_motif_glat_mask.py" />
+        <option value="$PROJECT_DIR$/scripts/train_glat_motifnet_mask_logit_thres_mbz.sh" />
+        <option value="$PROJECT_DIR$/models/train_rels_motifnet_mask_logit_thres_mbz.py" />
+        <option value="$PROJECT_DIR$/models/train_rels_motifnet_mask_logit_thres_train_v1mbz.py" />
+        <option value="$PROJECT_DIR$/scripts/train_glat_motifnet_mask_logit_thres_trainv1mbz.sh" />
+        <option value="$PROJECT_DIR$/scripts/train_glat_motifnet_mask_logit_thres_trainv2mbz.sh" />
+        <option value="$PROJECT_DIR$/models/train_rels_motifnet_mask.py" />
+        <option value="$PROJECT_DIR$/scripts/eval_motifnet_predcls_mask_logit_thres.sh" />
+        <option value="$PROJECT_DIR$/models/eval_stanford_motif_glat_mask_logit_thres.py" />
+        <option value="$PROJECT_DIR$/scripts/eval_motifnet_predcls_mask_logit_thres_v01.sh" />
+        <option value="$PROJECT_DIR$/models/train_rels_motifnet_mask_logit_thres_train_v2mbz.py" />
+        <option value="$PROJECT_DIR$/models/train_rels_motifnet_mask_top_gt.py" />
+        <option value="$PROJECT_DIR$/scripts/train_glat_motifnet_mask_top_gt.sh" />
+        <option value="$PROJECT_DIR$/scripts/eval_motifnet_predcls_mask_logit_thres_v2.sh" />
+        <option value="$PROJECT_DIR$/scripts/eval_motifnet_predcls_mask_logit_thres_top100_multithres.sh" />
+        <option value="$PROJECT_DIR$/models/eval_stanford_motif_glat_mask_logit_thres_v01.py" />
+        <option value="$PROJECT_DIR$/models/eval_stanford_motif_glat_mask_logit_thres_v2.py" />
+        <option value="$PROJECT_DIR$/scripts/eval_motifnet_predcls_mask_logit_thres_top30_multithres.sh" />
+        <option value="$PROJECT_DIR$/lib/stanford_model.py" />
+        <option value="$PROJECT_DIR$/lib/kern_model.py" />
+        <option value="$PROJECT_DIR$/scripts/eval_stanford_predcls_mask_logit_thres_top30_multithres.sh" />
+        <option value="$PROJECT_DIR$/models/eval_kern_mask_logit_thres.py" />
+        <option value="$PROJECT_DIR$/scripts/eval_kern_predcls_mask_logit_thres_top30_multithres.sh" />
+        <option value="$PROJECT_DIR$/scripts/train_kern_predcls_mask_logit_thres_trainv2.sh" />
+        <option value="$PROJECT_DIR$/models/train_rels_kern_mask_logit_thres_train_v2mbz.py" />
+        <option value="$PROJECT_DIR$/models/train_rels_kern_mask_logit_thres_train_v3.py" />
+        <option value="$PROJECT_DIR$/models/train_rels_motifnet_mask_logit_thres_train_v3.py" />
+        <option value="$PROJECT_DIR$/scripts/train_glat_motifnet_mask_logit_thres_trainv3.sh" />
+        <option value="$PROJECT_DIR$/models/train_rels.py" />
+        <option value="$PROJECT_DIR$/scripts/train_kern_sgcls_mask_logit_thres_trainv2.sh" />
+        <option value="$PROJECT_DIR$/scripts/train_glat_motifnet_mask_logit_thres_trainv3_sgcls.sh" />
+        <option value="$PROJECT_DIR$/scripts/train_kern_sgcls.sh" />
+        <option value="$PROJECT_DIR$/scripts/eval_motifnet_sglcs_mask_logit_thres_v2.sh" />
+        <option value="$PROJECT_DIR$/models/eval_stanford_motif_glat_mask_logit_thres_sgcls_v2.py" />
+        <option value="$PROJECT_DIR$/scripts/eval_motifnet_sglcs_mask_logit_thres_v3.sh" />
+        <option value="$PROJECT_DIR$/config.py" />
+        <option value="$PROJECT_DIR$/scripts/eval_motifnet_sgcls_mask_logit_thres_v3.sh" />
+        <option value="$PROJECT_DIR$/models/eval_stanford_motif_glat_mask_logit_thres_sgcls_v3.py" />
+        <option value="$PROJECT_DIR$/models/train_rels_motifnet_mask_logit_thres_train_v3_sgcls.py" />
+        <option value="$PROJECT_DIR$/dataloaders/visual_genome.py" />
+        <option value="$PROJECT_DIR$/models/train_rels_kern_mask_logit_thres_train_v2mbz_sgcls.py" />
       </list>
     </option>
   </component>
@@ -418,10 +317,10 @@
     <packageJsonPaths />
   </component>
   <component name="ProjectFrameBounds" fullScreen="true">
-    <option name="x" value="-693" />
-    <option name="y" value="-1440" />
-    <option name="width" value="2560" />
-    <option name="height" value="1440" />
+    <option name="x" value="-1920" />
+    <option name="y" value="303" />
+    <option name="width" value="1280" />
+    <option name="height" value="777" />
   </component>
   <component name="ProjectView">
     <navigator proportions="" version="1">
@@ -488,15 +387,15 @@
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
   </component>
   <component name="RecentsManager">
-    <key name="MoveFile.RECENT_KEYS">
-      <recent name="$PROJECT_DIR$/lib" />
-    </key>
     <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/scripts" />
       <recent name="$PROJECT_DIR$/models" />
       <recent name="$PROJECT_DIR$/visualization" />
       <recent name="$PROJECT_DIR$/lib" />
       <recent name="$PROJECT_DIR$" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/lib" />
     </key>
   </component>
   <component name="RunDashboard">
@@ -553,7 +452,7 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="-693" y="-1440" width="2560" height="1440" extended-state="0" />
+    <frame x="-1920" y="0" width="1920" height="1080" extended-state="0" />
     <editor active="true" />
     <layout>
       <window_info anchor="bottom" id="TODO" order="6" />
@@ -564,9 +463,10 @@
       <window_info anchor="bottom" id="Python Console" order="13" />
       <window_info anchor="bottom" id="Terminal" order="11" />
       <window_info anchor="right" id="Remote Host" order="3" weight="0.32991013" />
-      <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.4996337" visible="true" weight="0.13264495" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.4996337" visible="true" weight="0.20021299" />
       <window_info anchor="bottom" id="Docker" order="7" show_stripe_button="false" />
       <window_info anchor="right" id="Database" order="5" weight="0.32991013" />
+      <window_info anchor="bottom" id="Find" order="1" weight="0.32820514" />
       <window_info anchor="right" id="SciView" order="4" weight="0.03494837" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.0" />
@@ -578,7 +478,6 @@
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="File Transfer" order="9" weight="0.14337349" />
-      <window_info anchor="bottom" id="Find" order="1" weight="0.32891566" />
     </layout>
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -596,7 +495,7 @@
           </properties>
         </breakpoint>
       </default-breakpoints>
-      <option name="time" value="6" />
+      <option name="time" value="9" />
     </breakpoint-manager>
   </component>
   <component name="debuggerHistoryManager">
@@ -749,385 +648,356 @@ Unexpected key g</expression-string>
     </expressions>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/models/train_rels_stanford.py">
+    <entry file="file://$PROJECT_DIR$/models/eval_stanford_motif_glat_mask_threshold.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="430">
-          <caret line="247" column="36" selection-start-line="247" selection-start-column="29" selection-end-line="247" selection-end-column="36" />
+        <state relative-caret-position="382">
+          <caret line="248" lean-forward="true" selection-start-line="248" selection-end-line="248" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/scripts/save_motifnet_result.sh">
+    <entry file="file://$PROJECT_DIR$/scripts/eval_motifnet_predcls_mask_logit_thres_top100_multithres.sh">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="527">
-          <caret line="31" column="30" selection-start-line="31" selection-start-column="14" selection-end-line="31" selection-end-column="30" />
+        <state relative-caret-position="374">
+          <caret line="22" column="40" lean-forward="true" selection-start-line="22" selection-start-column="40" selection-end-line="22" selection-end-column="40" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/scripts/vis_glat_motifnet_mask_sgcls.sh">
+    <entry file="file://$PROJECT_DIR$/models/eval_stanford_motif_glat_mask_logit_thres_v2.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="170">
-          <caret line="10" lean-forward="true" selection-start-line="10" selection-end-line="10" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/scripts/eval_motifnet_glat.sh">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="629">
-          <caret line="37" lean-forward="true" selection-start-line="37" selection-end-line="37" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/lib/stanford_rel.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="446">
-          <caret line="344" column="27" selection-start-line="344" selection-start-column="27" selection-end-line="344" selection-end-column="27" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/lib/stanford_model.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2295">
-          <caret line="135" column="28" lean-forward="true" selection-start-line="135" selection-start-column="28" selection-end-line="135" selection-end-column="28" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/config.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="430">
-          <caret line="194" column="50" selection-start-line="194" selection-start-column="40" selection-end-line="194" selection-end-column="50" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/scripts/eval_motifnet_predcls.sh">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="544">
-          <caret line="32" column="58" selection-start-line="32" selection-start-column="58" selection-end-line="32" selection-end-column="103" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/models/eval_stanford_motif_glat.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-4836">
-          <caret line="30" column="73" selection-start-line="30" selection-start-column="73" selection-end-line="30" selection-end-column="73" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$USER_HOME$/Library/Caches/PyCharm2018.1/python_stubs/180230738/_collections.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="437">
-          <caret line="57" selection-start-line="46" selection-end-line="57" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/visualization/visualize_sgcls.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-1698">
-          <caret line="66" column="101" selection-start-line="66" selection-start-column="101" selection-end-line="66" selection-end-column="101" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/visualization/visualize_motifnet_mask.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-4790">
-          <caret line="57" column="18" lean-forward="true" selection-start-line="57" selection-start-column="18" selection-end-line="57" selection-end-column="18" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/scripts/eval_stanford_predcls_mask.sh">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="187">
-          <caret line="11" column="214" selection-start-line="11" selection-start-column="214" selection-end-line="11" selection-end-column="214" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/lib/object_detector.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-4566">
-          <caret line="57" column="8" selection-start-line="57" selection-start-column="8" selection-end-line="57" selection-end-column="8" />
-          <folding>
-            <element signature="e#18#36#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/scripts/eval_stanford_predcls.sh">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="476">
-          <caret line="28" column="106" lean-forward="true" selection-start-line="28" selection-start-column="106" selection-end-line="28" selection-end-column="106" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/scripts/train_glat_motifnet_mbz_v1.sh">
-      <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <caret column="19" lean-forward="true" selection-start-column="19" selection-end-column="19" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/scripts/train_glat_motifnet_mask.sh">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="17">
-          <caret line="1" column="52" selection-start-line="1" selection-start-column="45" selection-end-line="1" selection-end-column="52" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/models/train_rels_stanford_save_base.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2294">
-          <caret line="274" column="63" lean-forward="true" selection-start-line="274" selection-start-column="63" selection-end-line="274" selection-end-column="63" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$USER_HOME$/Library/Caches/PyCharm2018.1/remote_sources/180230738/-764002914/tensorboardX/writer.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="233">
-          <caret line="329" column="8" selection-start-line="329" selection-start-column="8" selection-end-line="329" selection-end-column="8" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/scripts/train_glat_motifnet_mask_rank_mbz.sh">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="136">
-          <caret line="8" column="7" lean-forward="true" selection-start-line="8" selection-start-column="7" selection-end-line="8" selection-end-column="7" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/scripts/train_glat_motifnet_mbz_v2now.sh">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="102">
-          <caret line="6" column="50" selection-start-line="6" selection-start-column="50" selection-end-line="6" selection-end-column="50" />
+        <state relative-caret-position="663">
+          <caret line="55" column="14" lean-forward="true" selection-start-line="55" selection-start-column="14" selection-end-line="55" selection-end-column="14" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/scripts/eval_stanford_predcls_mask_rank.sh">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="187">
-          <caret line="11" column="222" lean-forward="true" selection-start-line="11" selection-start-column="222" selection-end-line="11" selection-end-column="222" />
+          <caret line="11" column="24" selection-start-line="11" selection-start-column="24" selection-end-line="11" selection-end-column="24" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/lib/surgery.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="468">
-          <caret line="75" column="13" lean-forward="true" selection-start-line="75" selection-start-column="13" selection-end-line="75" selection-end-column="13" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/models/eval_stanford_motif_glat_mask_rank.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="3374">
-          <caret line="317" column="9" lean-forward="true" selection-start-line="317" selection-start-column="9" selection-end-line="317" selection-end-column="9" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/models/train_rels_motifnet_mask_rank_mbz.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-43">
-          <caret line="343" column="12" selection-start-line="343" selection-start-column="4" selection-end-line="343" selection-end-column="12" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/models/eval_stanford_motif_glat_mask_threshold.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-1430">
-          <caret line="341" column="69" selection-start-line="341" selection-start-column="69" selection-end-line="341" selection-end-column="69" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/lib/evaluation/sg_eval.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-3">
-          <caret line="225" column="38" lean-forward="true" selection-start-line="225" selection-start-column="38" selection-end-line="225" selection-end-column="38" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/models/save_base_result.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="893">
-          <caret line="273" column="33" selection-start-line="273" selection-start-column="26" selection-end-line="273" selection-end-column="33" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/scripts/eval_motifnet_predcls_mask_threshold.sh">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="187">
-          <caret line="11" column="229" selection-start-line="11" selection-start-column="229" selection-end-line="11" selection-end-column="229" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/scripts/eval_motifnet_predcls_mask_rank.sh">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="102">
-          <caret line="6" column="185" selection-start-line="6" selection-start-column="130" selection-end-line="6" selection-end-column="185" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/models/eval_stanford_motif_glat_mask_mat.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-2966">
-          <caret line="120" column="12" lean-forward="true" selection-start-line="120" selection-start-column="12" selection-end-line="120" selection-end-column="12" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/scripts/eval_motifnet_predcls_mask_mat.sh">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="187">
-          <caret line="11" column="55" selection-start-line="11" selection-start-column="55" selection-end-line="11" selection-end-column="55" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/scripts/eval_stat_motifnet_predcls_mask.sh">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="187">
-          <caret line="11" column="165" selection-start-line="11" selection-start-column="165" selection-end-line="11" selection-end-column="165" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/scripts/train_glat_motifnet_mask_mat_mbz.sh">
+    <entry file="file://$PROJECT_DIR$/scripts/train_glat_motifnet_mask_logit_thres_trainv1mbz.sh">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="187">
           <caret line="11" lean-forward="true" selection-start-line="11" selection-end-line="11" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/visualization/visualize_predcls_mask.py">
+    <entry file="file://$PROJECT_DIR$/scripts/eval_motifnet_predcls_mask_rank.sh">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/scripts/eval_kern_sgdet.sh">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/scripts/eval_kern_sgcls.sh">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/models/eval_rels.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="4063">
-          <caret line="254" selection-start-line="254" selection-end-line="254" />
+        <state relative-caret-position="485">
+          <caret line="297" column="57" lean-forward="true" selection-start-line="297" selection-start-column="57" selection-end-line="297" selection-end-column="57" />
           <folding>
-            <element signature="e#186#240#0" expanded="true" />
+            <element signature="e#0#77#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/lib/get_dataset_counts.py">
+    <entry file="file://$PROJECT_DIR$/lib/stanford_model.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="136">
-          <caret line="11" column="4" selection-start-line="11" selection-start-column="4" selection-end-line="11" selection-end-column="4" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/lib/sparse_targets.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="306">
-          <caret line="25" column="42" selection-start-line="25" selection-start-column="42" selection-end-line="25" selection-end-column="42" />
+        <state relative-caret-position="447">
+          <caret line="164" lean-forward="true" selection-start-line="164" selection-end-line="164" />
           <folding>
-            <element signature="e#0#45#0" expanded="true" />
+            <element signature="e#40#52#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/lib/get_union_boxes.py">
+    <entry file="file://$PROJECT_DIR$/models/train_rels_motifnet_aemask.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="102">
-          <caret line="14" column="24" selection-start-line="14" selection-start-column="6" selection-end-line="14" selection-end-column="24" />
+        <state relative-caret-position="774">
+          <caret line="299" column="28" selection-start-line="299" selection-start-column="19" selection-end-line="299" selection-end-column="28" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/scripts/train_glat_motifnet_mask_rank_mbz_1.sh">
+    <entry file="file://$PROJECT_DIR$/scripts/eval_stanford_predcls_mask_logit_thres_top30_multithres.sh">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="544">
+          <caret line="32" lean-forward="true" selection-start-line="32" selection-end-line="32" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/models/train_rels_kern_mask_logit_thres_train_v1mbz.py">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/scripts/train_kern_predcls.sh">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/scripts/train_kern_predcls_original.sh">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="153">
-          <caret line="9" column="7" lean-forward="true" selection-start-line="9" selection-end-line="10" />
+          <caret line="9" selection-start-line="9" selection-end-line="15" selection-end-column="1" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/scripts/eval_motifnet_predcls_mask.sh">
+    <entry file="file://$PROJECT_DIR$/scripts/train_glat_motifnet_mask_logit_thres_trainv2mbz.sh">
       <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <caret column="19" selection-start-column="19" selection-end-column="19" />
+        <state relative-caret-position="153">
+          <caret line="9" column="18" selection-start-line="9" selection-end-line="10" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/models/eval_stanford_motif_glat_mask.py">
+    <entry file="file://$PROJECT_DIR$/scripts/train_glat_motifnet_mask_top_gt.sh">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2805">
-          <caret line="178" column="54" selection-start-line="178" selection-start-column="54" selection-end-line="178" selection-end-column="54" />
+        <state relative-caret-position="357">
+          <caret line="21" column="7" lean-forward="true" selection-start-line="21" selection-start-column="7" selection-end-line="21" selection-end-column="7" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/scripts/train_glat_motifnet_mask_logit_thres_mbz.sh">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="17">
+          <caret line="1" column="57" selection-start-line="1" selection-start-column="57" selection-end-line="1" selection-end-column="57" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/models/train_rels_motifnet_mask_top_gt.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="730">
+          <caret line="380" column="27" selection-start-line="380" selection-start-column="12" selection-end-line="380" selection-end-column="27" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/pytorch_misc.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="102">
+          <caret line="13" column="4" selection-start-line="13" selection-start-column="4" selection-end-line="13" selection-end-column="4" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/scripts/eval_kern_predcls.sh">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="34">
+          <caret line="2" column="6" lean-forward="true" selection-start-line="2" selection-start-column="6" selection-end-line="2" selection-end-column="40" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/models/train_rels_motifnet_mask_logit_thres_train_v2mbz.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1306">
+          <caret line="375" column="19" lean-forward="true" selection-start-line="375" selection-start-column="19" selection-end-line="375" selection-end-column="19" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/scripts/train_kern_predcls_mask_logit_thres_trainv2.sh">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="221">
+          <caret line="13" column="20" lean-forward="true" selection-start-line="13" selection-start-column="20" selection-end-line="13" selection-end-column="20" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/models/train_rels_motifnet_mask_logit_thres_train_v1mbz.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="797">
+          <caret line="371" column="47" selection-start-line="371" selection-start-column="47" selection-end-line="371" selection-end-column="47" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/models/train_rels_kern_mask_logit_thres_train_v2mbz.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-276">
+          <caret line="82" lean-forward="true" selection-start-line="82" selection-end-line="82" />
           <folding>
-            <element signature="e#1#78#0" expanded="true" />
+            <element signature="e#94#171#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/scripts/train_glat_motifnet_mask_logit_thres_trainv3.sh">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="136">
+          <caret line="8" column="7" lean-forward="true" selection-start-line="8" selection-start-column="7" selection-end-line="8" selection-end-column="7" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/models/eval_kern_mask_logit_thres.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="187">
+          <caret line="11" column="31" lean-forward="true" selection-start-line="11" selection-start-column="31" selection-end-line="11" selection-end-column="31" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/models/train_detector.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-1754" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/models/train_rels_baseline_1.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="561">
+          <caret line="250" column="13" lean-forward="true" selection-start-line="250" selection-start-column="13" selection-end-line="250" selection-end-column="13" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/models/train_rels_motifnet.py">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/models/eval_rels_ori.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-722" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/models/train_rels_motifnet_mask_logit_thres_mbz.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="802">
+          <caret line="117" column="26" lean-forward="true" selection-start-line="117" selection-start-column="26" selection-end-line="117" selection-end-column="26" />
+          <folding>
+            <element signature="e#94#171#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/scripts/eval_kern_predcls_mask_logit_thres_top30_multithres.sh">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="850">
+          <caret line="50" column="68" lean-forward="true" selection-start-line="50" selection-start-column="68" selection-end-line="50" selection-end-column="68" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/models/train_rels_motifnet_mask_logit_thres_train_v3.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="12393">
+          <caret line="729" column="22" lean-forward="true" selection-start-line="729" selection-start-column="22" selection-end-line="729" selection-end-column="22" />
+          <folding>
+            <element signature="e#94#171#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/models/train_rels.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="244">
+          <caret line="217" lean-forward="true" selection-start-line="217" selection-end-line="217" />
+          <folding>
+            <element signature="e#94#171#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/lib/motifnet_model.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="995">
-          <caret line="395" column="81" selection-start-line="395" selection-start-column="28" selection-end-line="395" selection-end-column="81" />
+        <state relative-caret-position="7646">
+          <caret line="542" column="37" lean-forward="true" selection-start-line="542" selection-start-column="37" selection-end-line="542" selection-end-column="37" />
           <folding>
             <element signature="e#40#58#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/scripts/train_glat_motifnet_aemask.sh">
+    <entry file="file://$PROJECT_DIR$/scripts/train_kern_sgcls_mask_logit_thres_trainv2.sh">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="204">
-          <caret line="12" lean-forward="true" selection-start-line="12" selection-end-line="12" />
+        <state relative-caret-position="119">
+          <caret line="7" column="5" selection-start-line="7" selection-start-column="5" selection-end-line="7" selection-end-column="5" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/models/train_rels_motifnet_aemask.py">
+    <entry file="file://$PROJECT_DIR$/scripts/train_glat_motifnet_mask_logit_thres_trainv3_sgcls.sh">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="830">
-          <caret line="174" lean-forward="true" selection-start-line="174" selection-end-line="174" />
+        <state relative-caret-position="187">
+          <caret line="11" lean-forward="true" selection-start-line="11" selection-end-line="11" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/models/eval_stat_stanford_motif_glat_mask.py">
+    <entry file="file://$PROJECT_DIR$/scripts/train_kern_sgcls.sh">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2155">
-          <caret line="451" column="15" selection-start-line="451" selection-start-column="15" selection-end-line="451" selection-end-column="15" />
+        <state relative-caret-position="340">
+          <caret line="20" column="40" lean-forward="true" selection-start-line="20" selection-start-column="40" selection-end-line="20" selection-end-column="40" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/scripts/eval_motifnet_predcls_mask_logit_thres_v2.sh">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="68">
+          <caret line="4" column="41" selection-start-line="4" selection-start-column="41" selection-end-line="4" selection-end-column="41" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/config.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="335">
+          <caret line="202" column="110" selection-start-line="202" selection-start-column="110" selection-end-line="202" selection-end-column="110" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/kern_model.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="419">
+          <caret line="365" lean-forward="true" selection-start-line="365" selection-end-line="365" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/scripts/eval_motifnet_predcls_mask_logit_thres_v01.sh">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="187">
+          <caret line="11" column="37" selection-start-line="11" selection-start-column="37" selection-end-line="11" selection-end-column="37" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/models/eval_stanford_motif_glat_mask_logit_thres_v01.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-3020">
+          <caret line="293" column="45" selection-start-line="293" selection-start-column="45" selection-end-line="293" selection-end-column="45" />
           <folding>
             <element signature="e#1#78#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/dataloaders/visual_genome.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-173">
-          <caret line="433" column="4" selection-start-line="433" selection-start-column="4" selection-end-line="433" selection-end-column="4" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/models/train_rels_motifnet_mask_mat_mbz.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="439">
-          <caret line="106" column="13" lean-forward="true" selection-start-line="106" selection-start-column="13" selection-end-line="106" selection-end-column="13" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/lib/glat.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="439">
-          <caret line="357" column="4" selection-start-line="357" selection-start-column="4" selection-end-line="357" selection-end-column="4" />
+        <state relative-caret-position="180">
+          <caret line="299" column="58" lean-forward="true" selection-start-line="299" selection-start-column="58" selection-end-line="299" selection-end-column="58" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/models/train_rels_motifnet_mask.py">
+    <entry file="file://$PROJECT_DIR$/scripts/eval_motifnet_predcls_mask_logit_thres_top30_multithres.sh">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-3919">
-          <caret line="343" column="21" selection-start-line="343" selection-start-column="15" selection-end-line="343" selection-end-column="21" />
-          <folding>
-            <element signature="e#94#171#0" expanded="true" />
-            <marker date="1576262334547" expanded="true" signature="29007:29874" ph="..." />
-          </folding>
+        <state relative-caret-position="102">
+          <caret line="6" column="77" lean-forward="true" selection-start-line="6" selection-start-column="63" selection-end-line="6" selection-end-column="77" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/models/train_rels_motifnet.py">
+    <entry file="file://$PROJECT_DIR$/scripts/eval_motifnet_sgcls_mask_logit_thres_v3.sh">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-4326">
-          <caret line="90" selection-start-line="90" selection-end-line="90" />
-          <folding>
-            <element signature="e#94#171#0" expanded="true" />
-          </folding>
+        <state relative-caret-position="187">
+          <caret line="11" column="11" selection-start-line="11" selection-start-column="11" selection-end-line="11" selection-end-column="11" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/models/train_rels_motifnet_save_base.py">
+    <entry file="file://$PROJECT_DIR$/models/eval_stanford_motif_glat_mask_logit_thres_sgcls_v3.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-2999">
-          <caret line="418" lean-forward="true" selection-start-line="418" selection-end-line="418" />
+        <state relative-caret-position="502">
+          <caret line="269" column="55" selection-start-line="269" selection-start-column="55" selection-end-line="269" selection-end-column="55" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/models/train_rels_motifnet_mask_logit_thres_train_v3_sgcls.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-2848">
+          <caret line="479" lean-forward="true" selection-start-line="479" selection-end-line="479" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/dataloaders/visual_genome.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="460">
+          <caret line="469" lean-forward="true" selection-start-line="469" selection-end-line="469" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/models/train_rels_kern_mask_logit_thres_train_v2mbz_sgcls.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="259">
+          <caret line="354" column="15" selection-start-line="354" selection-start-column="15" selection-end-line="354" selection-end-column="15" />
           <folding>
             <element signature="e#94#171#0" expanded="true" />
           </folding>

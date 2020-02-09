@@ -13,6 +13,8 @@ import os
 from lib.glat import GLATNET
 from torch.autograd import Variable
 import pdb
+from torch.nn import functional as F
+
 
 conf = ModelConfig()
 if conf.model_s_m == 'motifnet':
@@ -75,7 +77,8 @@ detector = RelModel(classes=train.ind_to_classes, rel_classes=train.ind_to_predi
                     use_bias=use_bias,
                     use_tanh=use_tanh,
                     limit_vision=limit_vision,
-                    return_top100=True
+                    return_top100=True,
+                    return_unbias_logit=True,
                     )
 
 model = GLATNET(vocab_num=[52, 153],
@@ -266,7 +269,9 @@ all_pred_entries = []
 
 def val_batch(batch_num, b, evaluator,evaluator_multiple_preds, evaluator_list, evaluator_multiple_preds_list):
     # det_res = detector[b]
-    dict_gt, det_res = detector[b]
+    # dict_gt, det_res = detector[b]
+    # dict_gt, unbias_logit, det_res = detector[b]
+    dict_gt, bias_logit, det_res = detector[b]
 
     if conf.num_gpus == 1:
         det_res = [det_res]
@@ -321,19 +326,76 @@ def val_batch(batch_num, b, evaluator,evaluator_multiple_preds, evaluator_list, 
         #             else:
         #                 pred_wrong[i] += 1
 
-        # V2 Threshold
+        # V2 Threshold V6 logit threshold
+        # global total_pred_num
+        # global total_num_underthres
+        # global total_num_cover_gt_pair
+        # # unbias_logit = F.softmax(unbias_logit[:, 1:], dim=1).data.cpu().numpy()
+        # bias_logit = F.softmax(bias_logit[:, 1:], dim=1).data.cpu().numpy()
+        # # topk = int(pred_scores_i_b100.shape[0] * 0.3) if pred_scores_i_b100.shape[0]<100 else 30
+        # topk = int(pred_scores_i_b100.shape[0])
+        # total_pred_num += topk
+        # topk_pred_scores = bias_logit[rel_scores_idx_b100[:topk]]
         # for i, threshold in enumerate(rankings):
-        #     pred_idxs = np.nonzero(pred_scores_i_b100[:, 1:].max(1) < threshold)[0]
+        #     pred_idxs = np.nonzero(topk_pred_scores.max(1) < threshold)[0]
         #     pred_idxs = pred_idxs.tolist()
+        #     total_num_underthres[i] += len(pred_idxs)
         #     for j in pred_idxs:
         #         sub = rels_i_b100.data[j, 0]
         #         obj = rels_i_b100.data[j, 1]
-        #         pred_class = pred_entry['rel_scores'][j, 1:].argmax()+1
+        #         pred_class_bias = pred_entry['rel_scores'][j, 1:].argmax()+1
+        #         # pred_class_unbias = topk_pred_scores[j].argmax()
         #         if (int(sub), int(obj)) in dict_gt.keys():
-        #             if int(pred_class) in dict_gt[(int(sub), int(obj))]:
+        #             if int(pred_class_bias) in dict_gt[(int(sub), int(obj))]:
         #                 pred_right[i] += 1
         #             else:
         #                 pred_wrong[i] += 1
+        #             total_num_cover_gt_pair[i] +=1
+
+
+        # V7 certain threshold with different range of top sampels
+        global threshold
+        global total_pred_num
+        # global total_num_underthres
+        global total_num_cover_gt_pair
+        bias_logit = F.softmax(bias_logit[:, 1:], dim=1).data.cpu().numpy()
+        pred_num = int(pred_scores_i_b100.shape[0])
+
+        # pdb.set_trace()
+        for i in range(len(total_pred_num)):
+            total_pred_num[i] += int(pred_num * topn[i]) if i == 0 else int(pred_num * topn[i]) - int(pred_num * topn[i-1])
+        bias_logit_b100 = bias_logit[rel_scores_idx_b100]
+
+        pred_idxs = np.nonzero(bias_logit_b100.max(1) < threshold)[0]
+        pred_idxs = pred_idxs.tolist()
+
+        # pdb.set_trace()
+
+        for j in pred_idxs:
+            sub = rels_i_b100.data[j, 0]
+            obj = rels_i_b100.data[j, 1]
+            pred_class_bias = pred_entry['rel_scores'][j, 1:].argmax()+1
+
+            low_range = [int((i-0.1)*pred_num) for i in topn]
+            upper_range = [int(i*pred_num) for i in topn]
+            for i in range(len(upper_range)):
+                low = low_range[i]
+                upper = upper_range[i]
+                if j>= low and j < upper:
+                    save_range = i
+
+            # if batch_num == 356 or batch_num == 357:
+            #     pdb.set_trace()
+
+            if (int(sub), int(obj)) in dict_gt.keys():
+                if int(pred_class_bias) in dict_gt[(int(sub), int(obj))]:
+                    pred_right[save_range] += 1
+                else:
+                    pred_wrong[save_range] += 1
+                total_num_cover_gt_pair[save_range] +=1
+
+        # pdb.set_trace()
+
 
         # V3/V4 threshold + co-occurance matrix
         # for i, threshold in enumerate(rankings):
@@ -373,35 +435,34 @@ def val_batch(batch_num, b, evaluator,evaluator_multiple_preds, evaluator_list, 
         #             if (sub, obj) in dict_gt.keys():
         #                 pred_not_exist_based_on_mat_butreal[i] += 1
 
-        pdb.set_trace()
         # V5 Precision and Recall in topn
-        global total_gt
-        global total_correct
-        global total_sample
-        global total_gt_pairs
-        global total_bg_pairs
-        global total_bg_erasable_pairs
-        total_gt += len(dict_gt.keys())
-        num_predicate = rel_scores_idx_b100.shape[0]
-        for i in range(len(topns)):
-            if i*10 >= num_predicate:
-                break
-            topn_idx = list(range(i*10, (i+1)*10)) if num_predicate - (i+1)*10 >= 10 else list(range(i*10, num_predicate))
-            total_sample[i] += i*10 + len(topn_idx)
-            for pred_idx in topn_idx:
-                sub = int(rels_i_b100.data[pred_idx, 0])
-                sub_class = int(objs_i[sub])
-                obj = int(rels_i_b100.data[pred_idx, 1])
-                obj_class = int(objs_i[obj])
-                pred_class = int(pred_entry['rel_scores'][pred_idx, 1:].argmax()+1)
-                if (sub, obj) in dict_gt.keys():
-                    total_gt_pairs = [gt_pair+1 if idx >= i else gt_pair for idx, gt_pair in enumerate(total_gt_pairs)]
-                    if pred_class in dict_gt[(sub, obj)]:
-                        total_correct = [cor+1 if idx >= i else cor for idx, cor in enumerate(total_correct)]
-                else:
-                    total_bg_pairs = [bg_pair+1 if idx >= i else bg_pair for idx, bg_pair in enumerate(total_bg_pairs)]
-                    if pred_class not in np.nonzero(rel_matrix[sub_class, obj_class])[0]:
-                        total_bg_erasable_pairs = [bg_er_pair+1 if idx >= i else bg_er_pair for idx, bg_er_pair in enumerate(total_bg_erasable_pairs)]
+        # global total_gt
+        # global total_correct
+        # global total_sample
+        # global total_gt_pairs
+        # global total_bg_pairs
+        # global total_bg_erasable_pairs
+        # total_gt += len(dict_gt.keys())
+        # num_predicate = rel_scores_idx_b100.shape[0]
+        # for i in range(len(topns)):
+        #     if i*10 >= num_predicate:
+        #         break
+        #     topn_idx = list(range(i*10, (i+1)*10)) if num_predicate - (i+1)*10 >= 10 else list(range(i*10, num_predicate))
+        #     total_sample[i] += i*10 + len(topn_idx)
+        #     for pred_idx in topn_idx:
+        #         sub = int(rels_i_b100.data[pred_idx, 0])
+        #         sub_class = int(objs_i[sub])
+        #         obj = int(rels_i_b100.data[pred_idx, 1])
+        #         obj_class = int(objs_i[obj])
+        #         pred_class = int(pred_entry['rel_scores'][pred_idx, 1:].argmax()+1)
+        #         if (sub, obj) in dict_gt.keys():
+        #             total_gt_pairs = [gt_pair+1 if idx >= i else gt_pair for idx, gt_pair in enumerate(total_gt_pairs)]
+        #             if pred_class in dict_gt[(sub, obj)]:
+        #                 total_correct = [cor+1 if idx >= i else cor for idx, cor in enumerate(total_correct)]
+        #         else:
+        #             total_bg_pairs = [bg_pair+1 if idx >= i else bg_pair for idx, bg_pair in enumerate(total_bg_pairs)]
+        #             if pred_class not in np.nonzero(rel_matrix[sub_class, obj_class])[0]:
+        #                 total_bg_erasable_pairs = [bg_er_pair+1 if idx >= i else bg_er_pair for idx, bg_er_pair in enumerate(total_bg_erasable_pairs)]
 
 
         # num_predicate = rel_scores_idx_b100.shape[0]
@@ -451,8 +512,31 @@ detector.eval()
 # V1 rankings
 # rankings = [0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2]
 
-# V2 threshold
+# V2 threshold +
 # rankings = [0.01, 0.02, 0.03, 0.04, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5]
+# rankings = [0.08, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
+# rankings = [0.2, 0.25, 0.3, 0.35, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
+# print('ranking is:', rankings)
+# pred_right = [0] * 10
+
+# V6 logit threshold
+# rankings = [0.2, 0.25, 0.3, 0.35, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
+# print('ranking is:', rankings)
+# pred_right = [0] * 10
+# total_pred_num = 0
+# total_num_underthres = [0] * 10
+# total_num_cover_gt_pair = [0] * 10
+# pred_wrong = [0] * 10
+
+# V7 certain threshold with different range of top sampels
+threshold = 0.35
+print('threshold is:', threshold)
+topn = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]
+print('topn is:', topn)
+pred_right = [0] * 10
+total_pred_num = [0] * 10
+total_num_cover_gt_pair = [0] * 10
+pred_wrong = [0] * 10
 
 # V3&V4 threshold + co-occurance matrix (v3 top1 v4 top2)
 # rel_matrix = np.load('./prior_matrices/rel_matrix.npy')
@@ -469,14 +553,14 @@ detector.eval()
 # pred_not_exist_based_on_mat_butreal = [0] * len(rankings)
 
 # V5 Precision and Recall in topn
-rel_matrix = np.load('./prior_matrices/rel_matrix.npy')
-topns = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
-total_correct = [0]*10
-total_gt_pairs = [0] * 10
-total_bg_pairs = [0] * 10
-total_bg_erasable_pairs = [0] * 10
-total_sample = [0]*10
-total_gt = 0
+# rel_matrix = np.load('./prior_matrices/rel_matrix.npy')
+# topns = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
+# total_correct = [0]*10
+# total_gt_pairs = [0] * 10
+# total_bg_pairs = [0] * 10
+# total_bg_erasable_pairs = [0] * 10
+# total_sample = [0]*10
+# total_gt = 0
 
 print('Start over testing set')
 for val_b, batch in enumerate(tqdm(val_loader)):
@@ -486,15 +570,31 @@ for val_b, batch in enumerate(tqdm(val_loader)):
 
     torch.cuda.empty_cache()
     if val_b % 500 == 0 and val_b != 0:
-        # V1 or V2
-        # print('number of right prediction and ratio:', pred_right)
-        # print('ratio of right prediction and ratio:', [pred_right[i]*1.0/(pred_right[i]+pred_wrong[i]) for i in range(len(pred_right))])
+        # V1 or V2 or V6
+        # print('number of right prediction:', pred_right)
+        # print('ratio of right prediction:', [pred_right[i]*1.0/(pred_right[i]+pred_wrong[i]) for i in range(len(pred_right))])
         # print('\n')
         # print('number of wrong prediction:', pred_wrong)
         # print('ratio of wrong prediction:', [pred_wrong[i]*1.0/(pred_right[i]+pred_wrong[i]) for i in range(len(pred_wrong))])
         # print('\n')
+        # print('number of total predication:', total_pred_num)
+        # print('number of total under threshold:', total_num_underthres)
+        # print('number of total cover gt:', total_num_cover_gt_pair)
         # print('-----------')
         # print('\n')
+
+        # V7
+        print('number of right prediction:', pred_right)
+        print('ratio of right prediction:', [pred_right[i]*1.0/(pred_right[i]+pred_wrong[i]) for i in range(len(pred_right))])
+        print('\n')
+        print('number of wrong prediction:', pred_wrong)
+        print('ratio of wrong prediction:', [pred_wrong[i]*1.0/(pred_right[i]+pred_wrong[i]) for i in range(len(pred_wrong))])
+        print('\n')
+        print('number of total predication:', total_pred_num)
+        print('number of total cover gt:', total_num_cover_gt_pair)
+        print('ratio of cover gt and total predication :', [total_num_cover_gt_pair[i]/total_pred_num[i] for i in range(len(total_pred_num))])
+        print('-----------')
+        print('\n')
 
         # V3/v4
         # print('\n')
@@ -514,26 +614,31 @@ for val_b, batch in enumerate(tqdm(val_loader)):
         # print('<<<<<<<<<<<<<<<<<')
 
         # V5
-        print('\n')
-        print('>>>>>>>>>>>>>>>>>>')
-        print('total_correct number:', total_correct)
-        print('total_gt_pairs number:', total_gt_pairs)
-        print('total_bg_pairs number:', total_bg_pairs)
-        print('total_bg_erasable_pairs number:', total_bg_erasable_pairs)
-        print('total_sample number:', total_sample)
-        print('total_gt number:', total_gt)
-        print('<<<<<<<<<<<<<<<<<')
+        # print('\n')
+        # print('>>>>>>>>>>>>>>>>>>')
+        # print('total_correct number:', total_correct)
+        # print('total_gt_pairs number:', total_gt_pairs)
+        # print('total_bg_pairs number:', total_bg_pairs)
+        # print('total_bg_erasable_pairs number:', total_bg_erasable_pairs)
+        # print('total_sample number:', total_sample)
+        # print('total_gt number:', total_gt)
+        # print('<<<<<<<<<<<<<<<<<')
 
 # V1 or V2
-# print('Finished all testing set')
-# print('number of right prediction and ratio:', pred_right)
-# print('ratio of right prediction and ratio: ',
-#       [pred_right[i] * 1.0 / (pred_right[i] + pred_wrong[i]) for i in range(len(pred_right))])
-# print('\n')
-# print('number of wrong prediction:', pred_wrong)
-# print('ratio of wrong prediction:',
-#       [pred_wrong[i] * 1.0 / (pred_right[i] + pred_wrong[i]) for i in range(len(pred_wrong))])
+print('Finished all testing set')
+print('number of right prediction and ratio:', pred_right)
+print('ratio of right prediction and ratio: ',
+      [pred_right[i] * 1.0 / (pred_right[i] + pred_wrong[i]) for i in range(len(pred_right))])
+print('\n')
+print('number of wrong prediction:', pred_wrong)
+print('ratio of wrong prediction:',
+      [pred_wrong[i] * 1.0 / (pred_right[i] + pred_wrong[i]) for i in range(len(pred_wrong))])
+print('number of total predication:', total_pred_num)
+print('number of total cover gt:', total_num_cover_gt_pair)
 
+print('total ratio of right and wrong predication:', sum(pred_right)/sum(total_num_cover_gt_pair))
+print('total ratio of cover gt and total predication :',
+      [total_num_cover_gt_pair[i] / total_pred_num[i] for i in range(len(total_pred_num))])
 
 # V3
 # print('\n')
@@ -554,14 +659,14 @@ for val_b, batch in enumerate(tqdm(val_loader)):
 # print('<<<<<<<<<<<<<<<<<')
 
 # V5
-print('\n')
-print('>>>>>>>>>>>>>>>>>>')
-print('total_correct number:', total_correct)
-print('total_gt_pairs number:', total_gt_pairs)
-print('ratio of correct samples in gt samples:', [total_correct[i]*1.0/total_gt_pairs[i] for i in range(len(total_correct))])
-print('total_bg_pairs number:', total_bg_pairs)
-print('total_bg_erasable_pairs number:', total_bg_erasable_pairs)
-print('ratio of erasable bgs in bgs:', [total_bg_erasable_pairs[i]*1.0/total_bg_pairs[i] for i in range(len(total_bg_pairs))])
-print('total_sample number:', total_sample)
-print('total_gt number:', total_gt)
-print('<<<<<<<<<<<<<<<<<')
+# print('\n')
+# print('>>>>>>>>>>>>>>>>>>')
+# print('total_correct number:', total_correct)
+# print('total_gt_pairs number:', total_gt_pairs)
+# print('ratio of correct samples in gt samples:', [total_correct[i]*1.0/total_gt_pairs[i] for i in range(len(total_correct))])
+# print('total_bg_pairs number:', total_bg_pairs)
+# print('total_bg_erasable_pairs number:', total_bg_erasable_pairs)
+# print('ratio of erasable bgs in bgs:', [total_bg_erasable_pairs[i]*1.0/total_bg_pairs[i] for i in range(len(total_bg_pairs))])
+# print('total_sample number:', total_sample)
+# print('total_gt number:', total_gt)
+# print('<<<<<<<<<<<<<<<<<')

@@ -109,6 +109,8 @@ class ModelConfig(object):
         self.resume_ckpt = None
         self.model_s_m = None
 
+        self.threshold = None
+
         self.parser = self.setup_parser()
         self.args = vars(self.parser.parse_args())
 
@@ -197,6 +199,9 @@ class ModelConfig(object):
 
         parser.add_argument('-l2', dest='l2', help='weight decay of SGD', type=float, default=1e-4)
         parser.add_argument('-adamwd', dest='adamwd', help='weight decay of adam', type=float, default=0.0)
+
+        parser.add_argument('-threshold', dest='threshold', help='masking threshold', type=float, default=0.35)
+        # parser.add_argument('-adamwd', dest='adamwd', help='weight decay of adam', type=float, default=5e-4)
 
         parser.add_argument('-clip', dest='clip', help='gradients will be clipped to have norm less than this', type=float, default=5.0)
         parser.add_argument('-p', dest='print_interval', help='print during training', type=int,
