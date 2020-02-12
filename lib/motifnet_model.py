@@ -556,7 +556,9 @@ class RelModel(nn.Module):
 
                 rel_rep = F.softmax(result.rel_dists, dim=1)
 
+
                 if rel_inds[:, 0].max() - rel_inds[:, 0].min() + 1 == 1:
+
                     if self.inter_fea:
                         # return result, prod_rep, filter_dets(bboxes, result.obj_scores,
                         #                                      result.obj_preds, rel_inds[:, 1:], rel_rep,
@@ -565,6 +567,7 @@ class RelModel(nn.Module):
                                    result.obj_preds, rel_inds[:, 1:], rel_rep, rel_dists=result.rel_dists,
                                                              return_top100=self.return_top100, training=self.training)
                     else:
+
                         return result, filter_dets(bboxes, result.obj_scores,
                                    result.obj_preds, rel_inds[:, 1:], rel_rep, rel_dists=result.rel_dists,
                                                              return_top100=self.return_top100, training=self.training)
@@ -573,10 +576,13 @@ class RelModel(nn.Module):
                         #                            return_top100=self.return_top100, training=self.training)
                 # -----------------------------------Above: 1 batch_size, Below: Multiple batch_size------------------
                 #  assume rel_inds[:, 0] is from 0 to num_img-1
+
                 num_img = rel_inds[:, 0].max() - rel_inds[:, 0].min() + 1
                 rel_ind_per_img = []
                 obj_ind_per_img = []
+
                 for i in range(num_img):
+
                     rel_ind_cur_img = torch.nonzero(rel_inds[:, 0] == i).squeeze(-1)
                     rel_ind_per_img.append(rel_ind_cur_img)
                     obj_ind_cur_img = rel_inds[rel_ind_cur_img][:, 1]

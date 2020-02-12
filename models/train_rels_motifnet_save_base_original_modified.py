@@ -43,7 +43,7 @@ sys.path.append(codebase)
 exp_name = 'motif'
 
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+os.environ["CUDA_VISIBLE_DEVICES"] = "2"
 
 # conf = ModelConfig()
 #--------updated--------

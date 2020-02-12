@@ -275,6 +275,7 @@ class Pred_label(nn.Module):
 
         predicate = self.decoder_predicate(predicate)
         entity = self.decoder_entity(entity)
+
         if len(blank.size()) != 0:
             blank = self.decoder_entity(blank)
             blank_logits = self.softmax(blank)
