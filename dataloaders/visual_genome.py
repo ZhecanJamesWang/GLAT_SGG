@@ -431,7 +431,9 @@ class VGDataLoader(torch.utils.data.DataLoader):
         )
         return train_load, val_load
 
-def build_graph_structure(entries, index2name_object, index2name_predicate, if_predicting=False):
+def build_graph_structure(entries, index2name_object, index2name_predicate, if_predicting=False, sgclsdet=False):
+# def build_graph_structure(entries, index2name_object, index2name_predicate, if_predicting=False):
+
     # Input: pred_relations(Tensor) pred_classes(Variable)
     # Output: adj(Tensor) node_class(Variable) nodes_type(Tensor)
     total_data = {}
@@ -449,6 +451,10 @@ def build_graph_structure(entries, index2name_object, index2name_predicate, if_p
     entries_minibatch['rel_scores'] = []
     entries_minibatch['rel_dists'] = []
 
+    # For SGCLS
+    useless_entity_id = []
+    start_id = 0
+
     if entries['pred_relations'].size(1) == 4:
         # pdb.set_trace()
         # entries_minibatch['pred_relations'].append(entries['pred_relations'][:, 1:])
@@ -460,6 +466,18 @@ def build_graph_structure(entries, index2name_object, index2name_predicate, if_p
             entity_idx_cur_img = entries_minibatch['pred_relations'][i][:, :2]
             entries_minibatch['pred_classes'].append(entries['pred_classes'][entity_idx_cur_img.min():entity_idx_cur_img.max()+1])
             # pdb.set_trace()
+
+
+            # For SGCLS
+            end_id = entity_idx_cur_img.min()
+            # pdb.set_trace()
+            if start_id != end_id:
+                useless_entity_id += list(range(start_id, end_id))
+            start_id = entity_idx_cur_img.max() + 1
+            if i == entries['pred_relations'][:, 0].max() and start_id != entries['pred_classes'].size(0):
+                useless_entity_id += list(range(start_id, entries['pred_classes'].size(0)))
+
+
             entries_minibatch['pred_relations'][i][:, :2] = entries_minibatch['pred_relations'][i][:, :2] - entries_minibatch['pred_relations'][i][:, :2].min()
 
             # pdb.set_trace()
@@ -536,7 +554,12 @@ def build_graph_structure(entries, index2name_object, index2name_predicate, if_p
         # total_data['node_type'].append(np.asarray(nodes_type))
         # pdb.set_trace()
 
-    return total_data
+    # return total_data
+
+    if not sgclsdet:
+        return total_data
+    else:
+        return total_data, useless_entity_id
 
 
 # def build_graph_structure_reverse(entries, pred_label_predicate):
