@@ -26,7 +26,8 @@ import pdb
 #--------updated--------
 # from lib.stanford_model import RelModelStanford as RelModel
 # from lib.motifnet_model_original import RelModel
-from lib.motifnet_model import RelModel
+# from lib.motifnet_model import RelModel
+from lib.motifnet_model_sgcls import RelModel
 
 from lib.glat import GLATNET
 import pdb
@@ -325,14 +326,16 @@ result, det_res = detec
             'pred_classes': result.obj_preds,  # (num_entities) Tensor Variable
             'pred_rel_inds': det_res[3],  # (num_predicates, 3) Tensor Variable
             'rel_scores': det_res[4],  # (num_predicates, 51) Tensor Variable
-            'rel_dists': det_res[-2]
+            'rel_dists': det_res[-3],
+            'ent_dists': det_res[-1]
         }
     else:
         pred_entry = {
             'pred_classes': result.obj_preds,   # (num_entities) Tensor Variable
             'pred_rel_inds': result.rel_inds,  # (num_predicates, 3) Tensor Variable
             'rel_scores': result.rel_dists,   # (num_predicates, 51) Tensor Variable
-            'rel_dists': det_res[-1]
+            'rel_dists': det_res[-2],
+            'ent_dists': det_res[-1]
         }
     # pdb.set_trace()
     pred_entry = glat_postprocess(pred_entry, if_predicting=False)
@@ -342,7 +345,7 @@ result, det_res = detec
         useless_entity_id = pred_entry[1]
         pred_entry = pred_entry[0]
 
-    b_100_idx = det_res[-4]
+    b_100_idx = det_res[-5]
     # b_100_idx = det_res[-2]
 
     # a_100_idx = det_res[-1]
@@ -697,6 +700,7 @@ def glat_postprocess(pred_entry, if_predicting=False):
         pred_entry = numpy2cuda_dict(pred_entry)
 
     pred_entry['rel_dists'] = tensor2variable(pred_entry['rel_dists'])
+    pred_entry['ent_dists'] = tensor2variable(pred_entry['ent_dists'])
 
     pred_entry['rel_scores'] = tensor2variable(pred_entry['rel_scores'])
     pred_entry['pred_classes'] = tensor2variable(pred_entry['pred_classes'])
@@ -797,11 +801,11 @@ def val_batch(batch_num, b, evaluator, evaluator_multiple_preds, evaluator_list,
     for i, det in enumerate(det_res):
 
         if len(det) == 5 and not conf.return_top100:
-            (boxes_i, objs_i, obj_scores_i, rels_i, pred_scores_i, rel_dists) = det
+            (boxes_i, objs_i, obj_scores_i, rels_i, pred_scores_i, rel_dists, ent_dists) = det
             # (boxes_i, objs_i, obj_scores_i, rels_i, pred_scores_i) = det
         else:
             (boxes_i, objs_i, obj_scores_i, rels_i_b100, pred_scores_i_b100, rels_i_a100, pred_scores_i_a100,
-            rel_scores_idx_b100, rel_scores_idx_a100, rel_b_dists, rel_a_dists) = det
+            rel_scores_idx_b100, rel_scores_idx_a100, rel_b_dists, rel_a_dists, ent_dists) = det
             # (boxes_i, objs_i, obj_scores_i, rels_i_b100, pred_scores_i_b100, rels_i_a100, pred_scores_i_a100,
             #  rel_scores_idx_b100, rel_scores_idx_a100) = det
 
@@ -822,7 +826,9 @@ def val_batch(batch_num, b, evaluator, evaluator_multiple_preds, evaluator_list,
                 'pred_rel_inds': rels_i_b100, #(506, 2) (240, 2)
                 'obj_scores': obj_scores_i, #(23,) (16,)
                 'rel_scores': pred_scores_i_b100,  # hack for now. (506, 51) (240, 51)
-                'rel_dists': rel_b_dists.data.cpu().numpy()
+                'rel_dists': rel_b_dists.data.cpu().numpy(),
+                'ent_dists': ent_dists.data.cpu().numpy()
+
             }
         else:
             pred_entry = {
@@ -831,7 +837,8 @@ def val_batch(batch_num, b, evaluator, evaluator_multiple_preds, evaluator_list,
                 'pred_rel_inds': rels_i, #(506, 2) (240, 2)
                 'obj_scores': obj_scores_i, #(23,) (16,)
                 'rel_scores': pred_scores_i,  # hack for now. (506, 51) (240, 51)
-                'rel_dists': rel_dists.data.cpu().numpy()
+                'rel_dists': rel_dists.data.cpu().numpy(),
+                'ent_dists': ent_dists.data.cpu().numpy()
             }
 
         # pred_entry_init = copy.deepcopy(pred_entry)

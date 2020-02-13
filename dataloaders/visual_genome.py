@@ -453,6 +453,8 @@ def build_graph_structure(entries, index2name_object, index2name_predicate, if_p
     entries_minibatch['rel_scores'] = []
     entries_minibatch['rel_dists'] = []
 
+    entries_minibatch['ent_dists'] = []
+
     # For SGCLS
     useless_entity_id = []
     start_id = 0
@@ -475,6 +477,7 @@ def build_graph_structure(entries, index2name_object, index2name_predicate, if_p
             entries_minibatch['pred_classes'].append(entries['pred_classes'][entity_idx_cur_img.min():entity_idx_cur_img.max()+1])
             # pdb.set_trace()
 
+            # ToDo: add for ent_dists
 
             # For SGCLS
             end_id = entity_idx_cur_img.min()
@@ -496,6 +499,7 @@ def build_graph_structure(entries, index2name_object, index2name_predicate, if_p
 
         entries_minibatch['rel_scores'].append(entries['rel_scores'])
         entries_minibatch['rel_dists'].append(entries['rel_dists'])
+        entries_minibatch['ent_dists'].append(entries['ent_dists'])
 
     for i in range(len(entries_minibatch['pred_classes'])):
         # if if_predicting:
@@ -509,6 +513,8 @@ def build_graph_structure(entries, index2name_object, index2name_predicate, if_p
 
         return_rel_scores = entries_minibatch['rel_scores'][i]
         return_rel_dists = entries_minibatch['rel_dists'][i]
+
+        return_ent_dists = entries_minibatch['ent_dists'][i]
 
         entity_num = return_classes.size(0)
         total_node_num = entity_num + return_relations.size(0)
