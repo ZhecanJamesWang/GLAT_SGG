@@ -445,11 +445,15 @@ def build_graph_structure(entries, index2name_object, index2name_predicate, if_p
     total_data['node_logit'] = []
     total_data['node_logit_dists'] = []
 
+    total_data['ent_dists'] = []
+
     entries_minibatch = {}
     entries_minibatch['pred_relations'] = []
     entries_minibatch['pred_classes'] = []
     entries_minibatch['rel_scores'] = []
     entries_minibatch['rel_dists'] = []
+
+    entries_minibatch['ent_dists'] = []
 
     # For SGCLS
     useless_entity_id = []
@@ -467,6 +471,7 @@ def build_graph_structure(entries, index2name_object, index2name_predicate, if_p
             entries_minibatch['pred_classes'].append(entries['pred_classes'][entity_idx_cur_img.min():entity_idx_cur_img.max()+1])
             # pdb.set_trace()
 
+            # ToDo: add for ent_dists
 
             # For SGCLS
             end_id = entity_idx_cur_img.min()
@@ -486,6 +491,7 @@ def build_graph_structure(entries, index2name_object, index2name_predicate, if_p
         entries_minibatch['pred_classes'].append(entries['pred_classes'])
         entries_minibatch['rel_scores'].append(entries['rel_scores'])
         entries_minibatch['rel_dists'].append(entries['rel_dists'])
+        entries_minibatch['ent_dists'].append(entries['ent_dists'])
 
     for i in range(len(entries_minibatch['pred_classes'])):
         # if if_predicting:
@@ -500,13 +506,19 @@ def build_graph_structure(entries, index2name_object, index2name_predicate, if_p
         return_rel_scores = entries_minibatch['rel_scores'][i]
         return_rel_dists = entries_minibatch['rel_dists'][i]
 
+        return_ent_dists = entries_minibatch['ent_dists'][i]
+
         entity_num = return_classes.size(0)
         total_node_num = entity_num + return_relations.size(0)
         # pdb.set_trace()
+
         nodes_class = torch.cat((return_classes, Variable(return_relations[:, -1])), dim=0)
 
         nodes_logit = torch.cat((Variable(torch.zeros(return_classes.size()[0], return_rel_scores.size()[1]).cuda()), return_rel_scores))
         nodes_logit_dists = torch.cat((Variable(torch.zeros(return_classes.size()[0], return_rel_dists.size()[1]).cuda()), return_rel_dists))
+
+        ent_dists = torch.cat((return_ent_dists, Variable(torch.zeros(return_rel_dists.size()[0], return_ent_dists.size()[1]).cuda())))
+        # ent_dists = torch.cat((return_ent_dists, torch.zeros(return_rel_dists.size()[0], return_ent_dists.size()[1]).cuda()))
 
         # pdb.set_trace()
         nodes_type = torch.ones_like(return_classes).data
@@ -532,6 +544,7 @@ def build_graph_structure(entries, index2name_object, index2name_predicate, if_p
         total_data['node_type'].append(nodes_type)
         total_data['node_logit'].append(nodes_logit)
         total_data['node_logit_dists'].append(nodes_logit_dists)
+        total_data['ent_dists'].append(ent_dists)
 
 
 

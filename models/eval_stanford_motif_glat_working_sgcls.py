@@ -15,12 +15,13 @@ from lib.glat import GLATNET
 from torch.autograd import Variable
 import pdb
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 
 
 conf = ModelConfig()
 if conf.model_s_m == 'motifnet':
-    from lib.motifnet_model_working import RelModel
+    # from lib.motifnet_model_working import RelModel
+    from lib.motifnet_model_sgcls import RelModel
 elif conf.model_s_m == 'stanford':
     from lib.stanford_model import RelModelStanford as RelModel
 else:
@@ -195,10 +196,13 @@ def my_collate(total_data):
     node_logits = []
     node_logits_dists = []
 
+    ent_dists = []
+
     for i in range(sample_num):
         input_class = total_data['node_class'][i]
         adj = total_data['adj'][i]
         node_type = total_data['node_type'][i]
+
         node_logit = total_data['node_logit'][i]
         node_logit_pad = torch.Tensor([0] * node_logit.size()[0]).unsqueeze(-1).t()
         node_logit = torch.cat((node_logit, Variable(node_logit_pad.t().cuda())), dim=1)
@@ -206,6 +210,14 @@ def my_collate(total_data):
         node_logit_dists = total_data['node_logit_dists'][i]
         node_logit_pad_dists = torch.Tensor([0] * node_logit_dists.size()[0]).unsqueeze(-1).t()
         node_logit_dists = torch.cat((node_logit_dists, Variable(node_logit_pad_dists.t().cuda())), dim=1)
+
+        ent_dist = total_data['ent_dists'][i]
+        ent_pad_dist = torch.Tensor([0] * ent_dist.size()[0]).unsqueeze(-1).t()
+        ent_dist = torch.cat((ent_dist, Variable(ent_pad_dist.t().cuda()), Variable(ent_pad_dist.t().cuda())), dim=1)
+
+        # ent_logit = total_data['ent_dists'][i]
+        # node_logit_pad = torch.Tensor([0] * node_logit.size()[0]).unsqueeze(-1).t()
+        # node_logit = torch.cat((node_logit, Variable(node_logit_pad.t().cuda())), dim=1)
 
         # pad_node_logit = tensor2variable(torch.zeros((max_length - input_class.size(0)), node_logit.size()[1]).cuda())
         # node_logits.append(torch.cat((node_logit, pad_node_logit), 0).unsqueeze(0))
@@ -229,6 +241,14 @@ def my_collate(total_data):
 
         node_logits_dists.append(node_logit_dists)
 
+        if max_length - ent_dist.size(0) != 0:
+                pad_ent_dist = tensor2variable(torch.zeros((max_length - ent_dist.size(0)), ent_dist.size()[1]).cuda())
+                ent_dist = torch.cat((ent_dist, pad_ent_dist), 0).unsqueeze(0)
+        else:
+            ent_dist = ent_dist.unsqueeze(0)
+
+        ent_dists.append(ent_dist)
+
         pad_input_class = tensor2variable(blank_idx * torch.ones(max_length - input_class.size(0)).long().cuda())
         input_classes.append(torch.cat((input_class, pad_input_class), 0).unsqueeze(0))
         # input_classes.append(torch.cat((input_class, blank_idx*torch.ones(max_length-input_class.size(0)).long().cuda()), 0).unsqueeze(0))
@@ -246,12 +266,14 @@ def my_collate(total_data):
     node_logits = torch.cat(node_logits, 0)
     node_logits_dists = torch.cat(node_logits_dists, 0)
 
+    ent_dists = torch.cat(ent_dists, 0)
+
     adjs = torch.cat(adjs, 0)
     adjs_lbl = adjs
     adjs_con = torch.clamp(adjs, 0, 1)
     node_types = torch.cat(node_types, 0)
 
-    return input_classes, adjs_con, adjs_lbl, node_types, node_logits, node_logits_dists
+    return input_classes, adjs_con, adjs_lbl, node_types, node_logits, node_logits_dists, ent_dists
     # return input_classes, adjs_con, adjs_lbl, node_types
 
 
@@ -479,12 +501,19 @@ def soft_merge4(logit_base, logit_glat, node_type):
     return output_logit_predicate
 
 
-def soft_merge3(logit_base, logit_glat, node_type):
+def soft_merge3(logit_base, logit_glat, node_type, type):
 
-    index = (node_type == 0).squeeze(0).unsqueeze(-1).repeat(1, 52)
-    logit_base_predicate = logit_base.data.squeeze(0)[index].view(-1, 52)
+    if type == 0:
+        index = (node_type == type).squeeze(0).unsqueeze(-1).repeat(1, 52)
+        # logit_base_predicate = logit_base.data.squeeze(0)[index].view(-1, 52)
+        logit_base_predicate = logit_base.squeeze(0)[index].view(-1, 52)
 
-    logit_base_predicate = softmax_1(Variable(logit_base_predicate)).data
+    else:
+        index = (node_type == type).squeeze(0).unsqueeze(-1).repeat(1, 153)
+        logit_base_predicate = logit_base.squeeze(0)[index].view(-1, 153)
+
+
+    logit_base_predicate = softmax_1(logit_base_predicate).data
     logit_glat_predicate = softmax_1(logit_glat).data
 
     logit_base_predicate_weight = torch.max(logit_base_predicate, dim=1)[0]
@@ -494,8 +523,12 @@ def soft_merge3(logit_base, logit_glat, node_type):
 
     combined_weight = combined_weight/torch.sum(combined_weight, dim=0, keepdim=True)
 
-    logit_base_predicate_weight = combined_weight[0,:].unsqueeze(-1).repeat(1, 52)
-    logit_glat_predicate_weight = combined_weight[1,:].unsqueeze(-1).repeat(1, 52)
+    if type == 0:
+        logit_base_predicate_weight = combined_weight[0,:].unsqueeze(-1).repeat(1, 52)
+        logit_glat_predicate_weight = combined_weight[1,:].unsqueeze(-1).repeat(1, 52)
+    else:
+        logit_base_predicate_weight = combined_weight[0, :].unsqueeze(-1).repeat(1, 153)
+        logit_glat_predicate_weight = combined_weight[1, :].unsqueeze(-1).repeat(1, 153)
 
     logit_base_predicate = logit_base_predicate * logit_base_predicate_weight
     logit_glat = logit_glat.data * logit_glat_predicate_weight
@@ -508,13 +541,19 @@ def soft_merge3(logit_base, logit_glat, node_type):
     return output_logit_predicate
 
 
-def soft_merge2(logit_base, logit_glat, node_type):
+def soft_merge2(logit_base, logit_glat, node_type, type):
 
-    index = (node_type == 0).squeeze(0).unsqueeze(-1).repeat(1, 52)
-    logit_base_predicate = logit_base.data.squeeze(0)[index].view(-1, 52)
+    if type == 0:
+        index = (node_type == 0).squeeze(0).unsqueeze(-1).repeat(1, 52)
+        logit_base_predicate = logit_base.data.squeeze(0)[index].view(-1, 52)
+        logit_base_predicate_51 = Variable(logit_base_predicate[:, 1:]).clone()
+        logit_glat_predicate_51 = logit_glat[:, 1:].clone()
+    else:
+        index = (node_type == 0).squeeze(0).unsqueeze(-1).repeat(1, 153)
+        logit_base_predicate = logit_base.data.squeeze(0)[index].view(-1, 153)
+        logit_base_predicate_51 = Variable(logit_base_predicate).clone()
+        logit_glat_predicate_51 = logit_glat.clone()
 
-    logit_base_predicate_51 = Variable(logit_base_predicate[:, 1:]).clone()
-    logit_glat_predicate_51 = logit_glat[:, 1:].clone()
     logit_base_predicate_51 = softmax_1(logit_base_predicate_51).data
     logit_glat_predicate_51 = softmax_1(logit_glat_predicate_51).data
 
@@ -525,8 +564,12 @@ def soft_merge2(logit_base, logit_glat, node_type):
 
     combined_weight = combined_weight/torch.sum(combined_weight, dim=0, keepdim=True)
 
-    logit_base_predicate_weight = combined_weight[0,:].unsqueeze(-1).repeat(1, 52)
-    logit_glat_predicate_weight = combined_weight[1,:].unsqueeze(-1).repeat(1, 52)
+    if type == 0:
+        logit_base_predicate_weight = combined_weight[0,:].unsqueeze(-1).repeat(1, 52)
+        logit_glat_predicate_weight = combined_weight[1,:].unsqueeze(-1).repeat(1, 52)
+    else:
+        logit_base_predicate_weight = combined_weight[0, :].unsqueeze(-1).repeat(1, 153)
+        logit_glat_predicate_weight = combined_weight[1, :].unsqueeze(-1).repeat(1, 153)
 
     logit_base_predicate = logit_base_predicate * logit_base_predicate_weight
     logit_glat = logit_glat.data * logit_glat_predicate_weight
@@ -539,24 +582,37 @@ def soft_merge2(logit_base, logit_glat, node_type):
     return output_logit_predicate
 
 
-def soft_merge1(logit_base, logit_glat, node_type):
+def soft_merge1(logit_base, logit_glat, node_type, type):
 
-    index = (node_type == 0).squeeze(0).unsqueeze(-1).repeat(1, 52)
-    logit_base_predicate = logit_base.data.squeeze(0)[index].view(-1, 52)
+    if type == 0:
+        index = (node_type == 0).squeeze(0).unsqueeze(-1).repeat(1, 52)
+        logit_base_predicate = logit_base.data.squeeze(0)[index].view(-1, 52)
+    else:
+        index = (node_type == 1).squeeze(0).unsqueeze(-1).repeat(1, 153)
+        logit_base_predicate = logit_base.data.squeeze(0)[index].view(-1, 153)
+
 
     logit_base_predicate = logSoftmax_1(Variable(logit_base_predicate))
     logit_glat = logSoftmax_1(logit_glat)
 
-    logit_base_predicate_weight = torch.max(logit_base_predicate[:, 1:], dim=1)[0]
-    logit_glat_predicate_weight = torch.max(logit_glat[:, 1:], dim=1)[0]
+    if type == 0:
+        logit_base_predicate_weight = torch.max(logit_base_predicate[:, 1:], dim=1)[0]
+        logit_glat_predicate_weight = torch.max(logit_glat[:, 1:], dim=1)[0]
+    else:
+        logit_base_predicate_weight = torch.max(logit_base_predicate, dim=1)[0]
+        logit_glat_predicate_weight = torch.max(logit_glat, dim=1)[0]
 
     combined_weight = torch.cat((logit_base_predicate_weight.unsqueeze(0),
                                  Variable(logit_glat_predicate_weight.data.unsqueeze(0))), 0)
 
     combined_weight = softmax_0(combined_weight)
 
-    logit_base_predicate_weight = combined_weight[0,:].unsqueeze(-1).repeat(1, 52)
-    logit_glat_predicate_weight = combined_weight[1,:].unsqueeze(-1).repeat(1, 52)
+    if type == 0:
+        logit_base_predicate_weight = combined_weight[0,:].unsqueeze(-1).repeat(1, 52)
+        logit_glat_predicate_weight = combined_weight[1,:].unsqueeze(-1).repeat(1, 52)
+    else:
+        logit_base_predicate_weight = combined_weight[0,:].unsqueeze(-1).repeat(1, 153)
+        logit_glat_predicate_weight = combined_weight[1,:].unsqueeze(-1).repeat(1, 153)
 
     # ones = torch.ones(logit_base_predicate_weight.size()[0], 1)
 
@@ -616,7 +672,7 @@ def soft_merge1(logit_base, logit_glat, node_type):
 
 def glat_wrapper(total_data):
     # Batch size assumed to be 1
-    input_class, adjs_con, adjs_lbl, node_type, node_logit, node_logit_dists = my_collate(total_data)
+    input_class, adjs_con, adjs_lbl, node_type, node_logit, node_logit_dists, ent_dists = my_collate(total_data)
     # input_class, adjs_con, adjs_lbl, node_type = my_collate(total_data)
     if torch.is_tensor(input_class):
         input_class = Variable(input_class)
@@ -637,7 +693,9 @@ def glat_wrapper(total_data):
     pred_label_predicate = pred_label[0]  # flatten predicate (B*N, 51)
     pred_label_entities = pred_label[1]  # flatten entities
 
-    pred_label_predicate = soft_merge3(node_logit_dists, pred_label_predicate, node_type)
+    # pred_label_predicate = soft_merge3(node_logit_dists, pred_label_predicate, node_type, 0)
+    pred_label_predicate = soft_merge2(node_logit_dists, pred_label_predicate, node_type, 0)
+    pred_label_entities = soft_merge2(ent_dists, pred_label_entities, node_type, 1)
 
     return pred_label_predicate, pred_label_entities
     # return pred_label_predicate.data.cpu().numpy(), pred_label_entities.data.cpu().numpy()
@@ -656,6 +714,8 @@ def glat_postprocess(pred_entry, if_predicting=False):
         pred_entry = numpy2cuda_dict(pred_entry)
 
     pred_entry['rel_dists'] = tensor2variable(pred_entry['rel_dists'])
+
+    pred_entry['ent_dists'] = tensor2variable(pred_entry['ent_dists'])
 
     pred_entry['rel_scores'] = tensor2variable(pred_entry['rel_scores'])
     pred_entry['pred_classes'] = tensor2variable(pred_entry['pred_classes'])
@@ -678,10 +738,10 @@ def glat_postprocess(pred_entry, if_predicting=False):
 
     pred_label_predicate, pred_label_entities = glat_wrapper(total_data)
 
-    pred_entry['rel_scores'] = pred_label_predicate
+    pred_entry['rel_scores'] = pred_label_predicate[:, :-1]
 
     # For SGCLS
-    pred_entry['entity_scores'] = pred_label_entities
+    pred_entry['entity_scores'] = pred_label_entities[:, :-2]
     pred_entry['pred_classes'] = pred_label_entities.max(1)[1]
 
     # if "predcls" not in conf.mode:
@@ -694,7 +754,6 @@ def glat_postprocess(pred_entry, if_predicting=False):
         return pred_entry
 
 all_pred_entries = []
-
 
 def check_n_save(counter, det_res_list):
     length = len(det_res_list)
@@ -719,12 +778,18 @@ def val_batch(batch_num, b, evaluator, evaluator_multiple_preds, evaluator_list,
 
     for i, det in enumerate(det_res):
 
+        det = det[1]
+
         if len(det) == 6 and not conf.return_top100:
-            (boxes_i, objs_i, obj_scores_i, rels_i, pred_scores_i, rel_dists) = det
+            # (boxes_i, objs_i, obj_scores_i, rels_i, pred_scores_i, rel_dists) = det
+            (boxes_i, objs_i, obj_scores_i, rels_i, pred_scores_i, rel_dists, ent_dists) = det
             rels_i_a100 = np.asarray([])
         else:
+            # (boxes_i, objs_i, obj_scores_i, rels_i_b100, pred_scores_i_b100, rels_i_a100, pred_scores_i_a100,
+            #  rel_scores_idx_b100, rel_scores_idx_a100, rel_dists) = det
             (boxes_i, objs_i, obj_scores_i, rels_i_b100, pred_scores_i_b100, rels_i_a100, pred_scores_i_a100,
-             rel_scores_idx_b100, rel_scores_idx_a100, rel_dists) = det
+             rel_scores_idx_b100, rel_scores_idx_a100, rel_b_dists, rel_a_dists, ent_dists) = det
+            rel_dists = rel_b_dists
 
     # det_res_list.append(list(det_res))
     # counter, det_res_list = check_n_save(counter, det_res_list)
@@ -744,7 +809,8 @@ def val_batch(batch_num, b, evaluator, evaluator_multiple_preds, evaluator_list,
                 'pred_rel_inds': rels_i_b100,  # (506, 2) (240, 2)
                 'obj_scores': obj_scores_i,  # (23,) (16,)
                 'rel_scores': pred_scores_i_b100,  # hack for now. (506, 51) (240, 51)
-                'rel_dists': rel_dists.data.cpu().numpy()
+                'rel_dists': rel_dists.data.cpu().numpy(),
+                'ent_dists': ent_dists.data.cpu().numpy()
             }
         else:
             pred_entry = {
@@ -753,20 +819,22 @@ def val_batch(batch_num, b, evaluator, evaluator_multiple_preds, evaluator_list,
                 'pred_rel_inds': rels_i,  # (506, 2) (240, 2)
                 'obj_scores': obj_scores_i,  # (23,) (16,)
                 'rel_scores': pred_scores_i,  # hack for now. (506, 51) (240, 51)
-                'rel_dists': rel_dists.data.cpu().numpy()
+                'rel_dists': rel_dists.data.cpu().numpy(),
+                'ent_dists': ent_dists.data.cpu().numpy()
             }
 
         pred_entry = glat_postprocess(pred_entry, if_predicting=True)
-        # pred_entry = cuda2numpy_dict(pred_entry)
 
         # For SGCLS
         if conf.mode == "sgcls" or conf.mode == "sgdet":
             useless_entity_id = pred_entry[1]
             pred_entry = pred_entry[0]
 
+        pred_entry = cuda2numpy_dict(pred_entry)
+
         # without adding a_100
 
-        pred_entry['rel_scores'] = pred_entry['rel_scores'][:, :-1]
+        # pred_entry['rel_scores'] = pred_entry['rel_scores'][:, :-1]
 
         # conditioning on adding a_100
 
