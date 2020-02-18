@@ -766,6 +766,7 @@ def glat_postprocess(pred_entry, if_predicting=False):
     else:
         return pred_entry
 
+
 def rank_predicate(pred_entry):
     obj_scores0 = pred_entry['obj_scores'][pred_entry['pred_rel_inds'][:, 0]]
     obj_scores1 = pred_entry['obj_scores'][pred_entry['pred_rel_inds'][:, 1]]
