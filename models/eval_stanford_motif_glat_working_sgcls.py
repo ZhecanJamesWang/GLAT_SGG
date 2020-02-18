@@ -549,7 +549,7 @@ def soft_merge2(logit_base, logit_glat, node_type, type):
         logit_base_predicate_51 = Variable(logit_base_predicate[:, 1:]).clone()
         logit_glat_predicate_51 = logit_glat[:, 1:].clone()
     else:
-        index = (node_type == 0).squeeze(0).unsqueeze(-1).repeat(1, 153)
+        index = (node_type == 1).squeeze(0).unsqueeze(-1).repeat(1, 153)
         logit_base_predicate = logit_base.data.squeeze(0)[index].view(-1, 153)
         logit_base_predicate_51 = Variable(logit_base_predicate).clone()
         logit_glat_predicate_51 = logit_glat.clone()
@@ -693,9 +693,8 @@ def glat_wrapper(total_data):
     pred_label_predicate = pred_label[0]  # flatten predicate (B*N, 51)
     pred_label_entities = pred_label[1]  # flatten entities
 
-    # pred_label_predicate = soft_merge3(node_logit_dists, pred_label_predicate, node_type, 0)
-    pred_label_predicate = soft_merge2(node_logit_dists, pred_label_predicate, node_type, 0)
-    pred_label_entities = soft_merge2(ent_dists, pred_label_entities, node_type, 1)
+    pred_label_predicate = soft_merge3(node_logit_dists, pred_label_predicate, node_type, 0)
+    pred_label_entities = soft_merge3(ent_dists, pred_label_entities, node_type, 1)
 
     return pred_label_predicate, pred_label_entities
     # return pred_label_predicate.data.cpu().numpy(), pred_label_entities.data.cpu().numpy()
