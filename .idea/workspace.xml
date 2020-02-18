@@ -2,7 +2,10 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="11066203-4164-4413-bd1b-0e742342911b" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/lib/kern_model_sgcls.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/models/eval_rels_sgcls.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/motifnet_model_sgcls.py" beforeDir="false" afterPath="$PROJECT_DIR$/lib/motifnet_model_sgcls.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/models/eval_stanford_motif_glat_working_sgcls.py" beforeDir="false" afterPath="$PROJECT_DIR$/models/eval_stanford_motif_glat_working_sgcls.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -15,6 +18,7 @@
     <SUITE FILE_PATH="coverage/KERN$eval_stanford_motif_glat_py.coverage" NAME="eval_stanford_motif_glat.py Coverage Results" MODIFIED="1581051125887" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="/home/tangtangwzc/KERN" />
     <SUITE FILE_PATH="coverage/KERN$eval_stanford_motif_glat_working.coverage" NAME="eval_stanford_motif_glat_working Coverage Results" MODIFIED="1581060567232" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="/home/tangtangwzc/KERN" />
     <SUITE FILE_PATH="coverage/KERN$train_rels_py.coverage" NAME="train_rels.py Coverage Results" MODIFIED="1577430443987" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="/home/tangtangwzc/KERN" />
+    <SUITE FILE_PATH="coverage/KERN$eval_rels_sgcls.coverage" NAME="eval_rels_sgcls Coverage Results" MODIFIED="1582056996958" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="/home/tangtangwzc/KERN" />
     <SUITE FILE_PATH="coverage/KERN$eval_rels_original.coverage" NAME="eval_rels_original Coverage Results" MODIFIED="1573940924481" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="/home/tangtangwzc/KERN" />
     <SUITE FILE_PATH="coverage/KERN$eval_baseModel_glat.coverage" NAME="eval_baseModel_glat Coverage Results" MODIFIED="1578447345641" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="/home/tangtangwzc/KERN" />
     <SUITE FILE_PATH="coverage/KERN$eval_rels.coverage" NAME="eval_rels Coverage Results" MODIFIED="1577313244811" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="/home/tangtangwzc/KERN" />
@@ -29,7 +33,7 @@
       <usages-collector id="statistics.file.extensions.open">
         <counts>
           <entry key="Makefile" value="1" />
-          <entry key="py" value="207" />
+          <entry key="py" value="222" />
           <entry key="pyx" value="1" />
           <entry key="sh" value="22" />
         </counts>
@@ -38,26 +42,26 @@
         <counts>
           <entry key="PLAIN_TEXT" value="23" />
           <entry key="PyRemoteDebug" value="1" />
-          <entry key="Python" value="207" />
+          <entry key="Python" value="222" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
-          <entry key="py" value="13399" />
+          <entry key="py" value="13523" />
           <entry key="sh" value="18" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
           <entry key="PLAIN_TEXT" value="18" />
-          <entry key="Python" value="13399" />
+          <entry key="Python" value="13523" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.lifecycle.project">
         <counts>
           <entry key="project.closed" value="16" />
           <entry key="project.open.time.0" value="3" />
-          <entry key="project.open.time.1" value="4" />
+          <entry key="project.open.time.1" value="5" />
           <entry key="project.open.time.10" value="1" />
           <entry key="project.open.time.13" value="3" />
           <entry key="project.open.time.2" value="1" />
@@ -67,7 +71,7 @@
           <entry key="project.open.time.6" value="1" />
           <entry key="project.open.time.7" value="2" />
           <entry key="project.open.time.8" value="1" />
-          <entry key="project.opened" value="21" />
+          <entry key="project.opened" value="22" />
         </counts>
       </usages-collector>
     </session>
@@ -77,11 +81,20 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/models/eval_stanford_motif_glat_working_sgcls.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="244">
-              <caret line="734" column="9" selection-start-line="734" selection-start-column="9" selection-end-line="734" selection-end-column="9" />
+            <state relative-caret-position="172">
+              <caret line="714" column="50" lean-forward="true" selection-start-line="714" selection-start-column="50" selection-end-line="714" selection-end-column="50" />
               <folding>
                 <element signature="e#1#78#0" expanded="true" />
               </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/lib/motifnet_model_sgcls.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="253">
+              <caret line="704" column="36" lean-forward="true" selection-start-line="704" selection-start-column="36" selection-end-line="704" selection-end-column="36" />
             </state>
           </provider>
         </entry>
@@ -97,21 +110,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>sgcls</find>
-      <find>label</find>
-      <find>node_logits_dists</find>
-      <find>SGCLS</find>
-      <find>train_</find>
-      <find>train</find>
-      <find>wrapper</find>
-      <find>model</find>
-      <find>input_classes</find>
-      <find>max_length</find>
-      <find>rel_dists</find>
-      <find>node_logit_pad_dists</find>
-      <find>node_logit_dists</find>
-      <find>node_type</find>
-      <find>logit_base_predicate = softmax_</find>
       <find>:-1</find>
       <find>pred_relations</find>
       <find>nodes_class</find>
@@ -127,6 +125,21 @@
       <find>soft_merge2</find>
       <find>logit_base_predicate_51</find>
       <find>soft_merge</find>
+      <find>all_pred_entries =</find>
+      <find>sgcls</find>
+      <find>filter_det</find>
+      <find>glat_wrapper</find>
+      <find>twod_inds</find>
+      <find>kern</find>
+      <find>_</find>
+      <find>result.rel_dists</find>
+      <find>filter_dets</find>
+      <find>twod_inds = arange(r</find>
+      <find>result.rm_obj_dists</find>
+      <find>build_graph</find>
+      <find>glat</find>
+      <find>val_batch</find>
+      <find>build_graph_structu</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -156,7 +169,6 @@
         <option value="$PROJECT_DIR$/scripts/eval_stanford_motif_glat.sh" />
         <option value="$PROJECT_DIR$/lib/glat.py" />
         <option value="$PROJECT_DIR$/scripts/eval_kern_predcls.sh" />
-        <option value="$PROJECT_DIR$/lib/kern_model.py" />
         <option value="$PROJECT_DIR$/models/eval_stanford_motif_glat_copy_copy.py" />
         <option value="$PROJECT_DIR$/models/train_rels.py" />
         <option value="$PROJECT_DIR$/scripts/train_kern_stanford.sh" />
@@ -168,16 +180,19 @@
         <option value="$PROJECT_DIR$/models/train_rels_stanford.py" />
         <option value="$PROJECT_DIR$/lib/surgery.py" />
         <option value="$PROJECT_DIR$/lib/stanford_model.py" />
-        <option value="$PROJECT_DIR$/models/eval_rels.py" />
         <option value="$PROJECT_DIR$/models/eval_stanford_motif_glat.py" />
         <option value="$PROJECT_DIR$/lib/motifnet_model.py" />
         <option value="$PROJECT_DIR$/lib/motifnet_model_working.py" />
         <option value="$PROJECT_DIR$/lib/surgery_working.py" />
         <option value="$PROJECT_DIR$/models/eval_stanford_motif_glat_working.py" />
-        <option value="$PROJECT_DIR$/lib/motifnet_model_sgcls.py" />
         <option value="$PROJECT_DIR$/lib/surgery_sgcls.py" />
-        <option value="$PROJECT_DIR$/dataloaders/visual_genome.py" />
+        <option value="$PROJECT_DIR$/models/eval_rels.py" />
+        <option value="$PROJECT_DIR$/lib/kern_model.py" />
+        <option value="$PROJECT_DIR$/lib/motifnet_model_sgcls.py" />
+        <option value="$PROJECT_DIR$/lib/kern_model_sgcls.py" />
         <option value="$PROJECT_DIR$/models/eval_stanford_motif_glat_working_sgcls.py" />
+        <option value="$PROJECT_DIR$/models/eval_rels_sgcls.py" />
+        <option value="$PROJECT_DIR$/dataloaders/visual_genome.py" />
       </list>
     </option>
   </component>
@@ -259,7 +274,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.eval_stanford_motif_glat_working_sgcls">
+  <component name="RunManager" selected="Python.eval_rels_sgcls">
     <configuration name="eval_baseModel_glat" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="KERN" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -289,6 +304,35 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
+    <configuration name="eval_rels_sgcls" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="KERN" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="sftp://tangtangwzc@mango.cs.columbia.edu:22/dvmm-filer2/users/james/anaconda3/envs/KERN_env/bin/python" />
+      <option name="WORKING_DIRECTORY" value="/home/tangtangwzc/KERN" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <PathMappingSettings>
+        <option name="pathMappings">
+          <list>
+            <mapping local-root="$PROJECT_DIR$" remote-root="/home/tangtangwzc/KERN" />
+          </list>
+        </option>
+      </PathMappingSettings>
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/models/eval_rels_sgcls.py" />
+      <option name="PARAMETERS" value="-m sgcls -p 100 -clip 5 -ckpt checkpoints/kern_sgcls_predcls.tar -test -b 1 -use_ggnn_rel -ggnn_rel_time_step_num 3 -ggnn_rel_hidden_dim 512 -ggnn_rel_output_dim 512 -use_rel_knowledge -rel_knowledge prior_matrices/rel_matrix.npy" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <configuration name="eval_stanford_motif_glat_copy" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="KERN" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -310,35 +354,6 @@
         </option>
       </PathMappingSettings>
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/models/eval_stanford_motif_glat_copy.py" />
-      <option name="PARAMETERS" value="-m predcls -model_s_m stanford -b 1 -clip 5  -p 100 -pooling_dim 4096 -lr 1e-3 -ngpu 1 -test -ckpt checkpoints/stanford_1/vgrel-7.tar -nepoch 50" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration name="eval_stanford_motif_glat_copy_copy" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <module name="KERN" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="sftp://tangtangwzc@pineapple.cs.columbia.edu:22/dvmm-filer2/users/james/anaconda3/envs/KERN_env/bin/python" />
-      <option name="WORKING_DIRECTORY" value="/home/tangtangwzc/KERN" />
-      <option name="IS_MODULE_SDK" value="false" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <PathMappingSettings>
-        <option name="pathMappings">
-          <list>
-            <mapping local-root="$PROJECT_DIR$" remote-root="/home/tangtangwzc/KERN" />
-          </list>
-        </option>
-      </PathMappingSettings>
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/models/eval_stanford_motif_glat_copy_copy.py" />
       <option name="PARAMETERS" value="-m predcls -model_s_m stanford -b 1 -clip 5  -p 100 -pooling_dim 4096 -lr 1e-3 -ngpu 1 -test -ckpt checkpoints/stanford_1/vgrel-7.tar -nepoch 50" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -497,18 +512,18 @@
       <item itemvalue="Python.train_rels_stanford.py" />
       <item itemvalue="Python.eval_stanford_motif_glat.py" />
       <item itemvalue="Python.eval_stanford_motif_glat_copy" />
-      <item itemvalue="Python.eval_stanford_motif_glat_copy_copy" />
       <item itemvalue="Python.eval_baseModel_glat" />
       <item itemvalue="Python.eval_stanford_motif_glat_working" />
       <item itemvalue="Python.eval_stanford_motif_glat_working_sgcls" />
+      <item itemvalue="Python.eval_rels_sgcls" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.eval_rels_sgcls" />
         <item itemvalue="Python.eval_stanford_motif_glat_working_sgcls" />
         <item itemvalue="Python.eval_stanford_motif_glat_working" />
         <item itemvalue="Python.eval_baseModel_glat" />
         <item itemvalue="Python.eval_stanford_motif_glat_copy" />
-        <item itemvalue="Python.eval_stanford_motif_glat_copy_copy" />
       </list>
     </recent_temporary>
   </component>
@@ -538,19 +553,19 @@
     <frame x="0" y="0" width="1440" height="900" extended-state="0" />
     <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.1981402" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.031944446" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.32891566" />
       <window_info anchor="bottom" id="Run" order="2" weight="0.3987952" />
-      <window_info anchor="bottom" id="Debug" order="3" sideWeight="0.4987163" weight="0.17831326" />
+      <window_info active="true" anchor="bottom" id="Debug" order="3" sideWeight="0.4987163" visible="true" weight="0.37132785" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" weight="0.32891566" />
       <window_info anchor="bottom" id="Docker" order="7" show_stripe_button="false" />
       <window_info anchor="bottom" id="Version Control" order="8" />
-      <window_info anchor="bottom" id="File Transfer" order="9" sideWeight="0.49807444" weight="0.2060241" />
+      <window_info anchor="bottom" id="File Transfer" order="9" sideWeight="0.49807444" weight="0.20564042" />
       <window_info anchor="bottom" id="Database Changes" order="10" show_stripe_button="false" />
       <window_info anchor="bottom" id="Terminal" order="11" weight="0.32891566" />
       <window_info anchor="bottom" id="Event Log" order="12" sideWeight="0.5012837" side_tool="true" weight="0.34698796" />
@@ -1437,6 +1452,91 @@
           <line>562</line>
           <option name="timeStamp" value="670" />
         </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/lib/kern_model_sgcls.py</url>
+          <line>478</line>
+          <option name="timeStamp" value="671" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_rels_sgcls.py</url>
+          <line>493</line>
+          <option name="timeStamp" value="672" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_rels_sgcls.py</url>
+          <line>500</line>
+          <option name="timeStamp" value="673" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_rels_sgcls.py</url>
+          <line>522</line>
+          <option name="timeStamp" value="674" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_rels_sgcls.py</url>
+          <line>514</line>
+          <option name="timeStamp" value="675" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_rels_sgcls.py</url>
+          <line>515</line>
+          <option name="timeStamp" value="676" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_rels_sgcls.py</url>
+          <line>525</line>
+          <option name="timeStamp" value="677" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_rels_sgcls.py</url>
+          <line>524</line>
+          <option name="timeStamp" value="678" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/lib/surgery_sgcls.py</url>
+          <line>110</line>
+          <option name="timeStamp" value="679" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/lib/surgery_sgcls.py</url>
+          <line>108</line>
+          <option name="timeStamp" value="680" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/lib/surgery_sgcls.py</url>
+          <line>99</line>
+          <option name="timeStamp" value="681" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/lib/surgery_sgcls.py</url>
+          <line>92</line>
+          <option name="timeStamp" value="682" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_rels_sgcls.py</url>
+          <line>447</line>
+          <option name="timeStamp" value="683" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_rels_sgcls.py</url>
+          <line>451</line>
+          <option name="timeStamp" value="684" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_rels_sgcls.py</url>
+          <line>455</line>
+          <option name="timeStamp" value="685" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/dataloaders/visual_genome.py</url>
+          <line>519</line>
+          <option name="timeStamp" value="686" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/dataloaders/visual_genome.py</url>
+          <line>517</line>
+          <option name="timeStamp" value="687" />
+        </line-breakpoint>
       </breakpoints>
       <default-breakpoints>
         <breakpoint type="python-exception">
@@ -1498,6 +1598,26 @@
     </expressions>
     <expressions id="evaluateExpression">
       <expression>
+        <expression-string>type(return_ent_dists)</expression-string>
+        <language-id>Python</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>torch.cat((return_ent_dists, Variable(torch.zeros(return_rel_dists.size()[0], return_ent_dists.size()[1]).cuda())))</expression-string>
+        <language-id>Python</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>ent_dists</expression-string>
+        <language-id>Python</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>det</expression-string>
+        <language-id>Python</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
         <expression-string>logit_base_predicate_51.size()</expression-string>
         <language-id>Python</language-id>
         <evaluation-mode>EXPRESSION</evaluation-mode>
@@ -1522,39 +1642,9 @@
         <language-id>Python</language-id>
         <evaluation-mode>EXPRESSION</evaluation-mode>
       </expression>
-      <expression>
-        <expression-string>logit_base_predicate_weight.unsqueeze(0).size()</expression-string>
-        <language-id>Python</language-id>
-        <evaluation-mode>EXPRESSION</evaluation-mode>
-      </expression>
-      <expression>
-        <expression-string>torch.cat((logit_base_predicate_weight.unsqueeze(0), logit_glat_predicate_weight.unsqueeze(0)), 0)</expression-string>
-        <language-id>Python</language-id>
-        <evaluation-mode>EXPRESSION</evaluation-mode>
-      </expression>
-      <expression>
-        <expression-string>(node_type == 0)</expression-string>
-        <language-id>Python</language-id>
-        <evaluation-mode>EXPRESSION</evaluation-mode>
-      </expression>
-      <expression>
-        <expression-string>logit_base_predicate.size()</expression-string>
-        <language-id>Python</language-id>
-        <evaluation-mode>EXPRESSION</evaluation-mode>
-      </expression>
     </expressions>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/Makefile">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="75">
-          <caret line="5" column="29" lean-forward="true" selection-start-line="5" selection-start-column="29" selection-end-line="5" selection-end-column="29" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/lib/lstm/highway_lstm_cuda/_ext/__init__.py">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
     <entry file="file://$PROJECT_DIR$/lib/lstm/highway_lstm_cuda/_ext/highway_lstm_layer/__init__.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="30">
@@ -1587,9 +1677,6 @@
     <entry file="file://$USER_HOME$/Library/Caches/PyCharm2018.2/remote_sources/-1462509639/591061719/torch/autograd/variable.py" />
     <entry file="file://$USER_HOME$/Library/Caches/PyCharm2018.2/remote_sources/-1462509639/591061719/torch/autograd/__init__.py" />
     <entry file="file://$USER_HOME$/Library/Caches/PyCharm2018.2/remote_sources/-1462509639/591061719/torch/tensor.py" />
-    <entry file="file://$PROJECT_DIR$/models/eval_rels_ori.py">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
     <entry file="file://$PROJECT_DIR$/scripts/train_kern_predcls_glat.sh">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
@@ -1675,13 +1762,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/lib/kern_model.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="138">
-          <caret line="473" column="40" selection-start-line="473" selection-start-column="40" selection-end-line="473" selection-end-column="40" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/models/train_rels_stanford.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="532">
@@ -1764,16 +1844,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/lib/motifnet_model.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="201">
-          <caret line="549" column="15" selection-start-line="549" selection-start-column="15" selection-end-line="549" selection-end-column="15" />
-          <folding>
-            <element signature="e#40#58#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/models/train_rels_baseline_2.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="222">
@@ -1797,16 +1867,6 @@
           <caret line="674" selection-start-line="674" selection-end-line="674" />
           <folding>
             <element signature="e#1#78#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/models/eval_rels.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="8925">
-          <caret line="595" selection-start-line="595" selection-end-line="595" />
-          <folding>
-            <element signature="e#0#77#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -1846,24 +1906,74 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/models/eval_rels_ori.py">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/models/eval_rels.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-179">
+          <caret line="442" column="9" lean-forward="true" selection-start-line="442" selection-start-column="9" selection-end-line="442" selection-end-column="9" />
+          <folding>
+            <element signature="e#0#77#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/kern_model.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="78">
+          <caret line="469" lean-forward="true" selection-start-line="469" selection-end-line="469" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/motifnet_model.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="126">
+          <caret line="544" lean-forward="true" selection-start-line="544" selection-end-line="544" />
+          <folding>
+            <element signature="e#40#58#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/lib/motifnet_model_sgcls.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="500">
-          <caret line="739" selection-start-line="739" selection-end-line="739" />
+        <state relative-caret-position="253">
+          <caret line="704" column="36" lean-forward="true" selection-start-line="704" selection-start-column="36" selection-end-line="704" selection-end-column="36" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/lib/surgery_sgcls.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="500">
-          <caret line="93" column="51" selection-start-line="93" selection-start-column="51" selection-end-line="93" selection-end-column="51" />
+        <state relative-caret-position="79">
+          <caret line="86" column="15" selection-start-line="86" selection-start-column="15" selection-end-line="86" selection-end-column="15" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/kern_model_sgcls.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="301">
+          <caret line="533" column="83" lean-forward="true" selection-start-line="533" selection-start-column="83" selection-end-line="533" selection-end-column="102" />
+          <folding>
+            <element signature="e#21#39#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/models/eval_rels_sgcls.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="148">
+          <caret line="451" selection-start-line="451" selection-end-line="451" />
+          <folding>
+            <element signature="e#0#77#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/dataloaders/visual_genome.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="500">
-          <caret line="519" selection-start-line="519" selection-end-line="519" />
+        <state relative-caret-position="158">
+          <caret line="517" selection-start-line="517" selection-end-line="517" />
           <folding>
             <element signature="e#71#82#0" expanded="true" />
           </folding>
@@ -1872,8 +1982,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/models/eval_stanford_motif_glat_working_sgcls.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="244">
-          <caret line="734" column="9" selection-start-line="734" selection-start-column="9" selection-end-line="734" selection-end-column="9" />
+        <state relative-caret-position="172">
+          <caret line="714" column="50" lean-forward="true" selection-start-line="714" selection-start-column="50" selection-end-line="714" selection-end-column="50" />
           <folding>
             <element signature="e#1#78#0" expanded="true" />
           </folding>

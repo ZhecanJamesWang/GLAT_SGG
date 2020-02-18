@@ -714,6 +714,7 @@ def glat_postprocess(pred_entry, if_predicting=False):
 
     pred_entry['rel_dists'] = tensor2variable(pred_entry['rel_dists'])
 
+    #sgcls
     pred_entry['ent_dists'] = tensor2variable(pred_entry['ent_dists'])
 
     pred_entry['rel_scores'] = tensor2variable(pred_entry['rel_scores'])
@@ -737,6 +738,9 @@ def glat_postprocess(pred_entry, if_predicting=False):
 
     pred_label_predicate, pred_label_entities = glat_wrapper(total_data)
 
+    # pred_entry['rel_scores'] = pred_label_predicate
+
+    # For SGCLS
     pred_entry['rel_scores'] = pred_label_predicate[:, :-1]
 
     # For SGCLS
@@ -781,11 +785,15 @@ def val_batch(batch_num, b, evaluator, evaluator_multiple_preds, evaluator_list,
 
         if len(det) == 6 and not conf.return_top100:
             # (boxes_i, objs_i, obj_scores_i, rels_i, pred_scores_i, rel_dists) = det
+
+            # sgcls
             (boxes_i, objs_i, obj_scores_i, rels_i, pred_scores_i, rel_dists, ent_dists) = det
             rels_i_a100 = np.asarray([])
         else:
             # (boxes_i, objs_i, obj_scores_i, rels_i_b100, pred_scores_i_b100, rels_i_a100, pred_scores_i_a100,
             #  rel_scores_idx_b100, rel_scores_idx_a100, rel_dists) = det
+
+            # sgcls
             (boxes_i, objs_i, obj_scores_i, rels_i_b100, pred_scores_i_b100, rels_i_a100, pred_scores_i_a100,
              rel_scores_idx_b100, rel_scores_idx_a100, rel_b_dists, rel_a_dists, ent_dists) = det
             rel_dists = rel_b_dists
@@ -801,6 +809,7 @@ def val_batch(batch_num, b, evaluator, evaluator_multiple_preds, evaluator_list,
             'gt_boxes': val.gt_boxes[batch_num + i].copy(),  # (23, 4) (16, 4)
         }
 
+        # sgcls
         if conf.return_top100:
             pred_entry = {
                 'pred_boxes': boxes_i * BOX_SCALE / IM_SCALE,  # (23, 4) (16, 4)

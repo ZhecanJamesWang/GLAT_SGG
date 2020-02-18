@@ -693,7 +693,6 @@ class RelModel(nn.Module):
             else:
                 return result, []
 
-
         #validation here~~~~~~~~~~~~~~~~
         twod_inds = arange(result.obj_preds.data) * self.num_classes + result.obj_preds.data
         result.obj_scores = F.softmax(result.rm_obj_dists, dim=1).view(-1)[twod_inds]
@@ -731,12 +730,16 @@ class RelModel(nn.Module):
         if self.inter_fea:
             # return dict_gt, prod_rep, filter_dets(bboxes, result.obj_scores,
             #                result.obj_preds, rel_inds[:, 1:], rel_rep,  return_top100 = self.return_top100, training = False)
+
+            # sgcls
             return dict_gt, prod_rep, filter_dets(bboxes, result.obj_scores,result.obj_preds, rel_inds[:, 1:],
                                                   rel_rep, rel_dists = result.rel_dists, ent_dists=result.rm_obj_dists,
                                                   return_top100 = self.return_top100, training = False)
         else:
             # return dict_gt, filter_dets(bboxes, result.obj_scores,
             #                result.obj_preds, rel_inds[:, 1:], rel_rep, return_top100 = self.return_top100, training = False)
+
+            # sgcls
             return dict_gt, filter_dets(bboxes, result.obj_scores,result.obj_preds, rel_inds[:, 1:],
                                                   rel_rep, rel_dists = result.rel_dists, ent_dists=result.rm_obj_dists,
                                                   return_top100 = self.return_top100, training = False)
