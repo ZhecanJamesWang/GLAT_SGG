@@ -434,7 +434,6 @@ def train_batch(b, train_results, train_bias_logits, train_det_ress, epoch_num, 
     # For SGCLS
     # result.rm_obj_dists = pred_entry['entity_scores']
     # result.obj_preds = pred_entry['pred_classes']
-
     # For bug0
     result.rm_obj_dists = pred_entry['obj_scores_rm']
     result.obj_preds = pred_entry['pred_classes']
@@ -660,10 +659,11 @@ def glat_postprocess(pred_entry, mask_idx, if_predicting=False):
     pred_entry['rel_scores'] = pred_label_predicate
     # pdb.set_trace()
     # For SGCLS
+    # pred_entry['entity_scores'] = pred_label_entities
+
     # For bug0
     pred_entry['obj_scores_rm'] = pred_label_entities
     pred_entry['obj_scores'] = F.softmax(pred_label_entities, dim=1).max(1)[0]
-    # pred_entry['entity_scores'] = pred_label_entities
 
     pred_entry['pred_classes'] = pred_label_entities.max(1)[1]
 

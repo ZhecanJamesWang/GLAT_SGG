@@ -129,7 +129,7 @@ elif conf.model_s_m == 'motifnet':
 
     # Finetuned model v3
     print('loading Finetuned model v3')
-    ckpt_glat = torch.load('/home/haoxuan/code/KERN/checkpoints/motifnet_glat_sgcls_mask_logit_thres_train_v3/motifnet_glat-26.tar')
+    ckpt_glat = torch.load('/home/haoxuan/code/KERN/checkpoints/motifnet_glat_sgdet_mask_logit_thres_train_v3/motifnet_glat-49.tar')
 
     # Pretrained Model
     # print('loading pretrained model')
@@ -285,13 +285,7 @@ def glat_postprocess(pred_entry, mask_idx, if_predicting=False):
     pred_entry['rel_scores'] = pred_label_predicate
     # pdb.set_trace()
     # For SGCLS
-
-    # pdb.set_trace()
-
-    # softmax
-    pred_entry['obj_scores_rm'] = pred_label_entities
-
-    pred_entry['obj_scores'] = F.softmax(pred_label_entities, dim=1).max(1)[0]
+    pred_entry['entity_scores'] = pred_label_entities
     pred_entry['pred_classes'] = pred_label_entities.max(1)[1]
 
     if conf.mode == "sgcls" or conf.mode == "sgdet":

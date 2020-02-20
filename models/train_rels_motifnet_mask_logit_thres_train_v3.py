@@ -634,13 +634,28 @@ def glat_postprocess(pred_entry, mask_idx, if_predicting=False):
     # pdb.set_trace()
     pred_entry['pred_relations'] = torch.cat((pred_entry['pred_rel_inds'], pred_entry['rel_classes']), dim=1)
 
-    total_data = build_graph_structure(pred_entry, ind_to_classes, ind_to_predicates, if_predicting=if_predicting)
+    # For SGCLS
+    if conf.mode == "sgcls" or conf.mode == "sgdet":
+        total_data, useless_entity_id = build_graph_structure(pred_entry, ind_to_classes, ind_to_predicates, if_predicting=if_predicting,
+                                           sgclsdet=True)
+    else:
+        total_data = build_graph_structure(pred_entry, ind_to_classes, ind_to_predicates, if_predicting=if_predicting)
 
     pred_label_predicate, pred_label_entities = glat_wrapper(total_data)
+
     pred_entry['rel_scores'] = pred_label_predicate
 
-    return pred_entry
+    # For SGCLS
+    # pred_entry['entity_scores'] = pred_label_entities
+    pred_entry['obj_scores_rm'] = pred_label_entities
+    pred_entry['obj_scores'] = F.softmax(pred_label_entities, dim=1).max(1)[0]
 
+    pred_entry['pred_classes'] = pred_label_entities.max(1)[1]
+
+    if conf.mode == "sgcls" or conf.mode == "sgdet":
+        return pred_entry, useless_entity_id
+    else:
+        return pred_entry
 
 def rank_predicate(pred_entry):
     obj_scores0 = pred_entry['obj_scores'][pred_entry['pred_rel_inds'][:, 0]]

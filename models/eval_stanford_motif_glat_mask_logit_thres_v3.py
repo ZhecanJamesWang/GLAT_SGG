@@ -129,7 +129,8 @@ elif conf.model_s_m == 'motifnet':
 
     # Finetuned model v3
     print('loading Finetuned model v3')
-    ckpt_glat = torch.load('/home/haoxuan/code/KERN/checkpoints/motifnet_glat_sgcls_mask_logit_thres_train_v3/motifnet_glat-26.tar')
+    ckpt_glat = torch.load('/home/haoxuan/code/KERN/checkpoints/motifnet_glat_predcls_mask_logit_thres_train_v3/motifnet_glat-49.tar')
+
 
     # Pretrained Model
     # print('loading pretrained model')
@@ -251,7 +252,6 @@ def glat_wrapper(total_data):
     # return pred_label_predicate.data.cpu().numpy(), pred_label_entities.data.cpu().numpy()
 
 
-
 def glat_postprocess(pred_entry, mask_idx, if_predicting=False):
     # pred_entry = {
     #     'pred_boxes': boxes_i * BOX_SCALE / IM_SCALE,  # (23, 4) (16, 4)
@@ -271,34 +271,14 @@ def glat_postprocess(pred_entry, mask_idx, if_predicting=False):
     if mask_idx is not None:
         pred_entry['rel_classes'][mask_idx] = 51
     pred_entry['rel_classes'] = variable2tensor(pred_entry['rel_classes'])
-    # pdb.set_trace()
     pred_entry['pred_relations'] = torch.cat((pred_entry['pred_rel_inds'], pred_entry['rel_classes']), dim=1)
 
-    if conf.mode == "sgcls" or conf.mode == "sgdet":
-        total_data, useless_entity_id = build_graph_structure(pred_entry, ind_to_classes, ind_to_predicates, if_predicting=if_predicting,
-                                           sgclsdet=True)
-    else:
-        total_data = build_graph_structure(pred_entry, ind_to_classes, ind_to_predicates, if_predicting=if_predicting)
+    total_data = build_graph_structure(pred_entry, ind_to_classes, ind_to_predicates, if_predicting=if_predicting)
 
     pred_label_predicate, pred_label_entities = glat_wrapper(total_data)
-
     pred_entry['rel_scores'] = pred_label_predicate
-    # pdb.set_trace()
-    # For SGCLS
 
-    # pdb.set_trace()
-
-    # softmax
-    pred_entry['obj_scores_rm'] = pred_label_entities
-
-    pred_entry['obj_scores'] = F.softmax(pred_label_entities, dim=1).max(1)[0]
-    pred_entry['pred_classes'] = pred_label_entities.max(1)[1]
-
-    if conf.mode == "sgcls" or conf.mode == "sgdet":
-        return pred_entry, useless_entity_id
-    else:
-        return pred_entry
-
+    return pred_entry
 
 
 all_pred_entries = []
@@ -402,12 +382,10 @@ def val_batch(batch_num, b, evaluator,evaluator_multiple_preds, evaluator_list, 
         pred_entry['rel_scores'] = pred_scores_i_b100[input_pred_idxs_intop100]
         mask_idx = mask_idx_ininput
 
+        # if batch_num == 32 or batch_num == 33:
+        #     pdb.set_trace()
+
         pred_entry = glat_postprocess(pred_entry, if_predicting=True, mask_idx=mask_idx)
-
-        if conf.mode == "sgcls" or conf.mode == "sgdet":
-            useless_entity_id = pred_entry[1]
-            pred_entry = pred_entry[0]
-
         pred_entry = cuda2numpy_dict(pred_entry)
 
         pred_scores_i_b100_updated = copy.deepcopy(pred_scores_i_b100)
@@ -441,21 +419,6 @@ def val_batch(batch_num, b, evaluator,evaluator_multiple_preds, evaluator_list, 
                     if int(pred_class) in dict_gt[(int(sub), int(obj))]:
                         accs[0] += 1
 
-        # if mask_idx is not None:
-        #     for idx in mask_idx:
-        #         accs[1] += 1
-        #         sub = rels_i_b100.data[idx, 0]
-        #         obj = rels_i_b100.data[idx, 1]
-        #         pred_class = pred_entry['rel_scores'][idx, 1:].argmax()+1
-        #         if int(pred_class) in dict_gt[(int(sub), int(obj))]:
-        #             accs[0] += 1
-
-        all_pred_entries.append(pred_entry)
-
-        # evaluator[conf.mode].evaluate_scene_graph_entry(
-        #     gt_entry,
-        #     pred_entry,
-        # )
 
         eval_entry(conf.mode, gt_entry, pred_entry, evaluator, evaluator_multiple_preds,
                    evaluator_list, evaluator_multiple_preds_list)
@@ -472,6 +435,26 @@ for index, name in enumerate(ind_to_predicates):
     evaluator_list.append((index, name, BasicSceneGraphEvaluator.all_modes()))
     evaluator_multiple_preds_list.append((index, name, BasicSceneGraphEvaluator.all_modes(multiple_preds=True)))
 
+# if conf.cache is not None and os.path.exists(conf.cache):
+#     print("Found {}! Loading from it".format(conf.cache))
+#     with open(conf.cache,'rb') as f:
+#         all_pred_entries = pkl.load(f)
+#     for i, pred_entry in enumerate(tqdm(all_pred_entries)):
+#         gt_entry = {
+#             'gt_classes': val.gt_classes[i].copy(),
+#             'gt_relations': val.relationships[i].copy(),
+#             'gt_boxes': val.gt_boxes[i].copy(),
+#         }
+#         eval_entry(conf.mode, gt_entry, pred_entry, evaluator, evaluator_multiple_preds,
+#                    evaluator_list, evaluator_multiple_preds_list)
+#
+#     recall = evaluator[conf.mode].print_stats()
+#     recall_mp = evaluator_multiple_preds[conf.mode].print_stats()
+#
+#     mean_recall = calculate_mR_from_evaluator_list(evaluator_list, conf.mode, save_file=conf.save_rel_recall)
+#     mean_recall_mp = calculate_mR_from_evaluator_list(evaluator_multiple_preds_list, conf.mode, multiple_preds=True,
+#                                                       save_file=conf.save_rel_recall)
+# else:
 
 detector.eval()
 accs = [0, 0]

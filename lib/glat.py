@@ -286,8 +286,12 @@ class Pred_label(nn.Module):
         # pdb.set_trace()
 
         # lm_logits = self.decoder(h)
-        predicate_logits = self.softmax(predicate)
-        entity_logits = self.softmax(entity)
+        # pdb.set_trace()
+        # predicate_logits = self.softmax(predicate)
+        # entity_logits = self.softmax(entity)
+
+        predicate_logits = predicate
+        entity_logits = entity
 
         # pdb.set_trace()
         # if self.training:

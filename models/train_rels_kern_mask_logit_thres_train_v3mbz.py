@@ -23,8 +23,8 @@ import pdb
 
 #--------updated--------
 # from lib.stanford_model import RelModelStanford as RelModel
-from lib.motifnet_model import RelModel
-# from lib.kern_model import KERN
+# from lib.motifnet_model import RelModel
+from lib.kern_model import KERN
 
 from lib.glat import GLATNET
 import pdb
@@ -41,7 +41,7 @@ import math
 
 codebase = '../../'
 sys.path.append(codebase)
-exp_name = 'motif'
+exp_name = 'kern'
 
 
 # os.environ["CUDA_VISIBLE_DEVICES"] = "0"
@@ -80,34 +80,19 @@ train_loader, val_loader = VGDataLoader.splits(train, val, mode='rel',
 
 # python models/train_rels.py -m sgcls -model stanford -b 4 -p 400 -lr 1e-4 -ngpu 1 -ckpt checkpoints/vgdet/vg-24.tar -save_dir checkpoints/stanford -adam
 
-order = 'leftright'
-nl_obj = 2
-nl_edge = 4
-hidden_dim = 512
-pass_in_obj_feats_to_decoder = False
-pass_in_obj_feats_to_edge = False
-rec_dropout = 0.1
-use_bias = True
-use_tanh = False
-limit_vision = False
 
 
-detector = RelModel(classes=train.ind_to_classes, rel_classes=train.ind_to_predicates,
-                    num_gpus=conf.num_gpus, mode=conf.mode, require_overlap_det=True,
-                    use_resnet=conf.use_resnet, order=order,
-                    nl_edge=nl_edge, nl_obj=nl_obj, hidden_dim=hidden_dim,
-                    use_proposals=conf.use_proposals,
-                    pass_in_obj_feats_to_decoder=pass_in_obj_feats_to_decoder,
-                    pass_in_obj_feats_to_edge=pass_in_obj_feats_to_edge,
-                    pooling_dim=conf.pooling_dim,
-                    rec_dropout=rec_dropout,
-                    use_bias=use_bias,
-                    use_tanh=use_tanh,
-                    limit_vision=limit_vision,
-                    return_top100=True,
-                    return_unbias_logit=True
-                    )
 
+detector = KERN(classes=train.ind_to_classes, rel_classes=train.ind_to_predicates,
+                num_gpus=conf.num_gpus, mode=conf.mode, require_overlap_det=True,
+                use_resnet=conf.use_resnet, use_proposals=conf.use_proposals,
+                use_ggnn_obj=conf.use_ggnn_obj, ggnn_obj_time_step_num=conf.ggnn_obj_time_step_num,
+                ggnn_obj_hidden_dim=conf.ggnn_obj_hidden_dim, ggnn_obj_output_dim=conf.ggnn_obj_output_dim,
+                use_obj_knowledge=conf.use_obj_knowledge, obj_knowledge=conf.obj_knowledge,
+                use_ggnn_rel=conf.use_ggnn_rel, ggnn_rel_time_step_num=conf.ggnn_rel_time_step_num,
+                ggnn_rel_hidden_dim=conf.ggnn_rel_hidden_dim, ggnn_rel_output_dim=conf.ggnn_rel_output_dim,
+                use_rel_knowledge=conf.use_rel_knowledge, rel_knowledge=conf.rel_knowledge,
+                return_top100=conf.return_top100, return_unbias_logit=True)
 
 # detector = RelModel(classes=train.ind_to_classes, rel_classes=train.ind_to_predicates,
 #                     num_gpus=conf.num_gpus, mode=conf.mode, require_overlap_det=True,
@@ -156,18 +141,20 @@ def get_optim(lr, last_epoch=-1):
     # params = [{'params': fc_params, 'lr': lr / 10.0}, {'params': non_fc_params}]
     params = model.parameters()
     if conf.adam:
-        optimizer = optim.Adam(params, weight_decay=conf.adamwd, lr=lr, eps=1e-3)
+        # optimizer = optim.Adam(params, weight_decay=conf.adamwd, lr=lr)
+        optimizer = optim.Adam(params, weight_decay=5e-4, lr=lr, eps=1e-3)
     else:
         optimizer = optim.SGD(params, weight_decay=conf.l2, lr=lr, momentum=0.9)
 
     # scheduler = ReduceLROnPlateau(optimizer, 'max', patience=3, factor=0.1,
     #                               verbose=True, threshold=0.0001, threshold_mode='abs', cooldown=1)
     scheduler = lr_scheduler.StepLR(optimizer, step_size=5, gamma=0.3, last_epoch=last_epoch)
+    # scheduler = lr_scheduler.StepLR(optimizer, step_size=15, gamma=0.5, last_epoch=last_epoch)
 
     return optimizer, scheduler
 
 ckpt = torch.load(conf.ckpt)
-print("Loading EVERYTHING from motifnet", conf.ckpt)
+print("Loading EVERYTHING from kern", conf.ckpt)
 optimistic_restore(detector, ckpt['state_dict'])
 detector.cuda()
 start_epoch = -1
@@ -250,6 +237,9 @@ def train_epoch(epoch_num, train_results, train_bias_logits, train_det_ress):
             start = time.time()
 
             # break
+
+    writer.add_scalar('mask acc/train acc of mask', accs[0] * 1.0 / accs[1], epoch_num)
+
 
     return pd.concat(tr, axis=1)
 
@@ -423,20 +413,11 @@ def train_batch(b, train_results, train_bias_logits, train_det_ress, epoch_num, 
 
     pred_entry = glat_postprocess(pred_entry, if_predicting=False, mask_idx=mask_idxs_ininput)
 
-    # For SGCLS
-    if conf.mode == "sgcls" or conf.mode == "sgdet":
-        useless_entity_id = pred_entry[1]
-        pred_entry = pred_entry[0]
-
     rels_b_100 = pred_entry['pred_rel_inds']
     pred_scores_sorted_b_100 = pred_entry['rel_scores'][:, :-1]
 
-    # For SGCLS
-    # result.rm_obj_dists = pred_entry['entity_scores']
-    # result.obj_preds = pred_entry['pred_classes']
+    # b_100_idx abs coor
 
-    # For bug0
-    result.rm_obj_dists = pred_entry['obj_scores_rm']
     result.obj_preds = pred_entry['pred_classes']
 
     # t2 = time.time()
@@ -458,17 +439,12 @@ def train_batch(b, train_results, train_bias_logits, train_det_ress, epoch_num, 
     #     result.rel_inds = pred_entry['pred_rel_inds']
     #     result.rel_dists = pred_entry['rel_scores']
 
-    # For SGCLS
-    useful_entity_id = list(range(result.rm_obj_labels.size(0)))
-    for i in useless_entity_id:
-        useful_entity_id.remove(i)
-
     losses = {}
-
-    # For SGCLS
-    if conf.mode == "sgcls" or conf.mode == "sgdet":
-        losses['class_loss'] = F.cross_entropy(result.rm_obj_dists, result.rm_obj_labels[useful_entity_id])
-
+    if conf.use_ggnn_obj: # if not use ggnn obj, we just use scores of faster rcnn as their scores, there is no need to train
+        losses['class_loss'] = F.cross_entropy(result.rm_obj_dists, result.rm_obj_labels)
+    # losses['rel_loss'] = F.cross_entropy(result.rel_dists, result.rel_labels[:, -1])
+    # pdb.set_trace()
+    # losses['rel_loss'] = F.cross_entropy(pred_scores_sorted_b_100[mask_idxs_ininput], result.rel_labels[b_100_idx[mask_idxs_inalltop]][:, -1])
     losses['rel_loss'] = F.cross_entropy(pred_scores_sorted_b_100, result.rel_labels[b_100_idx[input_pred_idxs_inalltop]][:, -1])
     loss = sum(losses.values())
 
@@ -503,6 +479,7 @@ def val_epoch(epoch, eval_results, eval_logits, eval_det_ress):
     model.eval()
     evaluator_list = [] # for calculating recall of each relationship except no relationship
     evaluator_multiple_preds_list = []
+    # eval_logits = []
     accs = [0, 0]
 
     for index, name in enumerate(ind_to_predicates):
@@ -528,7 +505,7 @@ def val_epoch(epoch, eval_results, eval_logits, eval_det_ress):
     mean_recall = calculate_mR_from_evaluator_list(evaluator_list, conf.mode)
     mean_recall_mp = calculate_mR_from_evaluator_list(evaluator_multiple_preds_list, conf.mode, multiple_preds=True)
     print('test acc of mask:', accs[0] * 1.0 / accs[1])
-    writer.add_scalar('test acc of mask', accs[0] * 1.0 / accs[1], epoch)
+    writer.add_scalar('mask acc/test acc of mask', accs[0] * 1.0 / accs[1], epoch)
 
     return recall, recall_mp, mean_recall, mean_recall_mp
 
@@ -592,6 +569,8 @@ def glat_wrapper(total_data):
     #         predicate_num_list[i] = predicate_num_list[i] + predicate_num_list[i-1] if i != 0 else predicate_num_list[i]
     #     for i in range(len(predicate_num_list)):
     #         pred_label_predicate.append()
+
+    # pdb.set_trace()
 
     pred_label_predicate = pred_label[0]  # flatten predicate (B*N, 51)
     pred_label_entities = pred_label[1]  # flatten entities
@@ -658,12 +637,11 @@ def glat_postprocess(pred_entry, mask_idx, if_predicting=False):
     pred_label_predicate, pred_label_entities = glat_wrapper(total_data)
 
     pred_entry['rel_scores'] = pred_label_predicate
-    # pdb.set_trace()
+
     # For SGCLS
-    # For bug0
+    # pred_entry['entity_scores'] = pred_label_entities
     pred_entry['obj_scores_rm'] = pred_label_entities
     pred_entry['obj_scores'] = F.softmax(pred_label_entities, dim=1).max(1)[0]
-    # pred_entry['entity_scores'] = pred_label_entities
 
     pred_entry['pred_classes'] = pred_label_entities.max(1)[1]
 
@@ -782,12 +760,6 @@ def val_batch(batch_num, b, evaluator, evaluator_multiple_preds, evaluator_list,
         #     pdb.set_trace()
 
         pred_entry = glat_postprocess(pred_entry, if_predicting=True, mask_idx=mask_idx)
-
-        # For SGCLS
-        if conf.mode == "sgcls" or conf.mode == "sgdet":
-            useless_entity_id = pred_entry[1]
-            pred_entry = pred_entry[0]
-
         pred_entry = cuda2numpy_dict(pred_entry)
 
         pred_scores_i_b100_updated = copy.deepcopy(pred_scores_i_b100)
