@@ -257,13 +257,10 @@ class Pred_label(nn.Module):
         embed_shape_entity = model.embed_predicate.weight.shape
 
         self.FC = nn.Linear(embed_shape_predicate[1], embed_shape_predicate[1])
-
         self.decoder_predicate = nn.Linear(embed_shape_predicate[1], embed_shape_predicate[0], bias=False)
         self.decoder_predicate.weight = model.embed_predicate.weight
-
         self.decoder_entity = nn.Linear(embed_shape_entity[1], embed_shape_entity[0], bias=False)
         self.decoder_entity.weight = model.embed_entity.weight
-
         self.softmax = nn.LogSoftmax(dim=-1)
 
     def forward(self, h, node_type):
@@ -274,10 +271,9 @@ class Pred_label(nn.Module):
 
         predicate, predicate_order_list, entity, entity_order_list, blank, blank_order_list = split(h, node_type)
 
-        # pdb.set_trace()
+        predicate_logits = self.decoder_predicate(predicate)
+        entity_logits = self.decoder_entity(entity)
 
-        predicate = self.decoder_predicate(predicate)
-        entity = self.decoder_entity(entity)
         if len(blank.size()) != 0:
             blank = self.decoder_entity(blank)
             blank_logits = self.softmax(blank)
@@ -288,23 +284,20 @@ class Pred_label(nn.Module):
         # lm_logits = combine(predicate, predicate_order_list, entity, entity_order_list, b_size, n_num)
         # pdb.set_trace()
 
-        # lm_logits = self.decoder(h)
-
-        # predicate_logits = self.softmax(predicate)
-        # entity_logits = self.softmax(entity)
-
-        predicate_logits = predicate
-        entity_logits = entity
+        # lm = self.decoder(h_logits)
+        predicate = self.softmax(predicate_logits)
+        entity = self.softmax(entity_logits)
 
         # pdb.set_trace()
         # if self.training:
         #     return predicate_logits, entity_logits
         # else:
-        _, predicate_labels = torch.max(predicate_logits, dim=-1, keepdim=True)
-        _, entity_labels = torch.max(entity_logits, dim=-1, keepdim=True)
+        _, predicate_labels = torch.max(predicate, dim=-1, keepdim=True)
+        _, entity_labels = torch.max(entity, dim=-1, keepdim=True)
 
         all_labels = combine(predicate_labels, predicate_order_list, entity_labels, entity_order_list, blank_labels, blank_order_list, b_size, n_num)
-        return predicate_logits, entity_logits, all_labels
+
+        return predicate, entity, predicate_logits, entity_logits, all_labels
 
 
 class GLAT_basic(nn.Module):
@@ -368,7 +361,6 @@ def split(fea, node_type):
     fea_flatten = fea.view(batch_size*num_node, -1)
     dim = fea_flatten.size()[-1]
 
-
     # torch.repeat(node_type, (-1, dim))
     node_type_flatten = node_type.view(-1, 1).expand(-1, dim)
 
@@ -381,6 +373,8 @@ def split(fea, node_type):
 
 
     predicate = fea_flatten[predicate_mask].view(-1, dim)
+
+
     predicate_order_list = order_list[predicate_mask[:, 0]]
 
     entity = fea_flatten[entity_mask].view(-1, dim)
@@ -456,7 +450,6 @@ class GLAT_Seq(nn.Module):
         predicate, predicate_order_list, entity, entity_order_list, blank, blank_order_list = split(fea, node_type)
         predicate = self.embed_predicate(predicate)
         entity = self.embed_entity(entity)
-
         if len(blank.size()) != 0:
             blank = self.embed_entity(blank)
 

@@ -254,8 +254,10 @@ class Pred_label(nn.Module):
     def __init__(self, model):
         super(Pred_label, self).__init__()
         # embed_shape_predicate = model.embed_predicate.weight.shape
-        # embed_shape_predicate_logit = model.embed_predicate_logit.weight.shape
+
+        embed_shape_predicate_logit = model.embed_predicate_logit.weight.shape
         embed_shape_predicate = model.embed_predicate_logit.weight.shape
+
         embed_shape_entity = model.embed_predicate.weight.shape
 
         # self.FC = nn.Linear(embed_shape_predicate[1], embed_shape_predicate[1])
@@ -266,10 +268,11 @@ class Pred_label(nn.Module):
 
         self.decoder_predicate = nn.Linear(embed_shape_predicate[1], embed_shape_predicate[0], bias=False)
         self.decoder_predicate.weight = model.embed_predicate.weight
+        # self.decoder_predicate.weight = model.embed_predicate_logit.weight
 
-        # self.size = [embed_shape_predicate_logit[0], embed_shape_predicate_logit[1]]
-        # self.decoder_predicate_logit = nn.Linear(embed_shape_predicate_logit[0], embed_shape_predicate_logit[1], bias=False)
-        # self.decoder_predicate_logit.weight = model.embed_predicate_logit.weight.t()
+        self.decoder_predicate_logit = nn.Linear(embed_shape_predicate_logit[1], embed_shape_predicate_logit[0], bias=False)
+        # self.decoder_predicate_logit.weight = model.embed_predicate_logit.weight
+        self.decoder_predicate_logit.weight.data = model.embed_predicate_logit.weight.data.t()
 
         self.decoder_entity = nn.Linear(embed_shape_entity[1], embed_shape_entity[0], bias=False)
         self.decoder_entity.weight = model.embed_entity.weight
@@ -286,7 +289,9 @@ class Pred_label(nn.Module):
 
         # pdb.set_trace()
 
-        predicate = self.decoder_predicate(predicate)
+        predicate_one_hogt = self.decoder_predicate(predicate)
+        predicate_logit = self.decoder_predicate_logit(predicate)
+
         # predicate = self.decoder_predicate_logit(predicate)
         entity = self.decoder_entity(entity)
         if len(blank.size()) != 0:
@@ -299,19 +304,26 @@ class Pred_label(nn.Module):
         # lm_logits = combine(predicate, predicate_order_list, entity, entity_order_list, b_size, n_num)
         # pdb.set_trace()
 
+        predicate_logits = predicate_logit
+        entity_logits = entity
+
+        predicate_conf = self.softmax(predicate_logits)
+        entity_conf = self.softmax(entity_logits)
+
         # lm_logits = self.decoder(h)
-        predicate_logits = self.softmax(predicate)
-        entity_logits = self.softmax(entity)
+        # predicate_logits = self.softmax(predicate)
+        # entity_logits = self.softmax(entity)
 
         # pdb.set_trace()
         # if self.training:
         #     return predicate_logits, entity_logits
         # else:
-        _, predicate_labels = torch.max(predicate_logits, dim=-1, keepdim=True)
-        _, entity_labels = torch.max(entity_logits, dim=-1, keepdim=True)
+        _, predicate_labels = torch.max(predicate_conf, dim=-1, keepdim=True)
+        _, entity_labels = torch.max(entity_conf, dim=-1, keepdim=True)
 
         all_labels = combine(predicate_labels, predicate_order_list, entity_labels, entity_order_list, blank_labels, blank_order_list, b_size, n_num, predicate_labels)
-        return predicate_logits, entity_logits, all_labels
+
+        return predicate_conf, entity_conf, predicate_logits, entity_logits, all_labels
 
 
 class GLAT_basic(nn.Module):
@@ -393,7 +405,8 @@ def split(fea, node_type, node_logit=[]):
 
     predicate = fea_flatten[predicate_mask].view(-1, dim)
     if len(node_logit) != 0:
-        predicate_logit = node_logit[predicate_mask].view(-1, dim_logit)
+        # predicate_logit = node_logit[predicate_mask].view(-1, dim_logit)
+        predicate_logit = node_logit.view(-1, 52)[predicate_mask.expand(-1, 52)].view(-1, 52)
     else:
         predicate_logit = []
     predicate_order_list = order_list[predicate_mask[:, 0]]
@@ -442,8 +455,10 @@ class GLAT_Seq(nn.Module):
         self.num = len(types)
         # self.embed = nn.Embedding(vocab_num, fea_dim)
         self.embed_predicate = nn.Embedding(vocab_num[0], fea_dim)
+
         # self.embed_predicate_logit = nn.Linear(fea_dim, vocab_num[0])
         self.embed_predicate_logit = nn.Linear(vocab_num[0], fea_dim)
+        # self.embed_predicate_logit = nn.Embedding(vocab_num[0], fea_dim)
 
         self.embed_entity = nn.Embedding(vocab_num[1], fea_dim)
 
@@ -582,4 +597,3 @@ class Baseline(nn.Module):
         pred_edge = self.Pred_connect(x, adj)
 
         return pred_label, pred_edge
-
