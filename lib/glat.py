@@ -271,10 +271,8 @@ class Pred_label(nn.Module):
 
         predicate, predicate_order_list, entity, entity_order_list, blank, blank_order_list = split(h, node_type)
 
-        # pdb.set_trace()
-
-        predicate = self.decoder_predicate(predicate)
-        entity = self.decoder_entity(entity)
+        predicate_logits = self.decoder_predicate(predicate)
+        entity_logits = self.decoder_entity(entity)
 
         if len(blank.size()) != 0:
             blank = self.decoder_entity(blank)
@@ -286,19 +284,20 @@ class Pred_label(nn.Module):
         # lm_logits = combine(predicate, predicate_order_list, entity, entity_order_list, b_size, n_num)
         # pdb.set_trace()
 
-        # lm_logits = self.decoder(h)
-        predicate_logits = self.softmax(predicate)
-        entity_logits = self.softmax(entity)
+        # lm = self.decoder(h_logits)
+        predicate = self.softmax(predicate_logits)
+        entity = self.softmax(entity_logits)
 
         # pdb.set_trace()
         # if self.training:
         #     return predicate_logits, entity_logits
         # else:
-        _, predicate_labels = torch.max(predicate_logits, dim=-1, keepdim=True)
-        _, entity_labels = torch.max(entity_logits, dim=-1, keepdim=True)
+        _, predicate_labels = torch.max(predicate, dim=-1, keepdim=True)
+        _, entity_labels = torch.max(entity, dim=-1, keepdim=True)
 
         all_labels = combine(predicate_labels, predicate_order_list, entity_labels, entity_order_list, blank_labels, blank_order_list, b_size, n_num)
-        return predicate_logits, entity_logits, all_labels
+
+        return predicate, entity, predicate_logits, entity_logits, all_labels
 
 
 class GLAT_basic(nn.Module):

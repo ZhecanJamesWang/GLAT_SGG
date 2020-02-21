@@ -21,7 +21,7 @@ from torch.optim.lr_scheduler import ReduceLROnPlateau
 
 import pdb
 # import KERN model
-# from lib.kern_model import KERN
+from lib.kern_model_sgcls import KERN
 
 #--------updated--------
 # from lib.stanford_model import RelModelStanford as RelModel
@@ -30,6 +30,10 @@ import pdb
 from lib.motifnet_model_sgcls import RelModel
 
 from lib.glat import GLATNET
+# from lib.glat_logit import GLATNET
+# import models.models_kern.GLATNET as GLATNET
+from lib.utils import Counter, save_model
+
 import pdb
 from torch.autograd import Variable
 import copy
@@ -44,7 +48,7 @@ sys.path.append(codebase)
 exp_name = 'motif'
 
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+os.environ["CUDA_VISIBLE_DEVICES"] = "2"
 
 # conf = ModelConfig()
 #--------updated--------
@@ -98,20 +102,15 @@ logSoftmax_1 = torch.nn.LogSoftmax(dim=1)
 softmax_0 = torch.nn.Softmax(dim=0)
 softmax_1 = torch.nn.Softmax(dim=1)
 
-detector = RelModel(classes=train.ind_to_classes, rel_classes=train.ind_to_predicates,
-                    num_gpus=conf.num_gpus, mode=conf.mode, require_overlap_det=True,
-                    use_resnet=conf.use_resnet, order=order,
-                    nl_edge=nl_edge, nl_obj=nl_obj, hidden_dim=hidden_dim,
-                    use_proposals=conf.use_proposals,
-                    pass_in_obj_feats_to_decoder=pass_in_obj_feats_to_decoder,
-                    pass_in_obj_feats_to_edge=pass_in_obj_feats_to_edge,
-                    pooling_dim=conf.pooling_dim,
-                    rec_dropout=rec_dropout,
-                    use_bias=use_bias,
-                    use_tanh=use_tanh,
-                    limit_vision=limit_vision,
-                    return_top100=True
-                    )
+detector = KERN(classes=train.ind_to_classes, rel_classes=train.ind_to_predicates,
+                num_gpus=conf.num_gpus, mode=conf.mode, require_overlap_det=True,
+                use_resnet=conf.use_resnet, use_proposals=conf.use_proposals, pooling_dim=conf.pooling_dim,
+                use_ggnn_obj=conf.use_ggnn_obj, ggnn_obj_time_step_num=conf.ggnn_obj_time_step_num,
+                ggnn_obj_hidden_dim=conf.ggnn_obj_hidden_dim, ggnn_obj_output_dim=conf.ggnn_obj_output_dim,
+                use_obj_knowledge=conf.use_obj_knowledge, obj_knowledge=conf.obj_knowledge,
+                use_ggnn_rel=conf.use_ggnn_rel, ggnn_rel_time_step_num=conf.ggnn_rel_time_step_num,
+                ggnn_rel_hidden_dim=conf.ggnn_rel_hidden_dim, ggnn_rel_output_dim=conf.ggnn_rel_output_dim,
+                use_rel_knowledge=conf.use_rel_knowledge, rel_knowledge=conf.rel_knowledge, return_top100=conf.return_top100)
 
 
 model = GLATNET(vocab_num=[52, 153],
@@ -132,6 +131,10 @@ for n, param in detector.named_parameters():
 # Freeze the detector
 # for n, param in detector.detector.named_parameters():
 #     param.requires_grad = False
+
+# Freeze all the kern model detector
+for n, param in detector.named_parameters():
+    param.requires_grad = False
 
 print(print_para(detector), flush=True)
 
@@ -193,22 +196,9 @@ if conf.resume_training:
     optimizer, scheduler = get_optim(conf.lr, last_epoch=start_epoch)
 
 else:
-    # # ckpt_glat = torch.load('/home/haoxuan/code/GBERT/models/2019-10-31-03-13_2_2_2_2_2_2_concat_no_init_mask/best_test_node_mask_predicate_acc')
-    # ---------------pretrained model mask ration 0.5
-    # ckpt_glat = torch.load('/home/tangtangwzc/Common_sense/models/2019-11-03-17-51_2_2_2_2_2_2_concat_no_init_mask/best_test_node_mask_predicate_acc.pth')
-
     # ---------------pretrained model mask ration 0.3
     ckpt_glat = torch.load(
-        '/home/tangtangwzc/Common_sense/models/2019-12-18-16-08_2_2_2_2_2_2_concat_no_init_mask/best_test_node_mask_predicate_acc.pth')
-
-    # ckpt_glat = torch.load(
-    #     '/home/tangtangwzc/Common_sense/models/2019-11-03-17-28_2_2_2_2_2_2_concat_no_init_mask/best_test_node_mask_predicate_acc.pth')
-
-    # ---------------pretrained model mask ration 0.7
-    # ckpt_glat = torch.load('/home/tangtangwzc/Common_sense/models/2019-11-07-23-50_2_2_2_2_2_2_concat_no_init_mask/best_test_node_mask_predicate_acc.pth')
-
-    # # motif predcls finetune glat
-    # ckpt_glat = torch.load('/home/haoxuan/code/KERN/checkpoints/motifnet_glat_predcls_mbz/motifnet_glat-27.tar')
+        '/home/tangtangwzc/Common_sense/models/2019-11-03-17-28_2_2_2_2_2_2_concat_no_init_mask/best_test_node_mask_predicate_acc.pth')
 
     # optimistic_restore(model, ckpt_glat['state_dict'])
     optimistic_restore(model, ckpt_glat['model'])
@@ -388,11 +378,10 @@ result, det_res = detec
     for i in useless_entity_id:
         useful_entity_id.remove(i)
 
+
     # For SGCLS
-    # For bug0 >>>>>>>>>
-    result.rm_obj_dists = pred_entry['obj_scores_rm']
+    result.rm_obj_dists = pred_entry['entity_scores']
     result.obj_preds = pred_entry['pred_classes']
-    # For bug0 <<<<<<<<<<
 
 
     # t2 = time.time()
@@ -726,7 +715,7 @@ def glat_postprocess(pred_entry, if_predicting=False):
 
     # For SGCLS
     if conf.mode == "sgcls" or conf.mode == "sgdet":
-        total_data, useless_entity_id = build_graph_structure(pred_entry, ind_to_classes, ind_to_predicates, conf.mode,
+        total_data, useless_entity_id = build_graph_structure(pred_entry, ind_to_classes, ind_to_predicates,
                                                               if_predicting=if_predicting,
                                                               sgclsdet=True)
     else:
@@ -737,16 +726,8 @@ def glat_postprocess(pred_entry, if_predicting=False):
     pred_entry['rel_scores'] = pred_label_predicate
 
     # For SGCLS
-
-    if conf.mode == "sgcls" or conf.mode == "sgdet":
-        # pred_entry['entity_scores'] = pred_label_entities
-
-        # For bug0 >>>>>>>>>>>
-        pred_entry['obj_scores_rm'] = pred_label_entities
-        pred_entry['obj_scores'] = F.softmax(pred_label_entities, dim=1).max(1)[0]
-        # For bug0 <<<<<<<<<<<<
-
-        pred_entry['pred_classes'] = pred_label_entities.max(1)[1]
+    pred_entry['entity_scores'] = pred_label_entities
+    pred_entry['pred_classes'] = pred_label_entities.max(1)[1]
 
     # =====================================
     # if if_predicting:
@@ -893,9 +874,6 @@ def val_batch(batch_num, b, evaluator, evaluator_multiple_preds, evaluator_list,
                     # pred_entry_init['rel_scores'][i, j] = 0
 
         # rel_scores_one_hot[np.arange(len(pred_entry['rel_scores'])), pred_entry['rel_scores']] = 1
-
-        # pred_entry['rel_scores'] = pred_entry['rel_scores'][:, :-1]
-
         # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
         if len(rels_i_a100.shape) == 1:

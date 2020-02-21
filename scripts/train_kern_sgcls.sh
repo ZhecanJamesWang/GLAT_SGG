@@ -19,3 +19,4 @@ python models/train_rels.py -m sgcls -p 100 -clip 5 \
 -ggnn_rel_output_dim 512 \
 -use_rel_knowledge \
 -rel_knowledge prior_matrices/rel_matrix.npy
+

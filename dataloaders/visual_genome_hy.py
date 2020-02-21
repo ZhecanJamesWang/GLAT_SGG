@@ -278,10 +278,10 @@ def load_graphs(graphs_file, mode='train', num_im=-1, num_val_im=0, filter_empty
     :param filter_empty_rels: (will be filtered otherwise.)
     :param filter_non_overlap: If training, filter images that dont overlap.
     :return: image_index: numpy array corresponding to the index of images we're using
-             boxes: List where each element is a [num_gt, 4] array of ground 
+             boxes: List where each element is a [num_gt, 4] array of ground
                     truth boxes (x1, y1, x2, y2)
              gt_classes: List where each element is a [num_gt] array of classes
-             relationships: List where each element is a [num_r, 3] array of 
+             relationships: List where each element is a [num_r, 3] array of
                     (box_ind_1, box_ind_2, predicate) relationships
     """
     if mode not in ('train', 'val', 'test'):
@@ -431,8 +431,8 @@ class VGDataLoader(torch.utils.data.DataLoader):
         )
         return train_load, val_load
 
-def build_graph_structure(entries, index2name_object, index2name_predicate, mode, if_predicting=False, sgclsdet=False):
-    # def build_graph_structure(entries, index2name_object, index2name_predicate, if_predicting=False):
+def build_graph_structure(entries, index2name_object, index2name_predicate, if_predicting=False, sgclsdet=False):
+# def build_graph_structure(entries, index2name_object, index2name_predicate, if_predicting=False):
 
     # Input: pred_relations(Tensor) pred_classes(Variable)
     # Output: adj(Tensor) node_class(Variable) nodes_type(Tensor)
@@ -442,16 +442,14 @@ def build_graph_structure(entries, index2name_object, index2name_predicate, mode
     total_data['node_class'] = []
     # total_data['img_id'] = []
     total_data['node_type'] = []
-
     total_data['node_logit'] = []
     total_data['node_logit_dists'] = []
 
-    # total_data['ent_dists'] = []
+    total_data['ent_dists'] = []
 
     entries_minibatch = {}
     entries_minibatch['pred_relations'] = []
     entries_minibatch['pred_classes'] = []
-
     entries_minibatch['rel_scores'] = []
     entries_minibatch['rel_dists'] = []
 
@@ -461,20 +459,14 @@ def build_graph_structure(entries, index2name_object, index2name_predicate, mode
     useless_entity_id = []
     start_id = 0
 
-
     if entries['pred_relations'].size(1) == 4:
         # pdb.set_trace()
         # entries_minibatch['pred_relations'].append(entries['pred_relations'][:, 1:])
         # entries_minibatch['pred_classes'].append(entries['pred_classes'])
+
         for i in range(entries['pred_relations'][:, 0].max()+1):
             rel_idx_cur_img = (entries['pred_relations'][:, 0] == i).view(-1, 1).expand(-1, 4)
             entries_minibatch['pred_relations'].append(entries['pred_relations'][rel_idx_cur_img].view(-1, 4)[:, 1:])
-
-            rel_dists_idx_cur_img = (entries['pred_relations'][:, 0] == i).view(-1, 1).expand(-1, 51)
-            entries_minibatch['rel_dists'].append(entries['rel_dists'][rel_dists_idx_cur_img].view(-1, 51))
-
-            entries_minibatch['rel_scores'].append(entries['rel_scores'][rel_dists_idx_cur_img].view(-1, 51))
-
             entity_idx_cur_img = entries_minibatch['pred_relations'][i][:, :2]
             entries_minibatch['pred_classes'].append(entries['pred_classes'][entity_idx_cur_img.min():entity_idx_cur_img.max()+1])
             # pdb.set_trace()
@@ -493,17 +485,13 @@ def build_graph_structure(entries, index2name_object, index2name_predicate, mode
 
             entries_minibatch['pred_relations'][i][:, :2] = entries_minibatch['pred_relations'][i][:, :2] - entries_minibatch['pred_relations'][i][:, :2].min()
 
-            # print('go through 460 in visual_genome.py')
             # pdb.set_trace()
     else:
         entries_minibatch['pred_relations'].append(entries['pred_relations'])
         entries_minibatch['pred_classes'].append(entries['pred_classes'])
-
         entries_minibatch['rel_scores'].append(entries['rel_scores'])
         entries_minibatch['rel_dists'].append(entries['rel_dists'])
-
-        if mode == "sgcls" or mode == "sgdet":
-            entries_minibatch['ent_dists'].append(entries['ent_dists'])
+        entries_minibatch['ent_dists'].append(entries['ent_dists'])
 
     for i in range(len(entries_minibatch['pred_classes'])):
         # if if_predicting:
@@ -518,7 +506,7 @@ def build_graph_structure(entries, index2name_object, index2name_predicate, mode
         return_rel_scores = entries_minibatch['rel_scores'][i]
         return_rel_dists = entries_minibatch['rel_dists'][i]
 
-        # return_ent_dists = entries_minibatch['ent_dists'][i]
+        return_ent_dists = entries_minibatch['ent_dists'][i]
 
         entity_num = return_classes.size(0)
         total_node_num = entity_num + return_relations.size(0)
@@ -528,7 +516,8 @@ def build_graph_structure(entries, index2name_object, index2name_predicate, mode
         nodes_logit = torch.cat((Variable(torch.zeros(return_classes.size()[0], return_rel_scores.size()[1]).cuda(), requires_grad=True), return_rel_scores))
         nodes_logit_dists = torch.cat((Variable(torch.zeros(return_classes.size()[0], return_rel_dists.size()[1]).cuda(), requires_grad=True), return_rel_dists))
 
-        # ent_dists = torch.cat((return_ent_dists, Variable(torch.zeros(return_rel_dists.size()[0], return_ent_dists.size()[1]).cuda())))
+        ent_dists = torch.cat((return_ent_dists, Variable(torch.zeros(return_rel_dists.size()[0], return_ent_dists.size()[1]).cuda())))
+        # ent_dists = torch.cat((return_ent_dists, torch.zeros(return_rel_dists.size()[0], return_ent_dists.size()[1]).cuda()))
 
         nodes_type = torch.ones_like(return_classes).data
         nodes_type = torch.cat((nodes_type, torch.zeros_like(return_relations[:,0])), dim=0)
@@ -543,21 +532,19 @@ def build_graph_structure(entries, index2name_object, index2name_predicate, mode
                 adj[relation[0]][entity_num+j] = 1
             except Exception as e:
                 print(e)
-                pdb.set_trace()
+                pass
+                # pdb.set_trace()
             # print('position', )
             adj[entity_num+j][relation[1]] = 2
         total_data['adj'].append(adj)
         # total_data['node_name'].append(nodes_name)
         total_data['node_class'].append(nodes_class)
         total_data['node_type'].append(nodes_type)
-
         total_data['node_logit'].append(nodes_logit)
         total_data['node_logit_dists'].append(nodes_logit_dists)
+        total_data['ent_dists'].append(ent_dists)
 
-        # total_data['ent_dists'].append(ent_dists)
 
-        if mode == "sgcls" or mode == "sgdet":
-            total_data['ent_dists'] = entries['ent_dists']
 
         # total_node_num = len(return_classes) + return_relations.shape[0]
         # nodes_class = [] + list(return_classes)
@@ -577,6 +564,8 @@ def build_graph_structure(entries, index2name_object, index2name_predicate, mode
         # # total_data['img_id'].append(entry['image_id'])
         # total_data['node_type'].append(np.asarray(nodes_type))
         # pdb.set_trace()
+
+    # return total_data
 
     if not sgclsdet:
         return total_data

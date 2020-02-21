@@ -545,6 +545,26 @@ class RelModel(nn.Module):
 
 
         if self.training:
+
+            # For bug0 >>>>>>>>>
+            if self.mode == "sgdet":
+                probs = F.softmax(result.rm_obj_dists, 1)
+                nms_mask = result.rm_obj_dists.data.clone()
+                nms_mask.zero_()
+                for c_i in range(1, result.rm_obj_dists.size(1)):
+                    scores_ci = probs.data[:, c_i]
+                    boxes_ci = result.boxes_all.data[:, c_i]
+
+                    keep = apply_nms(scores_ci, boxes_ci,
+                                     pre_nms_topn=scores_ci.size(0), post_nms_topn=scores_ci.size(0),
+                                     nms_thresh=0.3)
+                    nms_mask[:, c_i][keep] = 1
+
+                result.obj_preds = Variable(nms_mask * probs.data, volatile=True)[:, 1:].max(1)[1] + 1
+            else:
+                result.obj_preds = result.rm_obj_dists[:,1:].max(1)[1] + 1
+            # For bug0 <<<<<<<<
+
             if self.return_top100:
                 # pdb.set_trace()
                 twod_inds = arange(result.obj_preds.data) * self.num_classes + result.obj_preds.data
@@ -609,7 +629,6 @@ class RelModel(nn.Module):
                 rel_scores_idx_a_100_all = []
                 rel_dists_b_all = []
                 rel_dists_a_all = []
-                ent_dists = []
 
                 for i in range(len(rel_ind_per_img)):
                     # boxes, obj_classes, obj_scores, rels_b_100, pred_scores_sorted_b_100, rels_a_100, \
@@ -633,8 +652,6 @@ class RelModel(nn.Module):
 
                     rels_b_100_all.append(torch.cat((i*torch.ones(rels_b_100.size(0), 1).type_as(rels_b_100), rels_b_100), dim=1))
 
-                    # Todo:
-                    # ent_dists
 
                     pred_scores_sorted_b_100_all.append(pred_scores_sorted_b_100)
                     rel_dists_b_all.append(rel_dists_b)
@@ -683,12 +700,12 @@ class RelModel(nn.Module):
                     return result, prod_rep, [boxes, obj_classes, obj_scores, rels_b_100_all, pred_scores_sorted_b_100_all,
                                     rels_a_100_all,
                                     pred_scores_sorted_a_100_all, rel_scores_idx_b_100_all, rel_scores_idx_a_100_all,
-                                              rel_dists_b_all, rel_dists_a_all]
+                                              rel_dists_b_all, rel_dists_a_all, ent_dists]
                 else:
                     # return result, [boxes, obj_classes, obj_scores, rels_b_100_all, pred_scores_sorted_b_100_all, rels_a_100_all, pred_scores_sorted_a_100_all, rel_scores_idx_b_100_all, rel_scores_idx_a_100_all]
                     return result, [boxes, obj_classes, obj_scores, rels_b_100_all, pred_scores_sorted_b_100_all, rels_a_100_all,
                                 pred_scores_sorted_a_100_all, rel_scores_idx_b_100_all, rel_scores_idx_a_100_all,
-                                    rel_dists_b_all, rel_dists_a_all]
+                                    rel_dists_b_all, rel_dists_a_all, ent_dists]
 
             else:
                 return result, []

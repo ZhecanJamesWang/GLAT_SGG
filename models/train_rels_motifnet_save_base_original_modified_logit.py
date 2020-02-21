@@ -45,7 +45,7 @@ sys.path.append(codebase)
 exp_name = 'motif'
 
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+os.environ["CUDA_VISIBLE_DEVICES"] = "2"
 
 # conf = ModelConfig()
 #--------updated--------
@@ -207,6 +207,9 @@ else:
 
     # ---------------pretrained model mask ration 0.7
     # ckpt_glat = torch.load('/home/tangtangwzc/Common_sense/models/2019-11-07-23-50_2_2_2_2_2_2_concat_no_init_mask/best_test_node_mask_predicate_acc.pth')
+
+    # #motif predcls finetune glat
+    # ckpt_glat=torch.load('/home/haoxuan/code/KERN/checkpoints/motifnet_glat_predcls_mbz/motifnet_glat-27.tar')
 
     # optimistic_restore(model, ckpt_glat['model'])
     model.cuda()
@@ -680,7 +683,7 @@ def glat_postprocess(pred_entry, if_predicting=False):
     # pdb.set_trace()
     pred_entry['pred_relations'] = torch.cat((pred_entry['pred_rel_inds'], pred_entry['rel_classes']), dim=1)
 
-    total_data = build_graph_structure(pred_entry, ind_to_classes, ind_to_predicates, if_predicting=if_predicting)
+    total_data = build_graph_structure(pred_entry, ind_to_classes, ind_to_predicates, conf.mode, if_predicting=if_predicting)
 
     pred_label_predicate, pred_label_entities = glat_wrapper(total_data)
     pred_entry['rel_scores'] = pred_label_predicate

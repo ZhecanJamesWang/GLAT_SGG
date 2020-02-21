@@ -7,4 +7,3 @@ python models/train_rels_motifnet.py -m sgcls -p 100 \
 -save_dir checkpoints/motifnet_glat_sgcls_mbz \
 -adam \
 -b 20 \
-
