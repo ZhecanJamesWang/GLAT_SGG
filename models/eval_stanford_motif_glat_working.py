@@ -15,7 +15,7 @@ from lib.glat_logit import GLATNET
 from torch.autograd import Variable
 import pdb
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+os.environ["CUDA_VISIBLE_DEVICES"] = "3"
 
 
 conf = ModelConfig()
@@ -125,7 +125,8 @@ elif conf.model_s_m == 'motifnet':
     # ckpt_glat=torch.load('/home/tangtangwzc/KERN/checkpoints/motifnet_glat_predcls_mbz_v2_2020_0202_2121/motifnet_glat-9.tar')
 
     # # self finetune predcls motif glat LOGIT weight
-    ckpt_glat = torch.load('/home/tangtangwzc/KERN/checkpoints/motifnet_glat_predcls_mbz_v2_2020_0204_1738//motifnet_glat-20.tar')
+    # ckpt_glat = torch.load('/home/tangtangwzc/KERN/checkpoints/motifnet_glat_predcls_mbz_v2_2020_0204_1738//motifnet_glat-20.tar')
+    ckpt_glat = torch.load("/home/tangtangwzc/KERN/checkpoints/motifnet_glat_predcls_mbz_v2_2020_0204_1738/motifnet_glat-14.tar")
 
 # # ---------------pretrained model mask ratio 0.5
 # ckpt_glat = torch.load('/home/tangtangwzc/Common_sense/models/2019-11-03-17-51_2_2_2_2_2_2_concat_no_init_mask/best_test_node_mask_predicate_acc.pth')
@@ -634,7 +635,11 @@ def glat_wrapper(total_data):
     pred_label_predicate = pred_label[0]  # flatten predicate (B*N, 51)
     pred_label_entities = pred_label[1]  # flatten entities
 
-    pred_label_predicate = soft_merge3(node_logit_dists, pred_label_predicate, node_type)
+    pred_label_predicate_logit = pred_label[2]
+    pred_label_entities_logit = pred_label[3]
+
+    # pred_label_predicate = soft_merge3(node_logit_dists, pred_label_predicate, node_type)
+    pred_label_predicate = soft_merge3(node_logit_dists, pred_label_predicate_logit, node_type)
 
     return pred_label_predicate, pred_label_entities
     # return pred_label_predicate.data.cpu().numpy(), pred_label_entities.data.cpu().numpy()
@@ -663,7 +668,9 @@ def glat_postprocess(pred_entry, if_predicting=False):
 
     # pred_entry = soft_merge6_original(pred_entry)
 
-    total_data = build_graph_structure(pred_entry, ind_to_classes, ind_to_predicates, if_predicting=if_predicting)
+    # total_data = build_graph_structure(pred_entry, ind_to_classes, ind_to_predicates, if_predicting=if_predicting)
+    total_data = build_graph_structure(pred_entry, ind_to_classes, ind_to_predicates, conf.mode,
+                                       if_predicting=if_predicting)
 
     pred_label_predicate, pred_label_entities = glat_wrapper(total_data)
     pred_entry['rel_scores'] = pred_label_predicate

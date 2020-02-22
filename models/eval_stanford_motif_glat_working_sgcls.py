@@ -129,7 +129,9 @@ elif conf.model_s_m == 'motifnet':
     # ckpt_glat = torch.load('/home/tangtangwzc/KERN/checkpoints/motifnet_glat_predcls_mbz_v2_2020_0204_1738//motifnet_glat-20.tar')
 
     # # # self finetune sgcls motif glat weight
-    ckpt_glat = torch.load('/home/tangtangwzc/KERN/checkpoints/motifnet_glat_sgcls_2020_0211_2317/motifnet_glat-20.tar')
+    # ckpt_glat = torch.load('/home/tangtangwzc/KERN/checkpoints/motifnet_glat_sgcls_2020_0211_2317/motifnet_glat-20.tar')
+    ckpt_glat = torch.load('/home/tangtangwzc/KERN/checkpoints/motifnet_glat_sgcls_2020_0220_1807/motifnet_glat-11.tar')
+
 
 # # ---------------pretrained model mask ratio 0.5
 # ckpt_glat = torch.load('/home/tangtangwzc/Common_sense/models/2019-11-03-17-51_2_2_2_2_2_2_concat_no_init_mask/best_test_node_mask_predicate_acc.pth')
@@ -501,7 +503,7 @@ def soft_merge4(logit_base, logit_glat, node_type):
     return output_logit_predicate
 
 
-def soft_merge3(logit_base, logit_glat, node_type, type):
+def soft_merge3(logit_base, logit_glat, node_type, type, useless_entity_id=[]):
 
     if type == 0:
         index = (node_type == type).squeeze(0).unsqueeze(-1).repeat(1, 52)
@@ -670,7 +672,7 @@ def soft_merge1(logit_base, logit_glat, node_type, type):
 #     return output_logit_predicate
 
 
-def glat_wrapper(total_data):
+def glat_wrapper(total_data, useless_entity_id):
     # Batch size assumed to be 1
     input_class, adjs_con, adjs_lbl, node_type, node_logit, node_logit_dists, ent_dists = my_collate(total_data)
     # input_class, adjs_con, adjs_lbl, node_type = my_collate(total_data)
@@ -693,8 +695,11 @@ def glat_wrapper(total_data):
     pred_label_predicate = pred_label[0]  # flatten predicate (B*N, 51)
     pred_label_entities = pred_label[1]  # flatten entities
 
-    pred_label_predicate = soft_merge3(node_logit_dists, pred_label_predicate, node_type, 0)
-    pred_label_entities = soft_merge3(ent_dists, pred_label_entities, node_type, 1)
+    pred_label_predicate_logit = pred_label[2]
+    pred_label_entities_logit = pred_label[3]
+
+    pred_label_predicate = soft_merge3(node_logit_dists, pred_label_predicate_logit, node_type, 0)
+    pred_label_entities = soft_merge3(ent_dists, pred_label_entities_logit, node_type, 1, useless_entity_id=useless_entity_id)
 
     return pred_label_predicate, pred_label_entities
     # return pred_label_predicate.data.cpu().numpy(), pred_label_entities.data.cpu().numpy()
@@ -736,7 +741,7 @@ def glat_postprocess(pred_entry, if_predicting=False):
     else:
         total_data = build_graph_structure(pred_entry, ind_to_classes, ind_to_predicates, if_predicting=if_predicting)
 
-    pred_label_predicate, pred_label_entities = glat_wrapper(total_data)
+    pred_label_predicate, pred_label_entities = glat_wrapper(total_data, useless_entity_id)
 
     # pred_entry['rel_scores'] = pred_label_predicate
 
@@ -744,11 +749,16 @@ def glat_postprocess(pred_entry, if_predicting=False):
     pred_entry['rel_scores'] = pred_label_predicate[:, :-1]
 
     # For SGCLS
-    pred_entry['entity_scores'] = pred_label_entities[:, :-2]
-    pred_entry['pred_classes'] = pred_label_entities.max(1)[1]
 
-    # if "predcls" not in conf.mode:
-    #     pred_entry['obj_scores'] = pred_label_entities
+    if conf.mode == "sgcls" or conf.mode == "sgdet":
+        # pred_entry['entity_scores'] = pred_label_entities
+
+        # For bug0 >>>>>>>>>>>
+        pred_entry['obj_scores_rm'] = pred_label_entities
+        pred_entry['obj_scores'] = F.softmax(pred_label_entities, dim=1).max(1)[0]
+        # For bug0 <<<<<<<<<<<<
+
+        pred_entry['pred_classes'] = pred_label_entities.max(1)[1]
 
     # return pred_entry
     if conf.mode == "sgcls" or conf.mode == "sgdet":

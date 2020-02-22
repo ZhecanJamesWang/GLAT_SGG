@@ -2,8 +2,10 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="11066203-4164-4413-bd1b-0e742342911b" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/lib/glat.py" beforeDir="false" afterPath="$PROJECT_DIR$/lib/glat.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/glat_logit.py" beforeDir="false" afterPath="$PROJECT_DIR$/lib/glat_logit.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/deployment.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/deployment.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/eval_stanford_motif_glat_working.py" beforeDir="false" afterPath="$PROJECT_DIR$/models/eval_stanford_motif_glat_working.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/eval_stanford_motif_glat_working_sgcls.py" beforeDir="false" afterPath="$PROJECT_DIR$/models/eval_stanford_motif_glat_working_sgcls.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -21,7 +23,7 @@
     <SUITE FILE_PATH="coverage/KERN$eval_rels.coverage" NAME="eval_rels Coverage Results" MODIFIED="1577313244811" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="/home/tangtangwzc/KERN" />
     <SUITE FILE_PATH="coverage/KERN$eval_stanford_motif_glat_copy.coverage" NAME="eval_stanford_motif_glat_copy Coverage Results" MODIFIED="1578368048578" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="/home/tangtangwzc/KERN" />
     <SUITE FILE_PATH="coverage/KERN$Unnamed.coverage" NAME="eval_stanford_motif_glat.py Coverage Results" MODIFIED="1574884208966" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="/home/tangtangwzc/KERN" />
-    <SUITE FILE_PATH="coverage/KERN$eval_stanford_motif_glat_working_sgcls.coverage" NAME="eval_stanford_motif_glat_working_sgcls Coverage Results" MODIFIED="1581896506482" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="/home/tangtangwzc/KERN" />
+    <SUITE FILE_PATH="coverage/KERN$eval_stanford_motif_glat_working_sgcls.coverage" NAME="eval_stanford_motif_glat_working_sgcls Coverage Results" MODIFIED="1582344716847" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="/home/tangtangwzc/KERN" />
     <SUITE FILE_PATH="coverage/KERN$eval_stanford_motif_glat_copy_copy.coverage" NAME="eval_stanford_motif_glat_copy_copy Coverage Results" MODIFIED="1577698893379" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="/home/tangtangwzc/KERN" />
     <SUITE FILE_PATH="coverage/KERN$train_rels_stanford_py.coverage" NAME="train_rels_stanford.py Coverage Results" MODIFIED="1578422435807" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="/home/tangtangwzc/KERN" />
   </component>
@@ -30,7 +32,7 @@
       <usages-collector id="statistics.file.extensions.open">
         <counts>
           <entry key="Makefile" value="1" />
-          <entry key="py" value="225" />
+          <entry key="py" value="226" />
           <entry key="pyx" value="1" />
           <entry key="sh" value="22" />
         </counts>
@@ -39,26 +41,26 @@
         <counts>
           <entry key="PLAIN_TEXT" value="23" />
           <entry key="PyRemoteDebug" value="1" />
-          <entry key="Python" value="225" />
+          <entry key="Python" value="226" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
-          <entry key="py" value="13523" />
+          <entry key="py" value="13640" />
           <entry key="sh" value="18" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
           <entry key="PLAIN_TEXT" value="18" />
-          <entry key="Python" value="13523" />
+          <entry key="Python" value="13640" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.lifecycle.project">
         <counts>
-          <entry key="project.closed" value="16" />
-          <entry key="project.open.time.0" value="4" />
-          <entry key="project.open.time.1" value="5" />
+          <entry key="project.closed" value="17" />
+          <entry key="project.open.time.0" value="5" />
+          <entry key="project.open.time.1" value="6" />
           <entry key="project.open.time.10" value="1" />
           <entry key="project.open.time.13" value="3" />
           <entry key="project.open.time.2" value="1" />
@@ -68,27 +70,42 @@
           <entry key="project.open.time.6" value="1" />
           <entry key="project.open.time.7" value="2" />
           <entry key="project.open.time.8" value="1" />
-          <entry key="project.opened" value="23" />
+          <entry key="project.opened" value="25" />
         </counts>
       </usages-collector>
     </session>
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/models/eval_stanford_motif_glat_working.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="149">
-              <caret line="640" lean-forward="true" selection-start-line="640" selection-end-line="640" />
+            <state relative-caret-position="7185">
+              <caret line="479" column="4" selection-start-line="479" selection-start-column="4" selection-end-line="479" selection-end-column="4" />
+              <folding>
+                <element signature="e#1#78#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/lib/glat_logit.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="176">
+              <caret line="304" column="25" lean-forward="true" selection-start-line="304" selection-start-column="25" selection-end-line="304" selection-end-column="25" />
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/lib/glat_logit.py">
+        <entry file="file://$PROJECT_DIR$/models/eval_stanford_motif_glat_working_sgcls.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="240">
-              <caret line="580" lean-forward="true" selection-start-line="580" selection-end-line="580" />
+            <state relative-caret-position="65">
+              <caret line="506" lean-forward="true" selection-start-line="506" selection-end-line="506" />
+              <folding>
+                <element signature="e#1#78#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -96,8 +113,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/lib/glat.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="368">
-              <caret line="136" column="24" lean-forward="true" selection-start-line="136" selection-start-column="24" selection-end-line="136" selection-end-column="24" />
+            <state relative-caret-position="1935">
+              <caret line="136" column="24" selection-start-line="136" selection-start-column="24" selection-end-line="136" selection-end-column="24" />
             </state>
           </provider>
         </entry>
@@ -113,15 +130,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>:-1</find>
-      <find>pred_relations</find>
-      <find>nodes_class</find>
-      <find>pred_entry = cuda2num</find>
-      <find>all_pred_entries</find>
-      <find>cuda2numpy_dict</find>
-      <find>[1:]</find>
-      <find>1:</find>
-      <find>entity_scores</find>
       <find>soft_merge4</find>
       <find>soft_merge3</find>
       <find>soft_merge1</find>
@@ -131,7 +139,6 @@
       <find>all_pred_entries =</find>
       <find>sgcls</find>
       <find>filter_det</find>
-      <find>glat_wrapper</find>
       <find>twod_inds</find>
       <find>kern</find>
       <find>_</find>
@@ -143,6 +150,16 @@
       <find>glat</find>
       <find>val_batch</find>
       <find>build_graph_structu</find>
+      <find>ckpt =</find>
+      <find>build</find>
+      <find>conf.ckpt</find>
+      <find>wrapper</find>
+      <find>train_</find>
+      <find>train</find>
+      <find>eval</find>
+      <find>glat_</find>
+      <find>glat_wrapper</find>
+      <find>useless</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -186,17 +203,17 @@
         <option value="$PROJECT_DIR$/lib/motifnet_model.py" />
         <option value="$PROJECT_DIR$/lib/motifnet_model_working.py" />
         <option value="$PROJECT_DIR$/lib/surgery_working.py" />
-        <option value="$PROJECT_DIR$/models/eval_stanford_motif_glat_working.py" />
         <option value="$PROJECT_DIR$/lib/surgery_sgcls.py" />
         <option value="$PROJECT_DIR$/models/eval_rels.py" />
         <option value="$PROJECT_DIR$/lib/kern_model.py" />
         <option value="$PROJECT_DIR$/lib/motifnet_model_sgcls.py" />
         <option value="$PROJECT_DIR$/lib/kern_model_sgcls.py" />
-        <option value="$PROJECT_DIR$/models/eval_stanford_motif_glat_working_sgcls.py" />
         <option value="$PROJECT_DIR$/models/eval_rels_sgcls.py" />
         <option value="$PROJECT_DIR$/dataloaders/visual_genome.py" />
-        <option value="$PROJECT_DIR$/lib/glat_logit.py" />
         <option value="$PROJECT_DIR$/lib/glat.py" />
+        <option value="$PROJECT_DIR$/models/eval_stanford_motif_glat_working.py" />
+        <option value="$PROJECT_DIR$/models/eval_stanford_motif_glat_working_sgcls.py" />
+        <option value="$PROJECT_DIR$/lib/glat_logit.py" />
       </list>
     </option>
   </component>
@@ -215,6 +232,7 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -246,7 +264,6 @@
           <select />
         </subPane>
       </pane>
-      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -258,7 +275,7 @@
     <property name="WebServerToolWindowPanel.toolwindow.show.permissions" value="false" />
     <property name="WebServerToolWindowPanel.toolwindow.show.size" value="false" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
-    <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
+    <property name="settings.editor.selected.configurable" value="web.server" />
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
@@ -278,7 +295,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.eval_rels_sgcls">
+  <component name="RunManager" selected="Python.eval_stanford_motif_glat_working_sgcls">
     <configuration name="eval_baseModel_glat" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="KERN" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -523,8 +540,8 @@
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.eval_rels_sgcls" />
         <item itemvalue="Python.eval_stanford_motif_glat_working_sgcls" />
+        <item itemvalue="Python.eval_rels_sgcls" />
         <item itemvalue="Python.eval_stanford_motif_glat_working" />
         <item itemvalue="Python.eval_baseModel_glat" />
         <item itemvalue="Python.eval_stanford_motif_glat_copy" />
@@ -557,7 +574,7 @@
     <frame x="0" y="0" width="1440" height="900" extended-state="0" />
     <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.25069445" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.21527778" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
@@ -569,7 +586,7 @@
       <window_info anchor="bottom" id="TODO" order="6" weight="0.32891566" />
       <window_info anchor="bottom" id="Docker" order="7" show_stripe_button="false" />
       <window_info anchor="bottom" id="Version Control" order="8" />
-      <window_info anchor="bottom" id="File Transfer" order="9" sideWeight="0.49807444" visible="true" weight="0.20564042" />
+      <window_info anchor="bottom" id="File Transfer" order="9" sideWeight="0.49807444" weight="0.20564042" />
       <window_info anchor="bottom" id="Database Changes" order="10" show_stripe_button="false" />
       <window_info anchor="bottom" id="Terminal" order="11" weight="0.32891566" />
       <window_info anchor="bottom" id="Event Log" order="12" sideWeight="0.5012837" side_tool="true" weight="0.34698796" />
@@ -1353,87 +1370,87 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/models/eval_stanford_motif_glat_working_sgcls.py</url>
-          <line>605</line>
+          <line>607</line>
           <option name="timeStamp" value="650" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/models/eval_stanford_motif_glat_working_sgcls.py</url>
-          <line>604</line>
+          <line>606</line>
           <option name="timeStamp" value="651" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/models/eval_stanford_motif_glat_working_sgcls.py</url>
-          <line>587</line>
+          <line>589</line>
           <option name="timeStamp" value="652" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/models/eval_stanford_motif_glat_working_sgcls.py</url>
-          <line>588</line>
+          <line>590</line>
           <option name="timeStamp" value="653" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/models/eval_stanford_motif_glat_working_sgcls.py</url>
-          <line>590</line>
+          <line>592</line>
           <option name="timeStamp" value="654" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/models/eval_stanford_motif_glat_working_sgcls.py</url>
-          <line>591</line>
+          <line>593</line>
           <option name="timeStamp" value="655" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/models/eval_stanford_motif_glat_working_sgcls.py</url>
-          <line>594</line>
+          <line>596</line>
           <option name="timeStamp" value="656" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/models/eval_stanford_motif_glat_working_sgcls.py</url>
-          <line>595</line>
+          <line>597</line>
           <option name="timeStamp" value="657" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/models/eval_stanford_motif_glat_working_sgcls.py</url>
-          <line>599</line>
+          <line>601</line>
           <option name="timeStamp" value="658" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/models/eval_stanford_motif_glat_working_sgcls.py</url>
-          <line>598</line>
+          <line>600</line>
           <option name="timeStamp" value="659" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/models/eval_stanford_motif_glat_working_sgcls.py</url>
-          <line>601</line>
+          <line>603</line>
           <option name="timeStamp" value="660" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/models/eval_stanford_motif_glat_working_sgcls.py</url>
-          <line>602</line>
+          <line>604</line>
           <option name="timeStamp" value="661" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/models/eval_stanford_motif_glat_working_sgcls.py</url>
-          <line>511</line>
+          <line>513</line>
           <option name="timeStamp" value="664" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/models/eval_stanford_motif_glat_working_sgcls.py</url>
-          <line>512</line>
+          <line>514</line>
           <option name="timeStamp" value="665" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/models/eval_stanford_motif_glat_working_sgcls.py</url>
-          <line>515</line>
+          <line>517</line>
           <option name="timeStamp" value="668" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/models/eval_stanford_motif_glat_working_sgcls.py</url>
-          <line>574</line>
+          <line>576</line>
           <option name="timeStamp" value="669" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/models/eval_stanford_motif_glat_working_sgcls.py</url>
-          <line>562</line>
+          <line>564</line>
           <option name="timeStamp" value="670" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -1936,16 +1953,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/models/eval_stanford_motif_glat_working_sgcls.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="337">
-          <caret line="725" lean-forward="true" selection-start-line="725" selection-end-line="725" />
-          <folding>
-            <element signature="e#1#78#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/lib/motifnet_model_sgcls.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="253">
@@ -1953,24 +1960,37 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/models/eval_stanford_motif_glat_working.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="7185">
+          <caret line="479" column="4" selection-start-line="479" selection-start-column="4" selection-end-line="479" selection-end-column="4" />
+          <folding>
+            <element signature="e#1#78#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/lib/glat.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="368">
-          <caret line="136" column="24" lean-forward="true" selection-start-line="136" selection-start-column="24" selection-end-line="136" selection-end-column="24" />
+        <state relative-caret-position="1935">
+          <caret line="136" column="24" selection-start-line="136" selection-start-column="24" selection-end-line="136" selection-end-column="24" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/models/eval_stanford_motif_glat_working_sgcls.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="65">
+          <caret line="506" lean-forward="true" selection-start-line="506" selection-end-line="506" />
+          <folding>
+            <element signature="e#1#78#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/lib/glat_logit.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="240">
-          <caret line="580" lean-forward="true" selection-start-line="580" selection-end-line="580" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/models/eval_stanford_motif_glat_working.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="149">
-          <caret line="640" lean-forward="true" selection-start-line="640" selection-end-line="640" />
+        <state relative-caret-position="176">
+          <caret line="304" column="25" lean-forward="true" selection-start-line="304" selection-start-column="25" selection-end-line="304" selection-end-column="25" />
         </state>
       </provider>
     </entry>
