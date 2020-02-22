@@ -15,7 +15,7 @@ from lib.glat import GLATNET
 from torch.autograd import Variable
 import pdb
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+os.environ["CUDA_VISIBLE_DEVICES"] = "2"
 
 
 conf = ModelConfig()
@@ -672,6 +672,16 @@ def soft_merge1(logit_base, logit_glat, node_type, type):
 #     return output_logit_predicate
 
 
+def rearrange_useless(ent_dists, pred_label_entities, useless_entity_id, node_type):
+
+    print("")
+    for id in useless_entity_id:
+        first_half = pred_label_entities[:id]
+        
+
+
+    return ent_dists, pred_label_entities
+
 def glat_wrapper(total_data, useless_entity_id):
     # Batch size assumed to be 1
     input_class, adjs_con, adjs_lbl, node_type, node_logit, node_logit_dists, ent_dists = my_collate(total_data)
@@ -699,6 +709,7 @@ def glat_wrapper(total_data, useless_entity_id):
     pred_label_entities_logit = pred_label[3]
 
     pred_label_predicate = soft_merge3(node_logit_dists, pred_label_predicate_logit, node_type, 0)
+    ent_dists, pred_label_entities = rearrange_useless(ent_dists, pred_label_entities, useless_entity_id, node_type)
     pred_label_entities = soft_merge3(ent_dists, pred_label_entities_logit, node_type, 1, useless_entity_id=useless_entity_id)
 
     return pred_label_predicate, pred_label_entities
