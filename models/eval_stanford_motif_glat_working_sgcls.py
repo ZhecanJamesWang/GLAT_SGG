@@ -15,7 +15,7 @@ from lib.glat import GLATNET
 from torch.autograd import Variable
 import pdb
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "2"
+os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 
 
 conf = ModelConfig()
@@ -198,7 +198,7 @@ def my_collate(total_data):
     node_logits = []
     node_logits_dists = []
 
-    ent_dists = []
+    # ent_dists = []
 
     for i in range(sample_num):
         input_class = total_data['node_class'][i]
@@ -213,9 +213,9 @@ def my_collate(total_data):
         node_logit_pad_dists = torch.Tensor([0] * node_logit_dists.size()[0]).unsqueeze(-1).t()
         node_logit_dists = torch.cat((node_logit_dists, Variable(node_logit_pad_dists.t().cuda())), dim=1)
 
-        ent_dist = total_data['ent_dists'][i]
-        ent_pad_dist = torch.Tensor([0] * ent_dist.size()[0]).unsqueeze(-1).t()
-        ent_dist = torch.cat((ent_dist, Variable(ent_pad_dist.t().cuda()), Variable(ent_pad_dist.t().cuda())), dim=1)
+        # ent_dist = total_data['ent_dists'][i]
+        # ent_pad_dist = torch.Tensor([0] * ent_dist.size()[0]).unsqueeze(-1).t()
+        # ent_dist = torch.cat((ent_dist, Variable(ent_pad_dist.t().cuda()), Variable(ent_pad_dist.t().cuda())), dim=1)
 
         # ent_logit = total_data['ent_dists'][i]
         # node_logit_pad = torch.Tensor([0] * node_logit.size()[0]).unsqueeze(-1).t()
@@ -243,13 +243,13 @@ def my_collate(total_data):
 
         node_logits_dists.append(node_logit_dists)
 
-        if max_length - ent_dist.size(0) != 0:
-                pad_ent_dist = tensor2variable(torch.zeros((max_length - ent_dist.size(0)), ent_dist.size()[1]).cuda())
-                ent_dist = torch.cat((ent_dist, pad_ent_dist), 0).unsqueeze(0)
-        else:
-            ent_dist = ent_dist.unsqueeze(0)
+        # if max_length - ent_dist.size(0) != 0:
+        #         pad_ent_dist = tensor2variable(torch.zeros((max_length - ent_dist.size(0)), ent_dist.size()[1]).cuda())
+        #         ent_dist = torch.cat((ent_dist, pad_ent_dist), 0).unsqueeze(0)
+        # else:
+        #     ent_dist = ent_dist.unsqueeze(0)
 
-        ent_dists.append(ent_dist)
+        # ent_dists.append(ent_dist)
 
         pad_input_class = tensor2variable(blank_idx * torch.ones(max_length - input_class.size(0)).long().cuda())
         input_classes.append(torch.cat((input_class, pad_input_class), 0).unsqueeze(0))
@@ -268,7 +268,8 @@ def my_collate(total_data):
     node_logits = torch.cat(node_logits, 0)
     node_logits_dists = torch.cat(node_logits_dists, 0)
 
-    ent_dists = torch.cat(ent_dists, 0)
+    # ent_dists = torch.cat(ent_dists, 0)
+    ent_dists = total_data['ent_dists']
 
     adjs = torch.cat(adjs, 0)
     adjs_lbl = adjs
@@ -505,15 +506,18 @@ def soft_merge4(logit_base, logit_glat, node_type):
 
 def soft_merge3(logit_base, logit_glat, node_type, type, useless_entity_id=[]):
 
+
     if type == 0:
         index = (node_type == type).squeeze(0).unsqueeze(-1).repeat(1, 52)
         # logit_base_predicate = logit_base.data.squeeze(0)[index].view(-1, 52)
         logit_base_predicate = logit_base.squeeze(0)[index].view(-1, 52)
-
     else:
-        index = (node_type == type).squeeze(0).unsqueeze(-1).repeat(1, 153)
-        logit_base_predicate = logit_base.squeeze(0)[index].view(-1, 153)
-
+        logit_glat = logit_glat[:, :-2]
+        # index = (node_type == type).squeeze(0).unsqueeze(-1).repeat(1, 153)
+        # logit_base_predicate = logit_base.squeeze(0)[index].view(-1, 153)
+        # index = (node_type == type).squeeze(0).unsqueeze(-1).repeat(1, 151)
+        # logit_base_predicate = logit_base.squeeze(0)[index].view(-1, 151)
+        logit_base_predicate = logit_base
 
     logit_base_predicate = softmax_1(logit_base_predicate).data
     logit_glat_predicate = softmax_1(logit_glat).data
@@ -529,8 +533,10 @@ def soft_merge3(logit_base, logit_glat, node_type, type, useless_entity_id=[]):
         logit_base_predicate_weight = combined_weight[0,:].unsqueeze(-1).repeat(1, 52)
         logit_glat_predicate_weight = combined_weight[1,:].unsqueeze(-1).repeat(1, 52)
     else:
-        logit_base_predicate_weight = combined_weight[0, :].unsqueeze(-1).repeat(1, 153)
-        logit_glat_predicate_weight = combined_weight[1, :].unsqueeze(-1).repeat(1, 153)
+        # logit_base_predicate_weight = combined_weight[0, :].unsqueeze(-1).repeat(1, 153)
+        # logit_glat_predicate_weight = combined_weight[1, :].unsqueeze(-1).repeat(1, 153)
+        logit_base_predicate_weight = combined_weight[0, :].unsqueeze(-1).repeat(1, 151)
+        logit_glat_predicate_weight = combined_weight[1, :].unsqueeze(-1).repeat(1, 151)
 
     logit_base_predicate = logit_base_predicate * logit_base_predicate_weight
     logit_glat = logit_glat.data * logit_glat_predicate_weight
@@ -674,13 +680,37 @@ def soft_merge1(logit_base, logit_glat, node_type, type):
 
 def rearrange_useless(ent_dists, pred_label_entities, useless_entity_id, node_type):
 
-    print("")
-    for id in useless_entity_id:
-        first_half = pred_label_entities[:id]
-        
+    first_slice = -1
+    second_slice = -1
+    first_half = []
 
+    original_length = pred_label_entities.size()[0]
+
+    for id in useless_entity_id:
+        if first_slice == -1:
+            first_slice = id
+        else:
+            second_slice = id
+
+        if first_slice != -1:
+            if len(first_half) == 0:
+                first_half = pred_label_entities[:first_slice, :]
+                first_half = torch.cat((first_half, ent_dists[id, :]), 0)
+
+            else:
+                first_half = torch.cat((first_half, pred_label_entities[first_slice:second_slice]), 0)
+                first_half = torch.cat((first_half, ent_dists[id, :]), 0)
+                first_slice = second_slice
+                second_slice = -1
+
+    if second_slice != -1 and second_slice != original_length - 1:
+        first_half = torch.cat((first_half, pred_label_entities[second_slice:]), 0)
+
+    if len(first_half) != 0:
+        pred_label_entities = first_half
 
     return ent_dists, pred_label_entities
+
 
 def glat_wrapper(total_data, useless_entity_id):
     # Batch size assumed to be 1
@@ -718,7 +748,7 @@ def glat_wrapper(total_data, useless_entity_id):
 
 def glat_postprocess(pred_entry, if_predicting=False):
     # pred_entry = {
-    #     'pred_boxes': boxes_i * BOX_SCALE / IM_SCALE,  # (23, 4) (16, 4)
+    #     'pred_boxe s': boxes_i * BOX_SCALE / IM_SCALE,  # (23, 4) (16, 4)
     #     'pred_classes': objs_i,  # (23,) (16,)
     #     'pred_rel_inds': rels_i,  # (506, 2) (240, 2)
     #     'obj_scores': obj_scores_i,  # (23,) (16,)
@@ -746,11 +776,15 @@ def glat_postprocess(pred_entry, if_predicting=False):
 
     # For SGCLS
     if conf.mode == "sgcls" or conf.mode == "sgdet":
-        total_data, useless_entity_id = build_graph_structure(pred_entry, ind_to_classes, ind_to_predicates,
-                                                              if_predicting=if_predicting,
-                                                              sgclsdet=True)
+        total_data, useless_entity_id = build_graph_structure(pred_entry, ind_to_classes, ind_to_predicates,  conf.mode,
+                                                              if_predicting=if_predicting, sgclsdet=True)
     else:
-        total_data = build_graph_structure(pred_entry, ind_to_classes, ind_to_predicates, if_predicting=if_predicting)
+        total_data = build_graph_structure(pred_entry, ind_to_classes, ind_to_predicates,  conf.mode,
+                                           if_predicting=if_predicting)
+        useless_entity_id = []
+    if len(useless_entity_id) != 0:
+        print("len(useless_entity_id): ", len(useless_entity_id))
+    print("len(useless_entity_id): ", len(useless_entity_id))
 
     pred_label_predicate, pred_label_entities = glat_wrapper(total_data, useless_entity_id)
 
@@ -766,7 +800,7 @@ def glat_postprocess(pred_entry, if_predicting=False):
 
         # For bug0 >>>>>>>>>>>
         pred_entry['obj_scores_rm'] = pred_label_entities
-        pred_entry['obj_scores'] = F.softmax(pred_label_entities, dim=1).max(1)[0]
+        pred_entry['obj_scores'] = softmax_1(pred_label_entities).max(1)[0]
         # For bug0 <<<<<<<<<<<<
 
         pred_entry['pred_classes'] = pred_label_entities.max(1)[1]
