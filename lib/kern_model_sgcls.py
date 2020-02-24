@@ -449,6 +449,8 @@ class KERN(nn.Module):
                 pred_scores_sorted_a_100_all = []
                 rel_scores_idx_b_100_all = []
                 rel_scores_idx_a_100_all = []
+                rel_dists_b_all = []
+                rel_dists_a_all = []
 
                 for i in range(len(rel_ind_per_img)):
                     # boxes, obj_classes, obj_scores, rels_b_100, pred_scores_sorted_b_100, rels_a_100, \
@@ -468,12 +470,16 @@ class KERN(nn.Module):
 
                     rels_b_100_all.append(torch.cat((i*torch.ones(rels_b_100.size(0), 1).type_as(rels_b_100), rels_b_100), dim=1))
                     pred_scores_sorted_b_100_all.append(pred_scores_sorted_b_100)
+                    rel_dists_b_all.append(rel_dists_b)
+
                     try:
                         rels_a_100_all.append(torch.cat((i*torch.ones(rels_a_100.size(0), 1).type_as(rels_a_100), rels_a_100), dim=1))
                     except:
                         rels_a_100_all.append(torch.Tensor([]).long().cuda())
 
                     pred_scores_sorted_a_100_all.append(pred_scores_sorted_a_100)
+                    rel_dists_a_all.append(rel_dists_a)
+
                     rel_scores_idx_b_100_all.append(rel_ind_per_img[i][rel_scores_idx_b_100])
                     # pdb.set_trace()
                     try:
@@ -485,6 +491,7 @@ class KERN(nn.Module):
                 rels_b_100_all = torch.cat(rels_b_100_all, dim=0)
                 pred_scores_sorted_b_100_all = torch.cat(pred_scores_sorted_b_100_all, dim=0)
                 rel_scores_idx_b_100_all = torch.cat(rel_scores_idx_b_100_all, 0)
+                rel_dists_b_all = torch.cat(rel_dists_b_all, dim=0)
 
                 try:
                     rels_a_100_all = torch.cat(rels_a_100_all, 0)
@@ -501,9 +508,15 @@ class KERN(nn.Module):
                 except:
                     rel_scores_idx_a_100_all = torch.Tensor([]).long().cuda()
 
+                try:
+                    rel_dists_a_all = torch.cat(rel_dists_a_all, dim=0)
+                except:
+                    rel_dists_a_all = torch.Tensor([]).long().cuda()
+
                 return result, [boxes, obj_classes, obj_scores, rels_b_100_all, pred_scores_sorted_b_100_all,
                                 rels_a_100_all,
-                                pred_scores_sorted_a_100_all, rel_scores_idx_b_100_all, rel_scores_idx_a_100_all, result.rel_dists]
+                                pred_scores_sorted_a_100_all, rel_scores_idx_b_100_all, rel_scores_idx_a_100_all,
+                                rel_dists_b_all, rel_dists_a_all, ent_dists]
             else:
                 return result, []
 

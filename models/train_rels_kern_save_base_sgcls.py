@@ -48,7 +48,7 @@ sys.path.append(codebase)
 exp_name = 'motif'
 
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "2"
+os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 
 # conf = ModelConfig()
 #--------updated--------
@@ -378,10 +378,11 @@ result, det_res = detec
     for i in useless_entity_id:
         useful_entity_id.remove(i)
 
-
     # For SGCLS
-    result.rm_obj_dists = pred_entry['entity_scores']
+    # For bug0 >>>>>>>>>
+    result.rm_obj_dists = pred_entry['obj_scores_rm']
     result.obj_preds = pred_entry['pred_classes']
+    # For bug0 <<<<<<<<<<
 
 
     # t2 = time.time()
@@ -409,8 +410,8 @@ result, det_res = detec
     if conf.mode == "sgcls" or conf.mode == "sgdet": # if not use ggnn obj, we just use scores of faster rcnn as their scores, there is no need to train
         losses['class_loss'] = F.cross_entropy(result.rm_obj_dists, result.rm_obj_labels[useful_entity_id])
 
-    if conf.use_ggnn_obj: # if not use ggnn obj, we just use scores of faster rcnn as their scores, there is no need to train
-        losses['class_loss'] = F.cross_entropy(result.rm_obj_dists, result.rm_obj_labels)
+    # if conf.use_ggnn_obj: # if not use ggnn obj, we just use scores of faster rcnn as their scores, there is no need to train
+    #     losses['class_loss'] = F.cross_entropy(result.rm_obj_dists, result.rm_obj_labels)
     # pdb.set_trace()
     losses['rel_loss'] = F.cross_entropy(result.rel_dists, result.rel_labels[:, -1])
     loss = sum(losses.values())
@@ -715,7 +716,7 @@ def glat_postprocess(pred_entry, if_predicting=False):
 
     # For SGCLS
     if conf.mode == "sgcls" or conf.mode == "sgdet":
-        total_data, useless_entity_id = build_graph_structure(pred_entry, ind_to_classes, ind_to_predicates,
+        total_data, useless_entity_id = build_graph_structure(pred_entry, ind_to_classes, ind_to_predicates, conf.mode,
                                                               if_predicting=if_predicting,
                                                               sgclsdet=True)
     else:
@@ -726,8 +727,16 @@ def glat_postprocess(pred_entry, if_predicting=False):
     pred_entry['rel_scores'] = pred_label_predicate
 
     # For SGCLS
-    pred_entry['entity_scores'] = pred_label_entities
-    pred_entry['pred_classes'] = pred_label_entities.max(1)[1]
+
+    if conf.mode == "sgcls" or conf.mode == "sgdet":
+        # pred_entry['entity_scores'] = pred_label_entities
+
+        # For bug0 >>>>>>>>>>>
+        pred_entry['obj_scores_rm'] = pred_label_entities
+        pred_entry['obj_scores'] = F.softmax(pred_label_entities, dim=1).max(1)[0]
+        # For bug0 <<<<<<<<<<<<
+
+        pred_entry['pred_classes'] = pred_label_entities.max(1)[1]
 
     # =====================================
     # if if_predicting:
@@ -874,6 +883,9 @@ def val_batch(batch_num, b, evaluator, evaluator_multiple_preds, evaluator_list,
                     # pred_entry_init['rel_scores'][i, j] = 0
 
         # rel_scores_one_hot[np.arange(len(pred_entry['rel_scores'])), pred_entry['rel_scores']] = 1
+
+        # pred_entry['rel_scores'] = pred_entry['rel_scores'][:, :-1]
+
         # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
         if len(rels_i_a100.shape) == 1:

@@ -471,6 +471,7 @@ def build_graph_structure(entries, index2name_object, index2name_predicate, mode
             entries_minibatch['pred_relations'].append(entries['pred_relations'][rel_idx_cur_img].view(-1, 4)[:, 1:])
 
             rel_dists_idx_cur_img = (entries['pred_relations'][:, 0] == i).view(-1, 1).expand(-1, 51)
+
             entries_minibatch['rel_dists'].append(entries['rel_dists'][rel_dists_idx_cur_img].view(-1, 51))
 
             entries_minibatch['rel_scores'].append(entries['rel_scores'][rel_dists_idx_cur_img].view(-1, 51))

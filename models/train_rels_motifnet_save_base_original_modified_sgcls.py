@@ -44,7 +44,7 @@ sys.path.append(codebase)
 exp_name = 'motif'
 
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+os.environ["CUDA_VISIBLE_DEVICES"] = "2"
 
 # conf = ModelConfig()
 #--------updated--------
@@ -420,8 +420,8 @@ result, det_res = detec
     if conf.mode == "sgcls" or conf.mode == "sgdet": # if not use ggnn obj, we just use scores of faster rcnn as their scores, there is no need to train
         losses['class_loss'] = F.cross_entropy(result.rm_obj_dists, result.rm_obj_labels[useful_entity_id])
 
-    if conf.use_ggnn_obj: # if not use ggnn obj, we just use scores of faster rcnn as their scores, there is no need to train
-        losses['class_loss'] = F.cross_entropy(result.rm_obj_dists, result.rm_obj_labels)
+    # if conf.use_ggnn_obj: # if not use ggnn obj, we just use scores of faster rcnn as their scores, there is no need to train
+    #     losses['class_loss'] = F.cross_entropy(result.rm_obj_dists, result.rm_obj_labels)
     # pdb.set_trace()
     losses['rel_loss'] = F.cross_entropy(result.rel_dists, result.rel_labels[:, -1])
     loss = sum(losses.values())
