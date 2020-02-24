@@ -2,11 +2,10 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="11066203-4164-4413-bd1b-0e742342911b" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/lib/stanford_model_sgcls.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/dataloaders/visual_genome.py" beforeDir="false" afterPath="$PROJECT_DIR$/dataloaders/visual_genome.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/kern_model_sgcls.py" beforeDir="false" afterPath="$PROJECT_DIR$/lib/kern_model_sgcls.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/models/train_rels_kern_save_base_sgcls.py" beforeDir="false" afterPath="$PROJECT_DIR$/models/train_rels_kern_save_base_sgcls.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/models/train_rels_motifnet_save_base_original_modified_sgcls.py" beforeDir="false" afterPath="$PROJECT_DIR$/models/train_rels_motifnet_save_base_original_modified_sgcls.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/train_rels_stanford_save_base_sgcls.py" beforeDir="false" afterPath="$PROJECT_DIR$/models/train_rels_stanford_save_base_sgcls.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -42,7 +41,7 @@
       <usages-collector id="statistics.file.extensions.open">
         <counts>
           <entry key="&lt;__array_function__ internals&gt;" value="1" />
-          <entry key="py" value="183" />
+          <entry key="py" value="187" />
           <entry key="sh" value="14" />
         </counts>
       </usages-collector>
@@ -50,26 +49,26 @@
         <counts>
           <entry key="PLAIN_TEXT" value="14" />
           <entry key="PyRemoteDebug" value="1" />
-          <entry key="Python" value="183" />
+          <entry key="Python" value="187" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
-          <entry key="py" value="11501" />
+          <entry key="py" value="11503" />
           <entry key="sh" value="41" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
           <entry key="PLAIN_TEXT" value="41" />
-          <entry key="Python" value="11501" />
+          <entry key="Python" value="11503" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.lifecycle.project">
         <counts>
           <entry key="project.closed" value="11" />
           <entry key="project.open.time.0" value="3" />
-          <entry key="project.open.time.1" value="3" />
+          <entry key="project.open.time.1" value="4" />
           <entry key="project.open.time.11" value="3" />
           <entry key="project.open.time.12" value="1" />
           <entry key="project.open.time.14" value="1" />
@@ -81,7 +80,7 @@
           <entry key="project.open.time.7" value="1" />
           <entry key="project.open.time.8" value="1" />
           <entry key="project.open.time.9" value="1" />
-          <entry key="project.opened" value="21" />
+          <entry key="project.opened" value="22" />
         </counts>
       </usages-collector>
     </session>
@@ -90,38 +89,14 @@
     <favorites_list name="KERN" />
   </component>
   <component name="FileEditorManager">
-    <splitter split-orientation="horizontal" split-proportion="0.38541666">
+    <splitter split-orientation="horizontal" split-proportion="0.5">
       <split-first>
         <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-          <file pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/dataloaders/visual_genome.py">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="209">
-                  <caret line="480" column="12" selection-start-line="480" selection-start-column="12" selection-end-line="480" selection-end-column="12" />
-                </state>
-              </provider>
-            </entry>
-          </file>
           <file pinned="false" current-in-tab="true">
-            <entry file="file://$PROJECT_DIR$/lib/motifnet_model_sgcls.py">
+            <entry file="file://$PROJECT_DIR$/lib/stanford_model_sgcls.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="139">
-                  <caret line="686" lean-forward="true" selection-start-line="686" selection-end-line="686" />
-                  <folding>
-                    <element signature="e#40#58#0" expanded="true" />
-                  </folding>
-                </state>
-              </provider>
-            </entry>
-          </file>
-          <file pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/models/train_rels_motifnet_save_base_original_modified_sgcls.py">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="220">
-                  <caret line="421" lean-forward="true" selection-start-line="421" selection-end-line="421" />
-                  <folding>
-                    <element signature="e#183#260#0" expanded="true" />
-                  </folding>
+                <state relative-caret-position="195">
+                  <caret line="22" column="7" lean-forward="true" selection-start-line="22" selection-start-column="7" selection-end-line="23" />
                 </state>
               </provider>
             </entry>
@@ -130,35 +105,14 @@
       </split-first>
       <split-second>
         <leaf>
-          <file pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/lib/kern_model_sgcls.py">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="303">
-                  <caret line="515" selection-start-line="515" selection-end-line="515" />
-                  <folding>
-                    <element signature="e#21#39#0" expanded="true" />
-                  </folding>
-                </state>
-              </provider>
-            </entry>
-          </file>
           <file pinned="false" current-in-tab="true">
-            <entry file="file://$PROJECT_DIR$/models/train_rels_kern_save_base_sgcls.py">
+            <entry file="file://$PROJECT_DIR$/lib/motifnet_model_sgcls.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="294">
-                  <caret line="211" column="20" selection-start-line="211" selection-start-column="20" selection-end-line="211" selection-end-column="20" />
+                <state relative-caret-position="64">
+                  <caret line="681" selection-start-line="681" selection-end-line="681" />
                   <folding>
-                    <element signature="e#183#260#0" expanded="true" />
+                    <element signature="e#40#58#0" expanded="true" />
                   </folding>
-                </state>
-              </provider>
-            </entry>
-          </file>
-          <file pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/lib/surgery_sgcls.py">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="66">
-                  <caret line="91" selection-start-line="91" selection-end-line="91" />
                 </state>
               </provider>
             </entry>
@@ -176,7 +130,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>conf</find>
       <find>build</find>
       <find>glat_post</find>
       <find>entity_scores</find>
@@ -195,7 +148,6 @@
       <find>pred_label</find>
       <find>ckpt</find>
       <find>glat_wrapper</find>
-      <find>ckpt =</find>
       <find>build_graph</find>
       <find>rel_dists</find>
       <find>cpu</find>
@@ -204,8 +156,10 @@
       <find>train_batch</find>
       <find>rel_dists_b</find>
       <find>soft_merge3</find>
-      <find>ckpt =</find>
       <find>useful_entity_id</find>
+      <find>transfer_result_cpu(res</find>
+      <find>ckpt =</find>
+      <find>traansfer</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -214,7 +168,6 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/scripts/train_glat_motifnet_mask_rank_mbz_1.sh" />
         <option value="$PROJECT_DIR$/models/train_rels_motifnet_mask_rank_mbz.py" />
         <option value="$PROJECT_DIR$/scripts/eval_stanford_predcls_mask_rank.sh" />
         <option value="$PROJECT_DIR$/models/eval_hint_stanford_motif_glat_mask.py" />
@@ -265,6 +218,7 @@
         <option value="$PROJECT_DIR$/dataloaders/visual_genome.py" />
         <option value="$PROJECT_DIR$/models/train_rels_kern_save_base_sgcls.py" />
         <option value="$PROJECT_DIR$/models/train_rels_motifnet_save_base_original_modified_sgcls.py" />
+        <option value="$PROJECT_DIR$/models/train_rels_stanford_save_base_sgcls.py" />
       </list>
     </option>
   </component>
@@ -336,18 +290,18 @@
     <property name="WebServerToolWindowPanel.toolwindow.show.permissions" value="false" />
     <property name="WebServerToolWindowPanel.toolwindow.show.size" value="false" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
-    <property name="two.files.diff.last.used.file" value="$PROJECT_DIR$/lib/motifnet_model_sgcls.py" />
+    <property name="two.files.diff.last.used.file" value="$PROJECT_DIR$/models/train_rels_motifnet_save_base_original_modified_sgcls.py" />
   </component>
   <component name="RecentsManager">
-    <key name="MoveFile.RECENT_KEYS">
-      <recent name="$PROJECT_DIR$/lib" />
-    </key>
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/lib" />
       <recent name="$PROJECT_DIR$/models" />
       <recent name="$PROJECT_DIR$/dataloaders" />
-      <recent name="$PROJECT_DIR$/lib" />
       <recent name="$PROJECT_DIR$/scripts" />
       <recent name="$PROJECT_DIR$/visualization" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/lib" />
     </key>
   </component>
   <component name="RunDashboard">
@@ -565,7 +519,7 @@
     <frame x="0" y="0" width="1440" height="900" extended-state="0" />
     <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.8193277" visible="true" weight="0.0" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.8193277" visible="true" weight="0.06458333" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" sideWeight="0.18067227" side_tool="true" weight="0.13136457" />
       <window_info anchor="bottom" id="Message" order="0" />
@@ -577,7 +531,7 @@
       <window_info anchor="bottom" id="TODO" order="6" />
       <window_info anchor="bottom" id="Docker" order="7" show_stripe_button="false" />
       <window_info anchor="bottom" id="Version Control" order="8" />
-      <window_info anchor="bottom" id="File Transfer" order="9" weight="0.1891892" />
+      <window_info anchor="bottom" id="File Transfer" order="9" visible="true" weight="0.1891892" />
       <window_info anchor="bottom" id="Database Changes" order="10" show_stripe_button="false" />
       <window_info anchor="bottom" id="Terminal" order="11" />
       <window_info anchor="bottom" id="Event Log" order="12" side_tool="true" />
@@ -701,7 +655,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/models/train_rels_motifnet_save_base_original_modified_sgcls.py</url>
-          <line>631</line>
+          <line>629</line>
           <option name="timeStamp" value="286" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -736,37 +690,37 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/models/train_rels_motifnet_save_base_original_modified_sgcls.py</url>
-          <line>913</line>
+          <line>911</line>
           <option name="timeStamp" value="299" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/models/train_rels_motifnet_save_base_original_modified_sgcls.py</url>
-          <line>734</line>
+          <line>732</line>
           <option name="timeStamp" value="300" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/models/train_rels_motifnet_save_base_original_modified_sgcls.py</url>
-          <line>675</line>
+          <line>673</line>
           <option name="timeStamp" value="301" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/models/train_rels_motifnet_save_base_original_modified_sgcls.py</url>
-          <line>668</line>
+          <line>666</line>
           <option name="timeStamp" value="302" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/models/train_rels_motifnet_save_base_original_modified_sgcls.py</url>
-          <line>669</line>
+          <line>667</line>
           <option name="timeStamp" value="303" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/models/train_rels_motifnet_save_base_original_modified_sgcls.py</url>
-          <line>736</line>
+          <line>734</line>
           <option name="timeStamp" value="304" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/models/train_rels_motifnet_save_base_original_modified_sgcls.py</url>
-          <line>728</line>
+          <line>726</line>
           <option name="timeStamp" value="308" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -896,13 +850,6 @@
     </expressions>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/scripts/train_glat_motifnet_aemask.sh">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="180">
-          <caret line="12" selection-start-line="12" selection-end-line="12" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/lib/get_union_boxes.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="90">
@@ -1143,13 +1090,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/models/train_rels_stanford_save_base_sgcls.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="135">
-          <caret line="38" lean-forward="true" selection-start-line="38" selection-end-line="38" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/models/train_rels.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-1264">
@@ -1206,10 +1146,13 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/lib/surgery_sgcls.py">
+    <entry file="file://$PROJECT_DIR$/lib/kern_model_sgcls.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="66">
-          <caret line="91" selection-start-line="91" selection-end-line="91" />
+        <state relative-caret-position="7725">
+          <caret line="515" selection-start-line="515" selection-end-line="515" />
+          <folding>
+            <element signature="e#21#39#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -1220,43 +1163,54 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/lib/kern_model_sgcls.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="303">
-          <caret line="515" selection-start-line="515" selection-end-line="515" />
-          <folding>
-            <element signature="e#21#39#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/models/train_rels_motifnet_save_base_original_modified_sgcls.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="220">
-          <caret line="421" lean-forward="true" selection-start-line="421" selection-end-line="421" />
+        <state relative-caret-position="154">
+          <caret line="44" column="39" selection-start-line="44" selection-start-column="39" selection-end-line="44" selection-end-column="39" />
           <folding>
             <element signature="e#183#260#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/lib/motifnet_model_sgcls.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="139">
-          <caret line="686" lean-forward="true" selection-start-line="686" selection-end-line="686" />
-          <folding>
-            <element signature="e#40#58#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/models/train_rels_kern_save_base_sgcls.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="294">
-          <caret line="211" column="20" selection-start-line="211" selection-start-column="20" selection-end-line="211" selection-end-column="20" />
+        <state relative-caret-position="159">
+          <caret line="202" column="9" selection-start-line="202" selection-start-column="9" selection-end-line="202" selection-end-column="9" />
           <folding>
             <element signature="e#183#260#0" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/surgery_sgcls.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="66">
+          <caret line="91" selection-start-line="91" selection-end-line="91" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/models/train_rels_stanford_save_base_sgcls.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="101">
+          <caret line="50" column="31" lean-forward="true" selection-start-line="50" selection-start-column="31" selection-end-line="50" selection-end-column="31" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/motifnet_model_sgcls.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="64">
+          <caret line="681" selection-start-line="681" selection-end-line="681" />
+          <folding>
+            <element signature="e#40#58#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/stanford_model_sgcls.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="195">
+          <caret line="22" column="7" lean-forward="true" selection-start-line="22" selection-start-column="7" selection-end-line="23" />
         </state>
       </provider>
     </entry>

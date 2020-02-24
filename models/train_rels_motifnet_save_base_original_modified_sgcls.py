@@ -2,7 +2,6 @@
 Training script for scene graph detection. Integrated with Rowan's faster rcnn setup
 """
 
-# from dataloaders.visual_genome_original import VGDataLoader, VG, build_graph_structure
 from dataloaders.visual_genome import VGDataLoader, VG, build_graph_structure
 
 import numpy as np
@@ -19,7 +18,6 @@ from lib.evaluation.sg_eval import BasicSceneGraphEvaluator, calculate_mR_from_e
 from lib.pytorch_misc import print_para
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 
-import pdb
 # import KERN model
 # from lib.kern_model import KERN
 
@@ -155,7 +153,7 @@ def get_optim(lr, last_epoch=-1):
     return optimizer, scheduler
 
 ckpt = torch.load(conf.ckpt)
-print("Loading EVERYTHING from motifnet", conf.ckpt)
+print("Loading EVERYTHING from", conf.ckpt)
 optimistic_restore(detector, ckpt['state_dict'])
 detector.cuda()
 start_epoch = -1
