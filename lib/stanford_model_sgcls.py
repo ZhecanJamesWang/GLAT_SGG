@@ -7,7 +7,7 @@ import torch.nn as nn
 import torch.nn.parallel
 from torch.autograd import Variable
 from torch.nn import functional as F
-from lib.surgery import filter_dets
+from lib.surgery_sgcls import filter_dets
 from lib.fpn.proposal_assignments.rel_assignments import rel_assignments
 from lib.pytorch_misc import arange
 from lib.object_detector import filter_det
@@ -165,6 +165,26 @@ class RelModelStanford(RelModel):
         #     return result
 
         if self.training:
+
+            # For bug0 >>>>>>>>>
+            if self.mode == "sgdet":
+                probs = F.softmax(result.rm_obj_dists, 1)
+                nms_mask = result.rm_obj_dists.data.clone()
+                nms_mask.zero_()
+                for c_i in range(1, result.rm_obj_dists.size(1)):
+                    scores_ci = probs.data[:, c_i]
+                    boxes_ci = result.boxes_all.data[:, c_i]
+
+                    keep = apply_nms(scores_ci, boxes_ci,
+                                     pre_nms_topn=scores_ci.size(0), post_nms_topn=scores_ci.size(0),
+                                     nms_thresh=0.3)
+                    nms_mask[:, c_i][keep] = 1
+
+                result.obj_preds = Variable(nms_mask * probs.data, volatile=True)[:, 1:].max(1)[1] + 1
+            else:
+                result.obj_preds = result.rm_obj_dists[:,1:].max(1)[1] + 1
+            # For bug0 <<<<<<<<
+
             if self.return_top100:
                 if self.mode == 'predcls':
                     # Hack to get the GT object labels
@@ -207,9 +227,13 @@ class RelModelStanford(RelModel):
                 rel_rep = F.softmax(result.rel_dists)
 
                 if rel_inds[:, 0].max() - rel_inds[:, 0].min() + 1 == 1:
+                    # return result, filter_dets(bboxes, result.obj_scores,
+                    #                            result.obj_preds, rel_inds[:, 1:], rel_rep, self.return_top100,
+                    #                            self.training)
                     return result, filter_dets(bboxes, result.obj_scores,
-                                               result.obj_preds, rel_inds[:, 1:], rel_rep, self.return_top100,
-                                               self.training)
+                                               result.obj_preds, rel_inds[:, 1:], rel_rep, rel_dists=result.rel_dists,
+                                               ent_dists=result.rm_obj_dists,
+                                               return_top100=self.return_top100, training=self.training)
 
                 # -----------------------------------Above: 1 batch_size, Below: Multiple batch_size------------------
                 #  assume rel_inds[:, 0] is from 0 to num_img-1
@@ -232,6 +256,8 @@ class RelModelStanford(RelModel):
                 pred_scores_sorted_a_100_all = []
                 rel_scores_idx_b_100_all = []
                 rel_scores_idx_a_100_all = []
+                rel_dists_b_all = []
+                rel_dists_a_all = []
 
                 for i in range(len(rel_ind_per_img)):
                     # boxes, obj_classes, obj_scores, rels_b_100, pred_scores_sorted_b_100, rels_a_100, \
@@ -248,17 +274,28 @@ class RelModelStanford(RelModel):
                     #                                                                                    self.return_top100,
                     #                                                                                    self.training)
 
-                    boxes, obj_classes, obj_scores, rels_b_100, pred_scores_sorted_b_100, rels_a_100, \
-                    pred_scores_sorted_a_100, rel_scores_idx_b_100, rel_scores_idx_a_100 = filter_dets(bboxes,
-                    result.obj_scores, result.obj_preds, rel_inds[rel_ind_per_img[i]][:,1:], rel_rep[rel_ind_per_img[i]],
-                                                                                                       self.return_top100,
-                                                                                                       self.training)
+                    # boxes, obj_classes, obj_scores, rels_b_100, pred_scores_sorted_b_100, rels_a_100, \
+                    # pred_scores_sorted_a_100, rel_scores_idx_b_100, rel_scores_idx_a_100 = filter_dets(bboxes,
+                    # result.obj_scores, result.obj_preds, rel_inds[rel_ind_per_img[i]][:,1:], rel_rep[rel_ind_per_img[i]],
+                    #                                                                                    self.return_top100,
+                    #                                                                                    self.training)
+                    (boxes, obj_classes, obj_scores, rels_b_100, pred_scores_sorted_b_100, rels_a_100, \
+                     pred_scores_sorted_a_100, rel_scores_idx_b_100, rel_scores_idx_a_100, rel_dists_b, rel_dists_a,
+                     ent_dists) = filter_dets(bboxes, result.obj_scores,
+                                              result.obj_preds, rel_inds[rel_ind_per_img[i]][:, 1:],
+                                              rel_rep[rel_ind_per_img[i]],
+                                              rel_dists=result.rel_dists,
+                                              ent_dists=result.rm_obj_dists,
+                                              return_top100=self.return_top100,
+                                              training=self.training)
 
                     # pdb.set_trace()
 
                     rels_b_100_all.append(
                         torch.cat((i * torch.ones(rels_b_100.size(0), 1).type_as(rels_b_100), rels_b_100), dim=1))
                     pred_scores_sorted_b_100_all.append(pred_scores_sorted_b_100)
+                    rel_dists_b_all.append(rel_dists_b)
+
                     try:
                         rels_a_100_all.append(
                             torch.cat((i * torch.ones(rels_a_100.size(0), 1).type_as(rels_a_100), rels_a_100), dim=1))
@@ -266,6 +303,7 @@ class RelModelStanford(RelModel):
                         rels_a_100_all.append(torch.Tensor([]).long().cuda())
 
                     pred_scores_sorted_a_100_all.append(pred_scores_sorted_a_100)
+                    rel_dists_a_all.append(rel_dists_a)
                     rel_scores_idx_b_100_all.append(rel_ind_per_img[i][rel_scores_idx_b_100])
                     # pdb.set_trace()
                     try:
@@ -277,6 +315,7 @@ class RelModelStanford(RelModel):
                 rels_b_100_all = torch.cat(rels_b_100_all, dim=0)
                 pred_scores_sorted_b_100_all = torch.cat(pred_scores_sorted_b_100_all, dim=0)
                 rel_scores_idx_b_100_all = torch.cat(rel_scores_idx_b_100_all, 0)
+                rel_dists_b_all = torch.cat(rel_dists_b_all, dim=0)
 
                 try:
                     rels_a_100_all = torch.cat(rels_a_100_all, 0)
@@ -293,9 +332,15 @@ class RelModelStanford(RelModel):
                 except:
                     rel_scores_idx_a_100_all = torch.Tensor([]).long().cuda()
 
+                try:
+                    rel_dists_a_all = torch.cat(rel_dists_a_all, dim=0)
+                except:
+                    rel_dists_a_all = torch.Tensor([]).long().cuda()
+
                 return result, [boxes, obj_classes, obj_scores, rels_b_100_all, pred_scores_sorted_b_100_all,
                                 rels_a_100_all,
-                                pred_scores_sorted_a_100_all, rel_scores_idx_b_100_all, rel_scores_idx_a_100_all]
+                                pred_scores_sorted_a_100_all, rel_scores_idx_b_100_all, rel_scores_idx_a_100_all,
+                                rel_dists_b_all, rel_dists_a_all, ent_dists]
 
             else:
                 # return result, []

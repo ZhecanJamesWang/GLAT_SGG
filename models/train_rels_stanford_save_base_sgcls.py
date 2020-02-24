@@ -22,7 +22,7 @@ from torch.optim.lr_scheduler import ReduceLROnPlateau
 # from lib.kern_model import KERN
 
 #--------updated--------
-from lib.stanford_model import RelModelStanford as RelModel
+from lib.stanford_model_sgcls import RelModelStanford as RelModel
 from lib.glat import GLATNET
 import pdb
 from torch.autograd import Variable
@@ -38,7 +38,7 @@ sys.path.append(codebase)
 exp_name = 'stanford'
 
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+os.environ["CUDA_VISIBLE_DEVICES"] = "3"
 
 # conf = ModelConfig()
 #--------updated--------
@@ -137,7 +137,7 @@ for n, param in detector.named_parameters():
 print(print_para(detector), flush=True)
 
 
-def get_optim(lr):
+def get_optim(lr, last_epoch=-1):
     # Lower the learning rate on the VGG fully connected layers by 1/10th. It's a hack, but it helps
     # stabilize the models.
     # fc_params = [p for n,p in detector.named_parameters() if n.startswith('roi_fmap') and p.requires_grad]
@@ -151,7 +151,7 @@ def get_optim(lr):
 
     # scheduler = ReduceLROnPlateau(optimizer, 'max', patience=3, factor=0.1,
     #                               verbose=True, threshold=0.0001, threshold_mode='abs', cooldown=1)
-    scheduler = lr_scheduler.StepLR(optimizer, step_size=5, gamma=0.3)
+    scheduler = lr_scheduler.StepLR(optimizer, step_size=5, gamma=0.3, last_epoch=last_epoch)
 
     return optimizer, scheduler
 
