@@ -130,8 +130,7 @@ elif conf.model_s_m == 'motifnet':
 
     # # # self finetune sgcls motif glat weight
     # ckpt_glat = torch.load('/home/tangtangwzc/KERN/checkpoints/motifnet_glat_sgcls_2020_0211_2317/motifnet_glat-20.tar')
-    ckpt_glat = torch.load('/home/tangtangwzc/KERN/checkpoints/motifnet_glat_sgcls_2020_0220_1807/motifnet_glat-11.tar')
-
+    # ckpt_glat = torch.load('/home/tangtangwzc/KERN/checkpoints/motifnet_glat_sgcls_2020_0220_1807/motifnet_glat-11.tar')
 
 # # ---------------pretrained model mask ratio 0.5
 # ckpt_glat = torch.load('/home/tangtangwzc/Common_sense/models/2019-11-03-17-51_2_2_2_2_2_2_concat_no_init_mask/best_test_node_mask_predicate_acc.pth')

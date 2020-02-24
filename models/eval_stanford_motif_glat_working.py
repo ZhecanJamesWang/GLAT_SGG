@@ -10,8 +10,8 @@ from tqdm import tqdm
 from config import BOX_SCALE, IM_SCALE
 import dill as pkl
 import os
-# from lib.glat_logit import GLATNET
-from lib.glat import GLATNET
+from lib.glat_logit import GLATNET
+# from lib.glat import GLATNET
 from torch.autograd import Variable
 import pdb
 
@@ -122,11 +122,14 @@ elif conf.model_s_m == 'motifnet':
     # ckpt_glat = torch.load('/home/haoxuan/code/KERN/checkpoints/motifnet_glat_predcls_mbz/motifnet_glat-27.tar')
 
     # # self finetune predcls motif glat weight
-    ckpt_glat=torch.load('/home/tangtangwzc/KERN/checkpoints/motifnet_glat_predcls_mbz_v2_2020_0202_2121/motifnet_glat-9.tar')
+    # ckpt_glat=torch.load('/home/tangtangwzc/KERN/checkpoints/motifnet_glat_predcls_mbz_v2_2020_0202_2121/motifnet_glat-9.tar')
+    # ckpt_glat = torch.load('/home/tangtangwzc/KERN/checkpoints/motifnet_glat_predcls_mbz_v2_2020_0222_0400/motifnet_glat-30.tar')
+    ckpt_glat = torch.load('/home/tangtangwzc/KERN/checkpoints/motifnet_glat_predcls_mbz_v2_2020_0221_2327/motifnet_glat-30.tar')
 
     # # # self finetune predcls motif glat LOGIT weight
     # # ckpt_glat = torch.load('/home/tangtangwzc/KERN/checkpoints/motifnet_glat_predcls_mbz_v2_2020_0204_1738//motifnet_glat-20.tar')
     # ckpt_glat = torch.load("/home/tangtangwzc/KERN/checkpoints/motifnet_glat_predcls_mbz_v2_2020_0204_1738/motifnet_glat-14.tar")
+
 
 # # ---------------pretrained model mask ratio 0.5
 # ckpt_glat = torch.load('/home/tangtangwzc/Common_sense/models/2019-11-03-17-51_2_2_2_2_2_2_concat_no_init_mask/best_test_node_mask_predicate_acc.pth')
@@ -625,8 +628,8 @@ def glat_wrapper(total_data):
     if torch.is_tensor(adjs_con):
         adj_con = Variable(adjs_con)
 
-    pred_label, pred_connect = model(input_class, adj_con, node_type)
-    # pred_label, pred_connect = model(input_class, adj_con, node_type, node_logit_dists)
+    # pred_label, pred_connect = model(input_class, adj_con, node_type)
+    pred_label, pred_connect = model(input_class, adj_con, node_type, node_logit_dists)
 
     # pred_label, pred_connect = model(input_class, adj_con, node_type, node_logit)
 
