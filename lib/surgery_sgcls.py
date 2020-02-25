@@ -19,6 +19,7 @@ from lib.fpn.box_utils import bbox_overlaps
 from time import time
 import pdb
 from torch.autograd import Variable
+import pdb
 
 # return filter_dets(bboxes, result.obj_scores,
 #                    result.obj_preds, rel_inds[:, 1:], rel_rep, self.return_top100)
@@ -59,11 +60,13 @@ def filter_dets(boxes, obj_scores, obj_classes, rel_inds, pred_scores, rel_dists
     # obj_scores_np = obj_scores.data.cpu().numpy()
     # objs_np = obj_classes.data.cpu().numpy()
     # boxes_out = boxes.data.cpu().numpy()
-    # try:
-    rel_dists_sorted = rel_dists[rel_scores_idx]
-    # except Exception as e:
-    #     print(e)
-    #     print("")
+    try:
+      rel_dists_sorted = rel_dists[rel_scores_idx]
+    except Exception as e:
+        print(e)
+        print("")
+        pdb.set_trace()
+
     split = 100
 
     if return_top100:

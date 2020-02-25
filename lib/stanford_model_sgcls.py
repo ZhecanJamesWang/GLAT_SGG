@@ -398,5 +398,9 @@ class RelModelStanford(RelModel):
             else:
                 dict_gt[(int(gt_rels[i, 1]), int(gt_rels[i, 2]))] = [int(gt_rels[i, 3])]
 
-        return dict_gt, filter_dets(bboxes, result.obj_scores,
-                                    result.obj_preds, rel_inds[:, 1:], rel_rep, self.return_top100)
+        # return dict_gt, filter_dets(bboxes, result.obj_scores,
+        #                             result.obj_preds, rel_inds[:, 1:], rel_rep, self.return_top100)
+
+        return dict_gt, filter_dets(bboxes, result.obj_scores, result.obj_preds, rel_inds[:, 1:],
+                            rel_rep, rel_dists=result.rel_dists, ent_dists=result.rm_obj_dists,
+                            return_top100=self.return_top100, training=False)

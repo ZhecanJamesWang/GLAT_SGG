@@ -38,7 +38,7 @@ sys.path.append(codebase)
 exp_name = 'stanford'
 
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "3"
+os.environ["CUDA_VISIBLE_DEVICES"] = "2"
 
 # conf = ModelConfig()
 #--------updated--------
