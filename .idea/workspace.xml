@@ -2,9 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="11066203-4164-4413-bd1b-0e742342911b" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/models/eval_stanford_motif_glat_working.py" beforeDir="false" afterPath="$PROJECT_DIR$/models/eval_stanford_motif_glat_working.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/models/eval_stanford_motif_glat_working_sgcls.py" beforeDir="false" afterPath="$PROJECT_DIR$/models/eval_stanford_motif_glat_working_sgcls.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -59,7 +57,7 @@
         <counts>
           <entry key="project.closed" value="18" />
           <entry key="project.open.time.0" value="5" />
-          <entry key="project.open.time.1" value="9" />
+          <entry key="project.open.time.1" value="10" />
           <entry key="project.open.time.10" value="1" />
           <entry key="project.open.time.13" value="3" />
           <entry key="project.open.time.2" value="2" />
@@ -70,7 +68,7 @@
           <entry key="project.open.time.6" value="1" />
           <entry key="project.open.time.7" value="2" />
           <entry key="project.open.time.8" value="1" />
-          <entry key="project.opened" value="30" />
+          <entry key="project.opened" value="31" />
         </counts>
       </usages-collector>
     </session>
@@ -80,11 +78,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/models/eval_stanford_motif_glat_working.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="363">
-              <caret line="26" column="22" lean-forward="true" selection-start-line="26" selection-start-column="22" selection-end-line="26" selection-end-column="22" />
-              <folding>
-                <element signature="e#1#78#0" expanded="true" />
-              </folding>
+            <state relative-caret-position="75">
+              <caret line="5" column="17" lean-forward="true" selection-start-line="5" selection-start-column="17" selection-end-line="5" selection-end-column="17" />
             </state>
           </provider>
         </entry>
@@ -92,8 +87,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/lib/glat_logit.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="212">
-              <caret line="580" lean-forward="true" selection-start-line="580" selection-end-line="580" />
+            <state relative-caret-position="8595">
+              <caret line="580" selection-start-line="580" selection-end-line="580" />
             </state>
           </provider>
         </entry>
@@ -101,7 +96,7 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/dataloaders/visual_genome.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="585">
+            <state relative-caret-position="6345">
               <caret line="423" column="22" selection-start-line="423" selection-start-column="22" selection-end-line="423" selection-end-column="22" />
               <folding>
                 <element signature="e#71#82#0" expanded="true" />
@@ -164,11 +159,10 @@
       <find>useless</find>
       <find>ckpt</find>
       <find>s</find>
-      <find>ckpt</find>
       <find>model</find>
-      <find>wrapper</find>
       <find>soft_merge</find>
       <find>soft_merge3</find>
+      <find>wrapper</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -1857,6 +1851,40 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/models/eval_stanford_motif_glat_working_sgcls.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="355">
+          <caret line="728" column="56" selection-start-line="728" selection-start-column="56" selection-end-line="728" selection-end-column="56" />
+          <folding>
+            <element signature="e#1#78#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/models/eval_stanford_motif_glat_working.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="75">
+          <caret line="5" column="17" lean-forward="true" selection-start-line="5" selection-start-column="17" selection-end-line="5" selection-end-column="17" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/glat_logit.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="8595">
+          <caret line="580" selection-start-line="580" selection-end-line="580" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/dataloaders/visual_genome.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="6345">
+          <caret line="423" column="22" selection-start-line="423" selection-start-column="22" selection-end-line="423" selection-end-column="22" />
+          <folding>
+            <element signature="e#71#82#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/lib/surgery_sgcls.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1425">
@@ -1868,43 +1896,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="4200">
           <caret line="287" column="18" selection-start-line="287" selection-start-column="18" selection-end-line="287" selection-end-column="18" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/lib/glat_logit.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="212">
-          <caret line="580" lean-forward="true" selection-start-line="580" selection-end-line="580" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/models/eval_stanford_motif_glat_working_sgcls.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="355">
-          <caret line="728" column="56" selection-start-line="728" selection-start-column="56" selection-end-line="728" selection-end-column="56" />
-          <folding>
-            <element signature="e#1#78#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/dataloaders/visual_genome.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="585">
-          <caret line="423" column="22" selection-start-line="423" selection-start-column="22" selection-end-line="423" selection-end-column="22" />
-          <folding>
-            <element signature="e#71#82#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/models/eval_stanford_motif_glat_working.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="363">
-          <caret line="26" column="22" lean-forward="true" selection-start-line="26" selection-start-column="22" selection-end-line="26" selection-end-column="22" />
-          <folding>
-            <element signature="e#1#78#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>

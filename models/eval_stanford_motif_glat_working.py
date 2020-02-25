@@ -10,8 +10,8 @@ from tqdm import tqdm
 from config import BOX_SCALE, IM_SCALE
 import dill as pkl
 import os
-from lib.glat_logit import GLATNET
-# from lib.glat import GLATNET
+# from lib.glat_logit import GLATNET
+from lib.glat import GLATNET
 from torch.autograd import Variable
 import pdb
 
@@ -123,8 +123,8 @@ elif conf.model_s_m == 'motifnet':
 
     # # self finetune predcls motif glat weight
     # ckpt_glat=torch.load('/home/tangtangwzc/KERN/checkpoints/motifnet_glat_predcls_mbz_v2_2020_0202_2121/motifnet_glat-9.tar')
-    # ckpt_glat = torch.load('/home/tangtangwzc/KERN/checkpoints/motifnet_glat_predcls_mbz_v2_2020_0222_0400/motifnet_glat-30.tar')
-    ckpt_glat = torch.load('/home/tangtangwzc/KERN/checkpoints/motifnet_glat_predcls_mbz_v2_2020_0221_2327/motifnet_glat-30.tar')
+    ckpt_glat = torch.load('/home/tangtangwzc/KERN/checkpoints/motifnet_glat_predcls_mbz_v2_2020_0222_0400/motifnet_glat-30.tar')
+    # ckpt_glat = torch.load('/home/tangtangwzc/KERN/checkpoints/motifnet_glat_predcls_mbz_v2_2020_0221_2327/motifnet_glat-30.tar')
 
     # # # self finetune predcls motif glat LOGIT weight
     # # ckpt_glat = torch.load('/home/tangtangwzc/KERN/checkpoints/motifnet_glat_predcls_mbz_v2_2020_0204_1738//motifnet_glat-20.tar')
@@ -628,8 +628,8 @@ def glat_wrapper(total_data):
     if torch.is_tensor(adjs_con):
         adj_con = Variable(adjs_con)
 
-    # pred_label, pred_connect = model(input_class, adj_con, node_type)
-    pred_label, pred_connect = model(input_class, adj_con, node_type, node_logit_dists)
+    pred_label, pred_connect = model(input_class, adj_con, node_type)
+    # pred_label, pred_connect = model(input_class, adj_con, node_type, node_logit_dists)
 
     # pred_label, pred_connect = model(input_class, adj_con, node_type, node_logit)
 
