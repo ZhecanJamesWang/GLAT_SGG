@@ -431,7 +431,7 @@ class VGDataLoader(torch.utils.data.DataLoader):
         )
         return train_load, val_load
 
-def build_graph_structure(entries, index2name_object, index2name_predicate, if_predicting=False, sgclsdet=False):
+def build_graph_structure(entries, index2name_object, index2name_predicate, mode, if_predicting=False, sgclsdet=False):
 # def build_graph_structure(entries, index2name_object, index2name_predicate, if_predicting=False):
 
     # Input: pred_relations(Tensor) pred_classes(Variable)
@@ -493,6 +493,9 @@ def build_graph_structure(entries, index2name_object, index2name_predicate, if_p
         entries_minibatch['rel_dists'].append(entries['rel_dists'])
         entries_minibatch['ent_dists'].append(entries['ent_dists'])
 
+        if mode == "sgcls" or mode == "sgdet":
+            entries_minibatch['ent_dists'].append(entries['ent_dists'])
+
     for i in range(len(entries_minibatch['pred_classes'])):
         # if if_predicting:
         #     return_classes = entry['pred_classes']
@@ -546,7 +549,8 @@ def build_graph_structure(entries, index2name_object, index2name_predicate, if_p
         total_data['node_logit_dists'].append(nodes_logit_dists)
         total_data['ent_dists'].append(ent_dists)
 
-
+        if mode == "sgcls" or mode == "sgdet":
+            total_data['ent_dists'] = entries['ent_dists']
 
         # total_node_num = len(return_classes) + return_relations.shape[0]
         # nodes_class = [] + list(return_classes)

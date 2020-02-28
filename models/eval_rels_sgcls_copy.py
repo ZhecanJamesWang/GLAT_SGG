@@ -15,7 +15,7 @@ from lib.kern_model_sgcls import KERN
 from lib.glat import GLATNET
 from torch.autograd import Variable
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 
 
 conf = ModelConfig()
@@ -107,7 +107,6 @@ print('finish pretrained loading')
 model.cuda()
 
 model.eval()
-
 
 def cuda2numpy(tensor):
     if torch.is_tensor(tensor):
@@ -314,7 +313,7 @@ def soft_merge3(logit_base, logit_glat, node_type, type, temp_model):
     logit_base_predicate = softmax_1(logit_base_predicate).data
     logit_glat_predicate = softmax_1(logit_glat).data
 
-    logit_base_predicate_one_hot = torch.max(logit_base_predicate[:,1:-1], dim=1)[1]
+    logit_base_predicate_one_hot = torch.max(logit_base_predicate, dim=1)[1]
     logit_base_predicate_weight = torch.max(logit_base_predicate, dim=1)[0]
     logit_glat_predicate_weight = torch.max(logit_glat_predicate, dim=1)[0] * temp_model
 
@@ -339,30 +338,45 @@ def soft_merge3(logit_base, logit_glat, node_type, type, temp_model):
     # output_logit_predicate = output_logit_predicate/torch.sum(output_logit_predicate, dim=1, keepdim=True)
     output_logit_predicate = softmax_1(Variable(output_logit_predicate))
 
-    output_predicate_one_hot = torch.max(output_logit_predicate[:,1:-1], dim=1)[1]
+    output_predicate_one_hot = torch.max(output_logit_predicate, dim=1)[1]
 
     return output_logit_predicate, logit_base_predicate_one_hot, output_predicate_one_hot
 
 
-def soft_merge2(logit_base, logit_glat, node_type):
+def soft_merge2(logit_base, logit_glat, node_type, type, temp_model):
+    if type == 0:
+        index = (node_type == 0).squeeze(0).unsqueeze(-1).repeat(1, 52)
+        logit_base_predicate = logit_base.data.squeeze(0)[index].view(-1, 52)
+        logit_base_predicate_51 = Variable(logit_base_predicate[:, 1:]).clone()
+        logit_glat_predicate_51 = logit_glat[:, 1:].clone()
+    else:
+        logit_glat = logit_glat[:, :-2]
+        # index = (node_type == 1).squeeze(0).unsqueeze(-1).repeat(1, 153)
+        # logit_base_predicate = logit_base.data.squeeze(0)[index].view(-1, 153)
+        # logit_base_predicate_51 = Variable(logit_base_predicate).clone()
+        # logit_glat_predicate_51 = logit_glat.clone()
+        logit_base_predicate = logit_base
 
-    index = (node_type == 0).squeeze(0).unsqueeze(-1).repeat(1, 52)
-    logit_base_predicate = logit_base.data.squeeze(0)[index].view(-1, 52)
-
-    logit_base_predicate_51 = Variable(logit_base_predicate[:, 1:]).clone()
-    logit_glat_predicate_51 = logit_glat[:, 1:].clone()
+    logit_base_predicate_51 = logit_base
+    logit_glat_predicate_51 = logit_glat
     logit_base_predicate_51 = softmax_1(logit_base_predicate_51).data
     logit_glat_predicate_51 = softmax_1(logit_glat_predicate_51).data
 
     logit_base_predicate_weight = torch.max(logit_base_predicate_51, dim=1)[0]
-    logit_glat_predicate_weight = torch.max(logit_glat_predicate_51, dim=1)[0]
+    logit_glat_predicate_weight = torch.max(logit_glat_predicate_51, dim=1)[0] * temp_model
 
     combined_weight = torch.cat((logit_base_predicate_weight.unsqueeze(0), logit_glat_predicate_weight.unsqueeze(0)), 0)
 
     combined_weight = combined_weight/torch.sum(combined_weight, dim=0, keepdim=True)
 
-    logit_base_predicate_weight = combined_weight[0,:].unsqueeze(-1).repeat(1, 52)
-    logit_glat_predicate_weight = combined_weight[1,:].unsqueeze(-1).repeat(1, 52)
+    if type == 0:
+        logit_base_predicate_weight = combined_weight[0,:].unsqueeze(-1).repeat(1, 52)
+        logit_glat_predicate_weight = combined_weight[1,:].unsqueeze(-1).repeat(1, 52)
+    else:
+        # logit_base_predicate_weight = combined_weight[0, :].unsqueeze(-1).repeat(1, 153)
+        # logit_glat_predicate_weight = combined_weight[1, :].unsqueeze(-1).repeat(1, 153)
+        logit_base_predicate_weight = combined_weight[0, :].unsqueeze(-1).repeat(1, 151)
+        logit_glat_predicate_weight = combined_weight[1, :].unsqueeze(-1).repeat(1, 151)
 
     logit_base_predicate = logit_base_predicate * logit_base_predicate_weight
     logit_glat = logit_glat.data * logit_glat_predicate_weight
@@ -372,7 +386,7 @@ def soft_merge2(logit_base, logit_glat, node_type):
     # output_logit_predicate = output_logit_predicate/torch.sum(output_logit_predicate, dim=1, keepdim=True)
     output_logit_predicate = softmax_1(Variable(output_logit_predicate))
 
-    return output_logit_predicate
+    return output_logit_predicate, [], []
 
 
 def rearrange_useless(ent_dists, pred_label_entities, useless_entity_id, node_type):
@@ -437,9 +451,9 @@ def glat_wrapper(total_data, useless_entity_id):
     pred_label_predicate_logit = pred_label[2]
     pred_label_entities_logit = pred_label[3]
 
-    pred_label_predicate, base_predicate_one_hot, output_predicate_one_hot = soft_merge3(node_logit_dists, pred_label_predicate_logit, node_type, 0, conf.temp_model)
+    pred_label_predicate, base_predicate_one_hot, output_predicate_one_hot = soft_merge2(node_logit_dists, pred_label_predicate_logit, node_type, 0, conf.temp_model)
     ent_dists, pred_label_entities = rearrange_useless(ent_dists, pred_label_entities, useless_entity_id, node_type)
-    pred_label_entities, base_entities_one_hot, output_entities_one_hot = soft_merge3(ent_dists, pred_label_entities_logit, node_type, 1, conf.temp_model)
+    pred_label_entities, base_entities_one_hot, output_entities_one_hot = soft_merge2(ent_dists, pred_label_entities_logit, node_type, 1, conf.temp_model)
 
     comparison_one_hot = [base_predicate_one_hot, output_predicate_one_hot, base_entities_one_hot, output_entities_one_hot]
 
@@ -491,7 +505,7 @@ def glat_postprocess(pred_entry, if_predicting=False):
 
     pred_label_predicate, pred_label_entities, comparison_one_hot = glat_wrapper(total_data, useless_entity_id)
 
-    # For SGCLS
+    # # For SGCLS
     pred_entry['rel_scores'] = pred_label_predicate[:, :-1]
 
     # For SGCLS
