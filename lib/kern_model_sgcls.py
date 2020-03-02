@@ -408,6 +408,13 @@ class KERN(nn.Module):
         result.rel_inds = rel_inds
         # pdb.set_trace()
 
+        dict_gt = {}
+        for i in range(gt_rels.size(0)):
+            if (int(gt_rels[i, 1]), int(gt_rels[i, 2]), int(gt_rels[i, 3])) in dict_gt:
+                dict_gt[(int(gt_rels[i, 1]), int(gt_rels[i, 2]), int(gt_rels[i, 3]))] += 1
+            else:
+                dict_gt[(int(gt_rels[i, 1]), int(gt_rels[i, 2]), int(gt_rels[i, 3]))] = 1
+
         if self.training:
 
             # For bug0 >>>>>>>>>
@@ -542,12 +549,12 @@ class KERN(nn.Module):
         # return filter_dets(bboxes, result.obj_scores,
         #                    result.obj_preds, rel_inds[:, 1:], rel_rep, rel_dists=result.rel_dists, return_top100=self.return_top100, training=False)
 
-        dict_gt = {}
-        for i in range(gt_rels.size(0)):
-            if (int(gt_rels[i, 1]), int(gt_rels[i, 2])) in dict_gt:
-                dict_gt[(int(gt_rels[i, 1]), int(gt_rels[i, 2]))].append(int(gt_rels[i, 3]))
-            else:
-                dict_gt[(int(gt_rels[i, 1]), int(gt_rels[i, 2]))] = [int(gt_rels[i, 3])]
+        # dict_gt = {}
+        # for i in range(gt_rels.size(0)):
+        #     if (int(gt_rels[i, 1]), int(gt_rels[i, 2])) in dict_gt:
+        #         dict_gt[(int(gt_rels[i, 1]), int(gt_rels[i, 2]))].append(int(gt_rels[i, 3]))
+        #     else:
+        #         dict_gt[(int(gt_rels[i, 1]), int(gt_rels[i, 2]))] = [int(gt_rels[i, 3])]
 
         # sgcls
         return dict_gt, filter_dets(bboxes, result.obj_scores, result.obj_preds, rel_inds[:, 1:],

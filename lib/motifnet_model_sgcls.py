@@ -543,6 +543,12 @@ class RelModel(nn.Module):
 
         result.rel_inds = rel_inds
 
+        dict_gt = {}
+        for i in range(gt_rels.size(0)):
+            if (int(gt_rels[i, 1]), int(gt_rels[i, 2]), int(gt_rels[i, 3])) in dict_gt:
+                dict_gt[(int(gt_rels[i, 1]), int(gt_rels[i, 2]), int(gt_rels[i, 3]))] += 1
+            else:
+                dict_gt[(int(gt_rels[i, 1]), int(gt_rels[i, 2]), int(gt_rels[i, 3]))] = 1
 
         if self.training:
 
@@ -731,12 +737,12 @@ class RelModel(nn.Module):
         # gt_rois = torch.cat((gt_im_inds.float()[:, None], gt_boxes), 1)
         # gt_gt_rois, gt_gt_labels, gt_rel_labels = proposal_assignments_gtbox_test(gt_rois.data, gt_boxes.data, gt_classes.data, gt_rels.data, image_offset, fg_thresh=0.5)
 
-        dict_gt = {}
-        for i in range(gt_rels.size(0)):
-            if (int(gt_rels[i, 1]), int(gt_rels[i, 2])) in dict_gt:
-                dict_gt[(int(gt_rels[i, 1]), int(gt_rels[i, 2]))].append(int(gt_rels[i, 3]))
-            else:
-                dict_gt[(int(gt_rels[i, 1]), int(gt_rels[i, 2]))] = [int(gt_rels[i, 3])]
+        # dict_gt = {}
+        # for i in range(gt_rels.size(0)):
+        #     if (int(gt_rels[i, 1]), int(gt_rels[i, 2])) in dict_gt:
+        #         dict_gt[(int(gt_rels[i, 1]), int(gt_rels[i, 2]))].append(int(gt_rels[i, 3]))
+        #     else:
+        #         dict_gt[(int(gt_rels[i, 1]), int(gt_rels[i, 2]))] = [int(gt_rels[i, 3])]
 
         # pred_scores_sorted_a_100, rel_scores_idx_b_100, rel_scores_idx_a_100, rel_dists_b, rel_dists_a) =
         # filter_dets(bboxes, result.obj_scores,result.obj_preds, rel_inds[rel_ind_per_img[i]][:, 1:], rel_rep[rel_ind_per_img[i]],

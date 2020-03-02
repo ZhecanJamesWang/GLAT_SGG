@@ -164,6 +164,13 @@ class RelModelStanford(RelModel):
         # if self.training:
         #     return result
 
+        dict_gt = {}
+        for i in range(gt_rels.size(0)):
+            if (int(gt_rels[i, 1]), int(gt_rels[i, 2]), int(gt_rels[i, 3])) in dict_gt:
+                dict_gt[(int(gt_rels[i, 1]), int(gt_rels[i, 2]), int(gt_rels[i, 3]))] += 1
+            else:
+                dict_gt[(int(gt_rels[i, 1]), int(gt_rels[i, 2]), int(gt_rels[i, 3]))] = 1
+
         if self.training:
 
             # For bug0 >>>>>>>>>
@@ -233,7 +240,7 @@ class RelModelStanford(RelModel):
                     return result, filter_dets(bboxes, result.obj_scores,
                                                result.obj_preds, rel_inds[:, 1:], rel_rep, rel_dists=result.rel_dists,
                                                ent_dists=result.rm_obj_dists,
-                                               return_top100=self.return_top100, training=self.training)
+                                               return_top100=self.return_top100, training=self.training), dict_gt
 
                 # -----------------------------------Above: 1 batch_size, Below: Multiple batch_size------------------
                 #  assume rel_inds[:, 0] is from 0 to num_img-1
@@ -340,7 +347,7 @@ class RelModelStanford(RelModel):
                 return result, [boxes, obj_classes, obj_scores, rels_b_100_all, pred_scores_sorted_b_100_all,
                                 rels_a_100_all,
                                 pred_scores_sorted_a_100_all, rel_scores_idx_b_100_all, rel_scores_idx_a_100_all,
-                                rel_dists_b_all, rel_dists_a_all, ent_dists]
+                                rel_dists_b_all, rel_dists_a_all, ent_dists], dict_gt
 
             else:
                 # return result, []
@@ -391,12 +398,12 @@ class RelModelStanford(RelModel):
         # return filter_dets(bboxes, result.obj_scores,
         #                    result.obj_preds, rel_inds[:, 1:], rel_rep, self.return_top100)
 
-        dict_gt = {}
-        for i in range(gt_rels.size(0)):
-            if (int(gt_rels[i, 1]), int(gt_rels[i, 2])) in dict_gt:
-                dict_gt[(int(gt_rels[i, 1]), int(gt_rels[i, 2]))].append(int(gt_rels[i, 3]))
-            else:
-                dict_gt[(int(gt_rels[i, 1]), int(gt_rels[i, 2]))] = [int(gt_rels[i, 3])]
+        # dict_gt = {}
+        # for i in range(gt_rels.size(0)):
+        #     if (int(gt_rels[i, 1]), int(gt_rels[i, 2])) in dict_gt:
+        #         dict_gt[(int(gt_rels[i, 1]), int(gt_rels[i, 2]))].append(int(gt_rels[i, 3]))
+        #     else:
+        #         dict_gt[(int(gt_rels[i, 1]), int(gt_rels[i, 2]))] = [int(gt_rels[i, 3])]
 
         # return dict_gt, filter_dets(bboxes, result.obj_scores,
         #                             result.obj_preds, rel_inds[:, 1:], rel_rep, self.return_top100)

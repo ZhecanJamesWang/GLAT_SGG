@@ -33,12 +33,14 @@ import torch.optim.lr_scheduler as lr_scheduler
 #--------updated--------
 import sys
 import os
+import dill as pkl
+
 codebase = '../../'
 sys.path.append(codebase)
 exp_name = 'stanford'
 
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "2"
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
 # conf = ModelConfig()
 #--------updated--------
@@ -230,15 +232,21 @@ def train_epoch(epoch_num, train_results, train_det_ress):
                               verbose=b % (conf.print_interval*10) == 0)) #b == 0))
 
         if b % conf.print_interval == 0 and b >= conf.print_interval:
-            mn = pd.concat(tr[-conf.print_interval:], axis=1).mean(1)
-            time_per_batch = (time.time() - start) / conf.print_interval
-            print("\ne{:2d}b{:5d}/{:5d} {:.3f}s/batch, {:.1f}m/epoch".format(
-                epoch_num, b, len(train_loader), time_per_batch, len(train_loader) * time_per_batch / 60))
-            print(mn)
+
+            # mn = pd.concat(tr[-conf.print_interval:], axis=1).mean(1)
+            # time_per_batch = (time.time() - start) / conf.print_interval
+            # print("\ne{:2d}b{:5d}/{:5d} {:.3f}s/batch, {:.1f}m/epoch".format(
+            #     epoch_num, b, len(train_loader), time_per_batch, len(train_loader) * time_per_batch / 60))
+            # print(mn)
+            print("\ne{:2d}b{:5d}/{:5d}".format(
+                epoch_num, b, len(train_loader)))
             print('-----------', flush=True)
-            start = time.time()
+            # start = time.time()
 
             # break
+
+    with open("train_triplet_freq",'wb') as f:
+        pkl.dump(dict_gt_list, f)
 
     return pd.concat(tr, axis=1)
 
@@ -283,6 +291,8 @@ def transfer_det_gpu(det_res):
         det_res_gpu.append(i.cuda())
     return det_res_gpu
 
+dict_gt_list = {}
+
 def train_batch(b, train_results, train_det_ress, epoch_num, batch_num, verbose=False):
     """
     :param b: contains:
@@ -303,139 +313,146 @@ def train_batch(b, train_results, train_det_ress, epoch_num, batch_num, verbose=
     :return:
     """
     if epoch_num == 0:
-        result, det_res = detector[b]
+        result, det_res, dict_gt = detector[b]
         train_results.append(transfer_result_cpu(result))
         train_det_ress.append(transfer_det_cpu(det_res))
     else:
         result = transfer_result_gpu(train_results[batch_num])
         det_res = transfer_det_gpu(train_det_ress[batch_num])
 
-    # pdb.set_trace()
-    # result.rm_obj_dists(num_entities, 151)  result.obj_preds(num_entities)  result.rm_obj_labels(num_entities)
-    # result.rel_dists(num_predicates, 51)  result.rel_labels(num_predicates)
-    # result.rel_inds(num_predicates, 3) 3
-    # pdb.set_trace()
-    # rel_inds obj_idx?-> global idx
+    for key, value in dict_gt.items():
+        if key in dict_gt_list:
+            dict_gt_list[key] += value
+        else:
+            dict_gt_list[key] = value
 
-    # t1 = time.time()
-    # print('base model time', t1-t0)
-
-    if conf.return_top100 and len(det_res) != 0:
-
-        pred_entry = {
-            'pred_classes': result.obj_preds,  # (num_entities) Tensor Variable
-            'pred_rel_inds': det_res[3],  # (num_predicates, 3) Tensor Variable
-            'rel_scores': det_res[4],  # (num_predicates, 51) Tensor Variable
-            'rel_dists': det_res[-3],
-            'ent_dists': det_res[-1]
-        }
-    else:
-        pred_entry = {
-            'pred_classes': result.obj_preds,   # (num_entities) Tensor Variable
-            'pred_rel_inds': result.rel_inds,  # (num_predicates, 3) Tensor Variable
-            'rel_scores': result.rel_dists,   # (num_predicates, 51) Tensor Variable
-            'rel_dists': det_res[-2],
-            'ent_dists': det_res[-1]
-        }
-    # pdb.set_trace()
-    pred_entry = glat_postprocess(pred_entry, if_predicting=False)
-
-    # For SGCLS
-    if conf.mode == "sgcls" or conf.mode == "sgdet":
-        useless_entity_id = pred_entry[1]
-        pred_entry = pred_entry[0]
-
-    b_100_idx = det_res[-5]
-    # b_100_idx = det_res[-2]
-
-    # a_100_idx = det_res[-1]
-    # totla_idx = b_100_idx + a_100_idx
-    # totla_idx = torch.cat((b_100_idx, a_100_idx), dim=0)
-
-    rels_b_100 = pred_entry['pred_rel_inds']
-    pred_scores_sorted_b_100 = pred_entry['rel_scores'][:, :-1]
-    # rels_a_100 = det_res[5]
-    # pred_scores_sorted_a_100 = det_res[6]
-
-    # if len(rels_a_100.size()) == 1:
-    #     rels_total = rels_b_100
-    # else:
-    #     rels_total = torch.cat((rels_b_100, rels_a_100), dim=0)
+    # vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+    # # pdb.set_trace()
+    # # result.rm_obj_dists(num_entities, 151)  result.obj_preds(num_entities)  result.rm_obj_labels(num_entities)
+    # # result.rel_dists(num_predicates, 51)  result.rel_labels(num_predicates)
+    # # result.rel_inds(num_predicates, 3) 3
+    # # pdb.set_trace()
+    # # rel_inds obj_idx?-> global idx
     #
-    # if len(pred_scores_sorted_a_100.size()) == 1:
-    #     pred_scores_sorted_total = pred_scores_sorted_b_100
-    # else:
-    #     pred_scores_sorted_total = torch.cat((pred_scores_sorted_b_100, pred_scores_sorted_a_100), dim=0)
-
-    # pdb.set_trace()
-    # b_100_idx abs coor?
-
-    for i in range(int(b_100_idx.size()[0])):
-        # pdb.set_trace()
-        idx = b_100_idx[i]
-        result.rel_dists[idx] = pred_scores_sorted_b_100[i]
-        # pdb.set_trace()
-        assert (result.rel_inds[idx] == rels_b_100[i]).all()
-
-        # if conf.batch_size != 1:
-        #     result.rel_inds[idx] = rels_b_100[i]
-        # else:
-        #     result.rel_inds[idx, 1:] = rels_b_100[i]
-
-
-    # For SGCLS
-    useful_entity_id = list(range(result.rm_obj_labels.size(0)))
-    for i in useless_entity_id:
-        useful_entity_id.remove(i)
-
-    # For SGCLS
-    # For bug0 >>>>>>>>>
-    result.rm_obj_dists = pred_entry['obj_scores_rm']
-    result.obj_preds = pred_entry['pred_classes']
-    # For bug0 <<<<<<<<<<
-
-
-    # t2 = time.time()
-    # print('glat model time', t2-t1)
-
+    # # t1 = time.time()
+    # # print('base model time', t1-t0)
     #
-    # rels_total = sorted(set(zip(totla_idx, rels_total)))
-    # rels_total = [rels[1] for rels in rels_total]
+    # if conf.return_top100 and len(det_res) != 0:
     #
-    # pred_scores_sorted_total = sorted(set(zip(totla_idx, pred_scores_sorted_total)))
-    # pred_scores_sorted_total = [pred_scores[1] for pred_scores in pred_scores_sorted_total]
-
-    # merge two lists
-
-    # if conf.return_top100:
-    #     result.rel_inds = rels_total
-    #     result.rel_dists = pred_scores_sorted_total
+    #     pred_entry = {
+    #         'pred_classes': result.obj_preds,  # (num_entities) Tensor Variable
+    #         'pred_rel_inds': det_res[3],  # (num_predicates, 3) Tensor Variable
+    #         'rel_scores': det_res[4],  # (num_predicates, 51) Tensor Variable
+    #         'rel_dists': det_res[-3],
+    #         'ent_dists': det_res[-1]
+    #     }
     # else:
-    #     result.rel_inds = pred_entry['pred_rel_inds']
-    #     result.rel_dists = pred_entry['rel_scores']
-
-    losses = {}
-
-    # For SGCLS
-    if conf.mode == "sgcls" or conf.mode == "sgdet": # if not use ggnn obj, we just use scores of faster rcnn as their scores, there is no need to train
-        losses['class_loss'] = F.cross_entropy(result.rm_obj_dists, result.rm_obj_labels[useful_entity_id])
-
-    # if conf.use_ggnn_obj: # if not use ggnn obj, we just use scores of faster rcnn as their scores, there is no need to train
-    #     losses['class_loss'] = F.cross_entropy(result.rm_obj_dists, result.rm_obj_labels)
-    # pdb.set_trace()
-    losses['rel_loss'] = F.cross_entropy(result.rel_dists, result.rel_labels[:, -1])
-    loss = sum(losses.values())
-
-    optimizer.zero_grad()
-    loss.backward()
-    clip_grad_norm(
-        [(n, p) for n, p in detector.named_parameters() if p.grad is not None],
-        max_norm=conf.clip, verbose=verbose, clip=True)
-    losses['total'] = loss
-    optimizer.step()
-    res = pd.Series({x: y.data[0] for x, y in losses.items()})
-    return res
-
+    #     pred_entry = {
+    #         'pred_classes': result.obj_preds,   # (num_entities) Tensor Variable
+    #         'pred_rel_inds': result.rel_inds,  # (num_predicates, 3) Tensor Variable
+    #         'rel_scores': result.rel_dists,   # (num_predicates, 51) Tensor Variable
+    #         'rel_dists': det_res[-2],
+    #         'ent_dists': det_res[-1]
+    #     }
+    # # pdb.set_trace()
+    # pred_entry = glat_postprocess(pred_entry, if_predicting=False)
+    #
+    # # For SGCLS
+    # if conf.mode == "sgcls" or conf.mode == "sgdet":
+    #     useless_entity_id = pred_entry[1]
+    #     pred_entry = pred_entry[0]
+    #
+    # b_100_idx = det_res[-5]
+    # # b_100_idx = det_res[-2]
+    #
+    # # a_100_idx = det_res[-1]
+    # # totla_idx = b_100_idx + a_100_idx
+    # # totla_idx = torch.cat((b_100_idx, a_100_idx), dim=0)
+    #
+    # rels_b_100 = pred_entry['pred_rel_inds']
+    # pred_scores_sorted_b_100 = pred_entry['rel_scores'][:, :-1]
+    # # rels_a_100 = det_res[5]
+    # # pred_scores_sorted_a_100 = det_res[6]
+    #
+    # # if len(rels_a_100.size()) == 1:
+    # #     rels_total = rels_b_100
+    # # else:
+    # #     rels_total = torch.cat((rels_b_100, rels_a_100), dim=0)
+    # #
+    # # if len(pred_scores_sorted_a_100.size()) == 1:
+    # #     pred_scores_sorted_total = pred_scores_sorted_b_100
+    # # else:
+    # #     pred_scores_sorted_total = torch.cat((pred_scores_sorted_b_100, pred_scores_sorted_a_100), dim=0)
+    #
+    # # pdb.set_trace()
+    # # b_100_idx abs coor?
+    #
+    # for i in range(int(b_100_idx.size()[0])):
+    #     # pdb.set_trace()
+    #     idx = b_100_idx[i]
+    #     result.rel_dists[idx] = pred_scores_sorted_b_100[i]
+    #     # pdb.set_trace()
+    #     assert (result.rel_inds[idx] == rels_b_100[i]).all()
+    #
+    #     # if conf.batch_size != 1:
+    #     #     result.rel_inds[idx] = rels_b_100[i]
+    #     # else:
+    #     #     result.rel_inds[idx, 1:] = rels_b_100[i]
+    #
+    #
+    # # For SGCLS
+    # useful_entity_id = list(range(result.rm_obj_labels.size(0)))
+    # for i in useless_entity_id:
+    #     useful_entity_id.remove(i)
+    #
+    # # For SGCLS
+    # # For bug0 >>>>>>>>>
+    # result.rm_obj_dists = pred_entry['obj_scores_rm']
+    # result.obj_preds = pred_entry['pred_classes']
+    # # For bug0 <<<<<<<<<<
+    #
+    #
+    # # t2 = time.time()
+    # # print('glat model time', t2-t1)
+    #
+    # #
+    # # rels_total = sorted(set(zip(totla_idx, rels_total)))
+    # # rels_total = [rels[1] for rels in rels_total]
+    # #
+    # # pred_scores_sorted_total = sorted(set(zip(totla_idx, pred_scores_sorted_total)))
+    # # pred_scores_sorted_total = [pred_scores[1] for pred_scores in pred_scores_sorted_total]
+    #
+    # # merge two lists
+    #
+    # # if conf.return_top100:
+    # #     result.rel_inds = rels_total
+    # #     result.rel_dists = pred_scores_sorted_total
+    # # else:
+    # #     result.rel_inds = pred_entry['pred_rel_inds']
+    # #     result.rel_dists = pred_entry['rel_scores']
+    #
+    # losses = {}
+    #
+    # # For SGCLS
+    # if conf.mode == "sgcls" or conf.mode == "sgdet": # if not use ggnn obj, we just use scores of faster rcnn as their scores, there is no need to train
+    #     losses['class_loss'] = F.cross_entropy(result.rm_obj_dists, result.rm_obj_labels[useful_entity_id])
+    #
+    # # if conf.use_ggnn_obj: # if not use ggnn obj, we just use scores of faster rcnn as their scores, there is no need to train
+    # #     losses['class_loss'] = F.cross_entropy(result.rm_obj_dists, result.rm_obj_labels)
+    # # pdb.set_trace()
+    # losses['rel_loss'] = F.cross_entropy(result.rel_dists, result.rel_labels[:, -1])
+    # loss = sum(losses.values())
+    #
+    # optimizer.zero_grad()
+    # loss.backward()
+    # clip_grad_norm(
+    #     [(n, p) for n, p in detector.named_parameters() if p.grad is not None],
+    #     max_norm=conf.clip, verbose=verbose, clip=True)
+    # losses['total'] = loss
+    # optimizer.step()
+    # res = pd.Series({x: y.data[0] for x, y in losses.items()})
+    # return res
+    # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 def val_epoch(epoch, eval_results, eval_det_ress):
 

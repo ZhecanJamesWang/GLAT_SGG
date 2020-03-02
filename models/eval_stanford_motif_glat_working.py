@@ -123,12 +123,15 @@ elif conf.model_s_m == 'motifnet':
 
     # # self finetune predcls motif glat weight
     # ckpt_glat=torch.load('/home/tangtangwzc/KERN/checkpoints/motifnet_glat_predcls_mbz_v2_2020_0202_2121/motifnet_glat-9.tar')
-    ckpt_glat = torch.load('/home/tangtangwzc/KERN/checkpoints/motifnet_glat_predcls_mbz_v2_2020_0222_0400/motifnet_glat-30.tar')
+    # ckpt_glat = torch.load('/home/tangtangwzc/KERN/checkpoints/motifnet_glat_predcls_mbz_v2_2020_0222_0400/motifnet_glat-30.tar')
     # ckpt_glat = torch.load('/home/tangtangwzc/KERN/checkpoints/motifnet_glat_predcls_mbz_v2_2020_0221_2327/motifnet_glat-30.tar')
 
     # # # self finetune predcls motif glat LOGIT weight
     # # ckpt_glat = torch.load('/home/tangtangwzc/KERN/checkpoints/motifnet_glat_predcls_mbz_v2_2020_0204_1738//motifnet_glat-20.tar')
     # ckpt_glat = torch.load("/home/tangtangwzc/KERN/checkpoints/motifnet_glat_predcls_mbz_v2_2020_0204_1738/motifnet_glat-14.tar")
+
+    # # HAOXUAN finetune new predcls motif glat weight
+    ckpt_glat = torch.load('/home/haoxuan/code/KERN/checkpoints/train_glat_motif_predcls_v2/motifnet-24.tar')
 
 
 # # ---------------pretrained model mask ratio 0.5
