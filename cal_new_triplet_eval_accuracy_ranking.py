@@ -31,24 +31,26 @@ sorted_list = sorted(zip(x, y), key=lambda pair: pair[1])
 
 max_v = np.max(y)
 split = 8
-unit = int(float(max_v)/split)
+unit = int(float(len(sorted_list))/split)
 
 print("max_v: ", max_v)
 
 bins = []
 for spl in range(split):
     bins.append(spl * unit)
-bins.append(max_v)
-
+# bins.append(max_v)
+bins.append(len(sorted_list))
 
 # bins = [0, max_v]
 # bins = [1, 10, 100, max_v]
-bins = [1, 3, 9, 27, 81, 243, max_v]
-
+# bins = [1, 3, 9, 27, 81, 243, max_v]
+# bins = [0, 100, 1000, 10000, 104602]
+# bins = [0, 300, 900, 2700, 8100, 24300, 72900, 104602]
 print(bins)
 
 triplet_bin = {}
-for x, y in sorted_list:
+for ranking in range(len(sorted_list)):
+    x, y = sorted_list[ranking]
     for index in range(len(bins)):
         bin = bins[index]
         if index == len(bins) - 1:
@@ -59,7 +61,7 @@ for x, y in sorted_list:
             #     else:
             #         triplet_bin[index] = [[x, y]]
         else:
-            if y >= bin and y <= bins[index + 1]:
+            if ranking >= bin and ranking <= bins[index + 1]:
                 if index in triplet_bin:
                     triplet_bin[index].append([x, y])
                 else:
@@ -85,7 +87,6 @@ infile.close()
 # motif
 # file = "cache/motif_predcls_2020_0229_2140_dict_pred_list_total"
 # file = "cache/motif_predcls_2020_0229_2204_dict_pred_list_total"
-
 # files = ["cache/motif_predcls_2020_0303_0404_dict_pred_list_total", "cache/motif_predcls_2020_0303_0403_dict_pred_list_total"]
 
 # stanford
@@ -94,14 +95,13 @@ infile.close()
 # debiasd kern
 files = ["caches/kern_sgcls_2020_0303_1540.pkl_dict_pred_list_total", "caches/kern_sgcls_2020_0303_1543.pkl_dict_pred_list_total", "caches/kern_sgcls_2020_0303_1153.pkl_dict_pred_list_total"]
 
-# counter = 0
+print("eval by ranking")
 for file in files:
     infile = open(file,'rb')
 
     dict_pred_list_total = pickle.load(infile)
 
     stats = ""
-    # counter = 0
 
     for bin, triplets in triplet_bin.items():
         bin_recall_num = 0
@@ -118,14 +118,13 @@ for file in files:
 
         # print("\n")
         print("bin {}".format(bin))
-        print(float(bin_recall_num)/bin_recall_den)
+        print(float(bin_recall_num) / bin_recall_den)
 
         stats += ("bin {}".format(bin) + "\n")
         stats += ("# of triplet: {}, triplet_occur train: {} \n".format(len(triplets), bin_con_triplet_freq))
         # print("counter: ", counter)
         stats += ("triplet occur test: {} \n".format(bin_recall_den))
 
-    # counter += 1
     print("\n")
 
 print(stats)

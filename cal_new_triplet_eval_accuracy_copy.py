@@ -68,12 +68,18 @@ import matplotlib.pyplot as plt
 # file = "caches/kern_sgcls_2020_0229_0428_dict_pred_list_total.pkl"
 
 # kern
-file = "caches/kern_sgcls_2020_0229_2121.pkl_dict_pred_list_total"
+# file = "caches/kern_sgcls_2020_0229_2121.pkl_dict_pred_list_total"
 # file = "caches/kern_sgcls_2020_0229_2132.pkl_dict_pred_list_total"
 
 # motif
 # file = "cache/motif_predcls_2020_0229_2140_dict_pred_list_total"
 # file = "cache/motif_predcls_2020_0229_2204_dict_pred_list_total"
+
+# file = "cache/motif_predcls_2020_0302_1827_dict_pred_list_total"
+# file = "cache/motif_predcls_2020_0302_1836_dict_pred_list_total"
+
+# file = "cache/motif_predcls_2020_0303_0404_dict_pred_list_total"
+file = "cache/motif_predcls_2020_0303_0403_dict_pred_list_total"
 
 infile = open(file,'rb')
 

@@ -543,12 +543,22 @@ class RelModel(nn.Module):
 
         result.rel_inds = rel_inds
 
+        def index2class(rels_index, rels_classes):
+            return_index = []
+            for index in rels_index:
+                index = index.data.cpu().numpy()[0]
+                return_index.append(rels_classes[index])
+            return torch.from_numpy(np.asarray(return_index))
+
         dict_gt = {}
+        gt_sub_list = index2class(gt_rels[:, 1], gt_classes.data[:, 1])
+        gt_obj_list = index2class(gt_rels[:, 2], gt_classes.data[:, 1])
+
         for i in range(gt_rels.size(0)):
-            if (int(gt_rels[i, 1]), int(gt_rels[i, 2]), int(gt_rels[i, 3])) in dict_gt:
-                dict_gt[(int(gt_rels[i, 1]), int(gt_rels[i, 2]), int(gt_rels[i, 3]))] += 1
+            if (int(gt_sub_list[i]), int(gt_obj_list[i]), int(gt_rels[i, 3])) in dict_gt:
+                dict_gt[(int(gt_sub_list[i]), int(gt_obj_list[i]), int(gt_rels[i, 1]), int(gt_rels[i, 2]), int(gt_rels[i, 3]))] += 1
             else:
-                dict_gt[(int(gt_rels[i, 1]), int(gt_rels[i, 2]), int(gt_rels[i, 3]))] = 1
+                dict_gt[(int(gt_sub_list[i]), int(gt_obj_list[i]), int(gt_rels[i, 1]), int(gt_rels[i, 2]), int(gt_rels[i, 3]))] = 1
 
         if self.training:
 

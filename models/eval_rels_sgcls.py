@@ -15,10 +15,11 @@ from lib.kern_model_sgcls import KERN
 from lib.glat import GLATNET
 from torch.autograd import Variable
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
 conf = ModelConfig()
 
+conf.glat_on = False
 conf.temp_model = 1
 
 train, val, test = VG.splits(num_val_im=conf.val_size, filter_duplicate_rels=True,
@@ -93,13 +94,19 @@ optimistic_restore(detector, ckpt['state_dict'])
 # finetuned glat(0.3)
 # ckpt_glat = torch.load('/home/tangtangwzc/KERN/saved_models/2019-11-20-23-59/with_constrant_mean__R@100.pth')
 
-# kern finetune sgcls
-ckpt_glat = torch.load('/home/tangtangwzc/KERN/checkpoints/kern_glat_sgcls_2020_0223_2320/motifnet_glat-18.tar')
+if conf.glat_on:
+    # # kern finetune sgcls
+    path = '/home/tangtangwzc/KERN/checkpoints/kern_glat_sgcls_2020_0223_2320/motifnet_glat-18.tar'
 
-# ckpt_glat = torch.load('/home/haoxuan/code/KERN/checkpoints/motifnet_glat/motifnet_glat-25.tar')
+    # =========================
+    # ckpt_glat = torch.load('/home/haoxuan/code/KERN/checkpoints/motifnet_glat/motifnet_glat-25.tar')
 
-# optimistic_restore(model, ckpt_glat['model'])
-optimistic_restore(model, ckpt_glat['state_dict'])
+    print(path)
+
+    ckpt_glat = torch.load(path)
+
+    # optimistic_restore(model, ckpt_glat['model'])
+    optimistic_restore(model, ckpt_glat['state_dict'])
 
 print('finish pretrained loading')
 # model.load_state_dict(ckpt_glat['model'])
@@ -518,39 +525,43 @@ def glat_postprocess(pred_entry, if_predicting=False):
         print("len(useless_entity_id): ", len(useless_entity_id))
     print("len(useless_entity_id): ", len(useless_entity_id))
 
-    # vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
-    pred_label_predicate, pred_label_entities, comparison_one_hot, change_list, pred_label_predicate_logit = glat_wrapper(total_data, useless_entity_id)
-    # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    if conf.glat_on:
+        # vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+        pred_label_predicate, pred_label_entities, comparison_one_hot, change_list, pred_label_predicate_logit = glat_wrapper(total_data, useless_entity_id)
+        # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
     extra_entry = {}
 
-    # vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
-    extra_entry['rel_scores'] = pred_label_predicate_logit[:, :-1]
-    extra_entry['pred_rel_inds'] = pred_entry['pred_rel_inds']
-    extra_entry['obj_scores'] = softmax_1(pred_label_entities).max(1)[0]
-    extra_entry['pred_classes'] = softmax_1(pred_label_entities).max(1)[1]
-    # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    if conf.glat_on:
+        # # vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+        extra_entry['rel_scores'] = pred_label_predicate_logit[:, :-1]
+        extra_entry['pred_rel_inds'] = pred_entry['pred_rel_inds']
+        extra_entry['obj_scores'] = softmax_1(pred_label_entities).max(1)[0]
+        extra_entry['pred_classes'] = softmax_1(pred_label_entities).max(1)[1]
+        # # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    if conf.glat_on:
+        # vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
-    # vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
-    # For SGCLS
-    pred_entry['rel_scores'] = pred_label_predicate[:, :-1]
+        # For SGCLS
+        pred_entry['rel_scores'] = pred_label_predicate[:, :-1]
 
-    # For SGCLS
-    if conf.mode == "sgcls" or conf.mode == "sgdet":
-        # pred_entry['entity_scores'] = pred_label_entities
+        # For SGCLS
 
-        # For bug0 >>>>>>>>>>>
-        pred_entry['obj_scores_rm'] = pred_label_entities
-        pred_entry['obj_scores'] = softmax_1(pred_label_entities).max(1)[0]
-        # For bug0 <<<<<<<<<<<<
+        if conf.mode == "sgcls" or conf.mode == "sgdet":
+            # pred_entry['entity_scores'] = pred_label_entities
 
-        pred_entry['pred_classes'] = pred_label_entities.max(1)[1]
-    # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+            # For bug0 >>>>>>>>>>>
+            pred_entry['obj_scores_rm'] = pred_label_entities
+            pred_entry['obj_scores'] = softmax_1(pred_label_entities).max(1)[0]
+            # For bug0 <<<<<<<<<<<<
 
-    # vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
-    # comparison_one_hot = []
-    # change_list = []
-    # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+            pred_entry['pred_classes'] = pred_label_entities.max(1)[1]
+        # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    if not conf.glat_on:
+        # vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+        comparison_one_hot = []
+        change_list = []
+        # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
     if conf.mode == "sgcls" or conf.mode == "sgdet":
         return pred_entry, useless_entity_id, comparison_one_hot, change_list, extra_entry
@@ -561,6 +572,7 @@ def glat_postprocess(pred_entry, if_predicting=False):
 all_pred_entries = []
 all_extra_entries = []
 dict_pred_list_total = {}
+recall_avg_by_img = []
 counter = 0
 correct = 0
 
@@ -569,6 +581,7 @@ def cal_recall(dict_gt, extra_entry):
     global correct
     global dict_pred_list_total
     global counter
+    global recall_avg_by_img
 
     dict_gt_list = {}
     for key, value in dict_gt.items():
@@ -578,8 +591,11 @@ def cal_recall(dict_gt, extra_entry):
             dict_gt_list[key] = [value, 0]
         counter += value
 
-    dict_pred_list = torch.cat((extra_entry['pred_rel_inds'], (extra_entry['rel_scores'][:, 1:].max(1)[1] + 1).data.unsqueeze(-1)),
-              dim=1).cpu().numpy()
+    # dict_pred_list = torch.cat((extra_entry['pred_rel_inds'], (extra_entry['rel_scores'][:, 1:].max(1)[1] + 1).data.unsqueeze(-1)),
+    #           dim=1).cpu().numpy()
+    dict_pred_list = torch.cat((extra_entry['pred_rel_inds_class'].cuda(), extra_entry['pred_rel_inds'], (extra_entry['rel_scores'][:, 1:].max(1)[1] + 1).data.unsqueeze(-1)), dim=1).cpu().numpy()
+
+    # dict_pred_list = transform2constraint(dict_pred_list, extra_entry)
 
     corr = 0
     for pred in dict_pred_list:
@@ -590,14 +606,27 @@ def cal_recall(dict_gt, extra_entry):
     correct += corr
     print("corr: ", corr)
 
+    recall_by_img = [[], []]
     for pred in dict_gt_list:
         # key = tuple(pred)
-        key = pred
+        key = tuple((pred[0], pred[1], pred[-1]))
         if key in dict_pred_list_total:
-            dict_pred_list_total[key][0] += int(dict_gt_list[key][0])
-            dict_pred_list_total[key][1] += int(dict_gt_list[key][1])
+            dict_pred_list_total[key][0] += int(dict_gt_list[pred][0])
+            dict_pred_list_total[key][1] += int(dict_gt_list[pred][1])
         else:
-            dict_pred_list_total[key] = dict_gt_list[key]
+            dict_pred_list_total[key] = dict_gt_list[pred]
+
+        recall_by_img[0].append(int(dict_gt_list[pred][0]))
+        recall_by_img[1].append(int(dict_gt_list[pred][1]))
+
+    recall_avg_by_img.append(float(np.sum(recall_by_img[0]))/np.sum(recall_by_img[1]))
+
+
+def index2class(rels_index, rels_classes):
+    return_index = []
+    for index in rels_index:
+        return_index.append(rels_classes[index].data.cpu().numpy()[0])
+    return torch.from_numpy(np.asarray(return_index))
 
 
 def val_batch(batch_num, b, evaluator, evaluator_multiple_preds, evaluator_list, evaluator_multiple_preds_list,
@@ -683,12 +712,17 @@ def val_batch(batch_num, b, evaluator, evaluator_multiple_preds, evaluator_list,
 
         extra_entry = pred_return[-1]
 
-        # vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
-        # extra_entry['rel_scores'] = pred_entry['rel_scores']
-        # extra_entry['pred_rel_inds'] = pred_entry['pred_rel_inds']
-        # extra_entry['obj_scores'] = pred_entry['obj_scores']
-        # extra_entry['pred_classes'] = pred_entry['pred_classes']
+        if not conf.glat_on:
+        # vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+            extra_entry['rel_scores'] = pred_entry['rel_scores']
+            extra_entry['pred_rel_inds'] = pred_entry['pred_rel_inds']
+            extra_entry['obj_scores'] = pred_entry['obj_scores']
+            extra_entry['pred_classes'] = pred_entry['pred_classes']
         # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+        gt_sub_list = index2class(pred_entry['pred_rel_inds'][:, 0], extra_entry['pred_classes'])
+        gt_obj_list = index2class(pred_entry['pred_rel_inds'][:, 1], extra_entry['pred_classes'])
+        extra_entry['pred_rel_inds_class'] = torch.cat((gt_sub_list.unsqueeze(-1), gt_obj_list.unsqueeze(-1)), dim = 1)
 
         cal_recall(dict_gt, extra_entry)
 
@@ -808,16 +842,19 @@ for val_b, batch in enumerate(tqdm(val_loader)):
                                                              evaluator_multiple_preds_list)
     torch.cuda.empty_cache()
 
+    if conf.glat_on:
+        # # vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+        changed_predicate_glat_total += change_list[0]
+        changed_entities_glat_total += change_list[1]
+
+        changed_predicate_merge_total += change_list[2]
+        changed_entities_merge_total += change_list[3]
+
+        count_predicate_total += count_predicate
+        count_entities_total += count_entities
+        # # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+if conf.glat_on:
     # # vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
-    changed_predicate_glat_total += change_list[0]
-    changed_entities_glat_total += change_list[1]
-
-    changed_predicate_merge_total += change_list[2]
-    changed_entities_merge_total += change_list[3]
-
-    count_predicate_total += count_predicate
-    count_entities_total += count_entities
-
     print("changed_predicate_glat: ", change_list[0])
     print("changed_entities_glat: ", change_list[1])
 
@@ -835,7 +872,10 @@ for val_b, batch in enumerate(tqdm(val_loader)):
 
     print("count_predicate_toal: ", count_predicate_total)
     print("count_entities_toal: ", count_entities_total)
-    # # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+    print(np.mean(recall_avg_by_img))
+
+# # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 recall = evaluator[conf.mode].print_stats()
 recall_mp = evaluator_multiple_preds[conf.mode].print_stats()
