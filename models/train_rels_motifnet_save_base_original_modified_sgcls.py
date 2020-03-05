@@ -47,6 +47,14 @@ os.environ["CUDA_VISIBLE_DEVICES"] = "2"
 # conf = ModelConfig()
 #--------updated--------
 conf = ModelConfig()
+if conf.model == 'motifnet':
+    from lib.rel_model import RelModel
+elif conf.model == 'linknet':
+    from lib.rel_model_linknet import RelModelLinknet as RelModel
+elif conf.model == 'stanford':
+    from lib.rel_model_stanford import RelModelStanford as RelModel
+else:
+    raise ValueError()
 
 # We use tensorboard to observe results and decrease learning rate manually. If you want to use TB, you need to install TensorFlow fist.
 if conf.tb_log_dir is not None:

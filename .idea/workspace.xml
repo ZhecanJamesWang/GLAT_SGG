@@ -2,9 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="11066203-4164-4413-bd1b-0e742342911b" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/lib/stanford_model_sgcls.py" beforeDir="false" afterPath="$PROJECT_DIR$/lib/stanford_model_sgcls.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/surgery_sgcls.py" beforeDir="false" afterPath="$PROJECT_DIR$/lib/surgery_sgcls.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/models/train_rels_stanford_save_base_sgcls.py" beforeDir="false" afterPath="$PROJECT_DIR$/models/train_rels_stanford_save_base_sgcls.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/rel_model_linknet.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/train_rels_motifnet_save_base_original_modified_sgcls.py" beforeDir="false" afterPath="$PROJECT_DIR$/models/train_rels_motifnet_save_base_original_modified_sgcls.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -13,140 +13,106 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="CoverageDataManager">
-    <SUITE FILE_PATH="coverage/KERN$train_rels_stanford_save_base_sgcls.coverage" NAME="train_rels_stanford_save_base_sgcls Coverage Results" MODIFIED="1582618061348" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="/home/tangtangwzc/KERN" />
-    <SUITE FILE_PATH="coverage/KERN$train_rels_motifnet_save_base_modified.coverage" NAME="train_rels_motifnet_save_base_modified Coverage Results" MODIFIED="1580262179241" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="/home/tangtangwzc/KERN" />
-    <SUITE FILE_PATH="coverage/KERN$train_rels_motifnet_save_base_original_modified_sgcls.coverage" NAME="train_rels_motifnet_save_base_original_modified_sgcls Coverage Results" MODIFIED="1582507099687" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="/home/tangtangwzc/KERN" />
-    <SUITE FILE_PATH="coverage/KERN$train_rels_motifnet_save_base_original_modified.coverage" NAME="train_rels_motifnet_save_base_original_modified Coverage Results" MODIFIED="1581126036948" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="/home/tangtangwzc/KERN" />
-    <SUITE FILE_PATH="coverage/KERN$train_rels_motifnet_save_base_original_modified_lm.coverage" NAME="train_rels_motifnet_save_base_original_modified_lm Coverage Results" MODIFIED="1581137525215" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="/home/tangtangwzc/KERN" />
-    <SUITE FILE_PATH="coverage/KERN$train_rels_motifnet_save_base_original_modified_logit.coverage" NAME="train_rels_motifnet_save_base_original_modified_logit Coverage Results" MODIFIED="1582248442849" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="/home/tangtangwzc/KERN" />
-    <SUITE FILE_PATH="coverage/KERN$train_rels_motifnet_save_base.coverage" NAME="train_rels_motifnet_save_base Coverage Results" MODIFIED="1580701548393" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="/home/tangtangwzc/KERN" />
-    <SUITE FILE_PATH="coverage/KERN$train_rels_kern_save_base_sgcls.coverage" NAME="train_rels_kern_save_base_sgcls Coverage Results" MODIFIED="1582517476231" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="/home/tangtangwzc/KERN" />
-  </component>
-  <component name="DatabaseView">
-    <option name="SHOW_INTERMEDIATE" value="true" />
-    <option name="GROUP_DATA_SOURCES" value="true" />
-    <option name="GROUP_SCHEMA" value="true" />
-    <option name="GROUP_CONTENTS" value="false" />
-    <option name="SORT_POSITIONED" value="false" />
-    <option name="SHOW_EMPTY_GROUPS" value="false" />
-    <option name="AUTO_SCROLL_FROM_SOURCE" value="false" />
-    <option name="HIDDEN_KINDS">
-      <set />
-    </option>
-    <expand />
-    <select />
+    <SUITE FILE_PATH="coverage/KERN$train_rels_stanford_save_base_sgcls.coverage" NAME="train_rels_stanford_save_base_sgcls Coverage Results" MODIFIED="1583181844335" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="/home/tangtangwzc/KERN" />
+    <SUITE FILE_PATH="coverage/KERN$cal_new_triplet_eval_accuracy.coverage" NAME="cal_new_triplet_eval_accuracy Coverage Results" MODIFIED="1583347849584" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/KERN$eval_rels_original.coverage" NAME="eval_rels_original Coverage Results" MODIFIED="1573940924481" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="/home/tangtangwzc/KERN" />
+    <SUITE FILE_PATH="coverage/KERN$eval_baseModel_glat.coverage" NAME="eval_baseModel_glat Coverage Results" MODIFIED="1578447345641" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="/home/tangtangwzc/KERN" />
+    <SUITE FILE_PATH="coverage/KERN$train_rels_stanford_save_base_sgcls_gt.coverage" NAME="train_rels_stanford_save_base_sgcls_gt Coverage Results" MODIFIED="1583278135549" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/models" />
+    <SUITE FILE_PATH="coverage/KERN$eval_rels.coverage" NAME="eval_rels Coverage Results" MODIFIED="1577313244811" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="/home/tangtangwzc/KERN" />
+    <SUITE FILE_PATH="coverage/KERN$eval_rels_sgcls_copy.coverage" NAME="eval_rels_sgcls_copy Coverage Results" MODIFIED="1582742694373" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="/home/tangtangwzc/KERN" />
+    <SUITE FILE_PATH="coverage/KERN$cal_new_triplet_eval_accuracy_copy.coverage" NAME="cal_new_triplet_eval_accuracy_copy Coverage Results" MODIFIED="1583252118469" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/KERN$eval_stanford_motif_glat_working_sgcls.coverage" NAME="eval_stanford_motif_glat_working_sgcls Coverage Results" MODIFIED="1583216409385" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="/home/tangtangwzc/KERN" />
+    <SUITE FILE_PATH="coverage/KERN$eval_stanford_motif_glat_copy_copy.coverage" NAME="eval_stanford_motif_glat_copy_copy Coverage Results" MODIFIED="1577698893379" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="/home/tangtangwzc/KERN" />
+    <SUITE FILE_PATH="coverage/KERN$cal_new_triplet_eval_accuracy_ranking.coverage" NAME="cal_new_triplet_eval_accuracy_ranking Coverage Results" MODIFIED="1583348062964" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/KERN$eval_stanford_motif_glat_py.coverage" NAME="eval_stanford_motif_glat.py Coverage Results" MODIFIED="1581051125887" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="/home/tangtangwzc/KERN" />
+    <SUITE FILE_PATH="coverage/KERN$eval_stanford_motif_glat_working.coverage" NAME="eval_stanford_motif_glat_working Coverage Results" MODIFIED="1581060567232" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="/home/tangtangwzc/KERN" />
+    <SUITE FILE_PATH="coverage/KERN$train_rels_py.coverage" NAME="train_rels.py Coverage Results" MODIFIED="1577430443987" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="/home/tangtangwzc/KERN" />
+    <SUITE FILE_PATH="coverage/KERN$eval_rels_sgcls.coverage" NAME="eval_rels_sgcls Coverage Results" MODIFIED="1582707146653" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="/home/tangtangwzc/KERN" />
+    <SUITE FILE_PATH="coverage/KERN$eval_stanford_motif_glat_copy.coverage" NAME="eval_stanford_motif_glat_copy Coverage Results" MODIFIED="1578368048578" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="/home/tangtangwzc/KERN" />
+    <SUITE FILE_PATH="coverage/KERN$Unnamed.coverage" NAME="eval_stanford_motif_glat.py Coverage Results" MODIFIED="1574884208966" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="/home/tangtangwzc/KERN" />
+    <SUITE FILE_PATH="coverage/KERN$train_rels_stanford_py.coverage" NAME="train_rels_stanford.py Coverage Results" MODIFIED="1578422435807" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="/home/tangtangwzc/KERN" />
   </component>
   <component name="FUSProjectUsageTrigger">
     <session id="-747324333">
       <usages-collector id="statistics.file.extensions.open">
         <counts>
-          <entry key="&lt;__array_function__ internals&gt;" value="1" />
-          <entry key="py" value="195" />
-          <entry key="sh" value="14" />
+          <entry key="Makefile" value="2" />
+          <entry key="Makefile_ori" value="1" />
+          <entry key="py" value="300" />
+          <entry key="pyx" value="1" />
+          <entry key="sh" value="24" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.open">
         <counts>
-          <entry key="PLAIN_TEXT" value="14" />
+          <entry key="PLAIN_TEXT" value="27" />
           <entry key="PyRemoteDebug" value="1" />
-          <entry key="Python" value="195" />
+          <entry key="Python" value="300" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
-          <entry key="py" value="11556" />
-          <entry key="sh" value="41" />
+          <entry key="py" value="25935" />
+          <entry key="sh" value="18" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
-          <entry key="PLAIN_TEXT" value="41" />
-          <entry key="Python" value="11556" />
+          <entry key="PLAIN_TEXT" value="18" />
+          <entry key="Python" value="25935" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.lifecycle.project">
         <counts>
-          <entry key="project.closed" value="11" />
-          <entry key="project.open.time.0" value="3" />
-          <entry key="project.open.time.1" value="6" />
-          <entry key="project.open.time.11" value="3" />
-          <entry key="project.open.time.12" value="1" />
-          <entry key="project.open.time.14" value="1" />
-          <entry key="project.open.time.2" value="1" />
-          <entry key="project.open.time.20" value="1" />
+          <entry key="project.closed" value="22" />
+          <entry key="project.open.time.0" value="5" />
+          <entry key="project.open.time.1" value="11" />
+          <entry key="project.open.time.10" value="1" />
+          <entry key="project.open.time.13" value="3" />
+          <entry key="project.open.time.19" value="1" />
+          <entry key="project.open.time.2" value="3" />
+          <entry key="project.open.time.22" value="1" />
+          <entry key="project.open.time.3" value="1" />
           <entry key="project.open.time.4" value="1" />
-          <entry key="project.open.time.5" value="2" />
+          <entry key="project.open.time.5" value="5" />
           <entry key="project.open.time.6" value="2" />
-          <entry key="project.open.time.7" value="1" />
-          <entry key="project.open.time.8" value="1" />
-          <entry key="project.open.time.9" value="1" />
-          <entry key="project.opened" value="24" />
+          <entry key="project.open.time.7" value="4" />
+          <entry key="project.open.time.8" value="2" />
+          <entry key="project.opened" value="40" />
         </counts>
       </usages-collector>
     </session>
   </component>
-  <component name="FavoritesManager">
-    <favorites_list name="KERN" />
-  </component>
   <component name="FileEditorManager">
-    <splitter split-orientation="horizontal" split-proportion="0.5">
-      <split-first>
-        <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-          <file pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/lib/stanford_model_sgcls.py">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="326">
-                  <caret line="402" lean-forward="true" selection-start-line="402" selection-end-line="402" />
-                  <folding>
-                    <element signature="e#40#52#0" expanded="true" />
-                  </folding>
-                </state>
-              </provider>
-            </entry>
-          </file>
-          <file pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/lib/surgery_sgcls.py">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="279">
-                  <caret line="26" column="42" lean-forward="true" selection-start-line="26" selection-start-column="42" selection-end-line="26" selection-end-column="42" />
-                  <folding>
-                    <element signature="e#266#284#0" expanded="true" />
-                  </folding>
-                </state>
-              </provider>
-            </entry>
-          </file>
-          <file pinned="false" current-in-tab="true">
-            <entry file="file://$PROJECT_DIR$/models/train_rels_stanford_save_base_sgcls.py">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="315">
-                  <caret line="957" column="14" lean-forward="true" selection-start-line="957" selection-start-column="14" selection-end-line="957" selection-end-column="14" />
-                  <folding>
-                    <element signature="e#94#171#0" expanded="true" />
-                  </folding>
-                </state>
-              </provider>
-            </entry>
-          </file>
-        </leaf>
-      </split-first>
-      <split-second>
-        <leaf>
-          <file pinned="false" current-in-tab="true">
-            <entry file="file://$PROJECT_DIR$/lib/motifnet_model_sgcls.py">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="276">
-                  <caret line="758" column="103" lean-forward="true" selection-start-line="756" selection-end-line="758" selection-end-column="103" />
-                  <folding>
-                    <element signature="e#40#58#0" expanded="true" />
-                  </folding>
-                </state>
-              </provider>
-            </entry>
-          </file>
-        </leaf>
-      </split-second>
-    </splitter>
+    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/models/train_rels_stanford_save_base_sgcls_gt.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="270">
+              <caret line="18" column="17" selection-start-line="18" selection-start-column="17" selection-end-line="18" selection-end-column="17" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/models/train_rels_motifnet_save_base_original_modified_sgcls.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="255">
+              <caret line="51" column="20" selection-start-line="51" selection-start-column="20" selection-end-line="51" selection-end-column="27" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/dataloaders/visual_genome.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="210">
+              <caret line="14" column="25" lean-forward="true" selection-start-line="14" selection-start-column="25" selection-end-line="14" selection-end-column="25" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+    </leaf>
   </component>
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
@@ -157,36 +123,36 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>.t()</find>
-      <find>embed_shape_predicate_logit</find>
-      <find>bug0</find>
-      <find>optimizer</find>
-      <find>ent_dis</find>
-      <find>embed_predicate_logit</find>
-      <find>wrapper</find>
-      <find>result</find>
-      <find>total_data['ent_dists']</find>
-      <find>softmax</find>
-      <find>pred_label</find>
-      <find>ckpt</find>
-      <find>glat_wrapper</find>
-      <find>build_graph</find>
-      <find>cpu</find>
-      <find>rel_dists_b_all</find>
-      <find>if conf.use_ggnn_obj:</find>
-      <find>rel_dists_b</find>
-      <find>soft_merge3</find>
-      <find>useful_entity_id</find>
-      <find>transfer_result_cpu(res</find>
+      <find>val</find>
+      <find>index</find>
+      <find>extra_entry</find>
+      <find>'pred_classes'</find>
+      <find>index2</find>
+      <find>train_</find>
+      <find>print</find>
+      <find>rearrange</find>
+      <find>pred_re</find>
+      <find>recall_avg_by_img</find>
+      <find>map</find>
+      <find>gt_rels</find>
+      <find>def val_batch</find>
+      <find>freq</find>
+      <find>recall</find>
+      <find>post</find>
       <find>ckpt =</find>
-      <find>traansfer</find>
-      <find>get_op</find>
-      <find>get_</find>
+      <find>ckpt</find>
+      <find>gt_classes</find>
+      <find>return</find>
       <find>train_batch</find>
-      <find>rel_dists_sorted</find>
-      <find>set_</find>
-      <find>pdb.</find>
-      <find>rel_dists</find>
+      <find>save</find>
+      <find>train_triplet</find>
+      <find>train_triplet_freq</find>
+      <find>result</find>
+      <find>dict_gt_list</find>
+      <find>bin_con_triplet_freq</find>
+      <find>cal_recall</find>
+      <find>conf.glat_on</find>
+      <find>model</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -195,57 +161,57 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/scripts/eval_stanford_predcls_mask_rank.sh" />
-        <option value="$PROJECT_DIR$/models/eval_hint_stanford_motif_glat_mask.py" />
-        <option value="$PROJECT_DIR$/models/eval_stanford_motif_glat_mask_rank.py" />
-        <option value="$PROJECT_DIR$/scripts/eval_motifnet_predcls_mask_rank.sh" />
-        <option value="$PROJECT_DIR$/scripts/train_glat_motifnet_mask_mat_mbz.sh" />
-        <option value="$PROJECT_DIR$/scripts/eval_motifnet_predcls_mask_threshold.sh" />
-        <option value="$PROJECT_DIR$/models/eval_stanford_motif_glat_mask_threshold.py" />
-        <option value="$PROJECT_DIR$/models/train_rels_motifnet_mask_mat_mbz.py" />
-        <option value="$PROJECT_DIR$/scripts/eval_motifnet_predcls_mask_mat.sh" />
-        <option value="$PROJECT_DIR$/models/eval_stanford_motif_glat_mask_mat.py" />
-        <option value="$PROJECT_DIR$/scripts/eval_stat_motifnet_predcls_mask.sh" />
-        <option value="$PROJECT_DIR$/models/eval_stat_stanford_motif_glat_mask.py" />
-        <option value="$PROJECT_DIR$/visualization/visualize_predcls_mask.py" />
-        <option value="$PROJECT_DIR$/models/eval_stanford_motif_glat_mask.py" />
-        <option value="$PROJECT_DIR$/scripts/eval_motifnet_predcls_mask.sh" />
-        <option value="$PROJECT_DIR$/scripts/train_glat_motifnet_armask.sh" />
-        <option value="$PROJECT_DIR$/scripts/train_glat_motifnet_aemask.sh" />
-        <option value="$PROJECT_DIR$/models/train_rels_motifnet_aemask.py" />
-        <option value="$PROJECT_DIR$/models/train_rels_stanford_save_base.py" />
-        <option value="$PROJECT_DIR$/scripts/train_glat_motifnet_mbz_v2now.sh" />
-        <option value="$PROJECT_DIR$/lib/linear_merge.py" />
-        <option value="$PROJECT_DIR$/models/train_rels.py" />
-        <option value="$PROJECT_DIR$/lib/surgery_originaly.py" />
-        <option value="$PROJECT_DIR$/dataloaders/visual_genome_original.py" />
-        <option value="$PROJECT_DIR$/lib/motifnet_model_original.py" />
+        <option value="$PROJECT_DIR$/scripts/train_kern_predcls_glat_exp1.sh" />
+        <option value="$PROJECT_DIR$/scripts/eval_kern_predcls_original.sh" />
         <option value="$PROJECT_DIR$/lib/surgery_original.py" />
-        <option value="$PROJECT_DIR$/models/train_rels_motifnet_save_base_original.py" />
-        <option value="$PROJECT_DIR$/models/train_rels_motifnet_save_base.py" />
-        <option value="$PROJECT_DIR$/models/train_rels_motifnet_save_base_modified.py" />
-        <option value="$PROJECT_DIR$/lib/linear_merge_node.py" />
-        <option value="$PROJECT_DIR$/test.py" />
-        <option value="$PROJECT_DIR$/models/train_rels_motifnet_save_base_original_modified_lm.py" />
-        <option value="$PROJECT_DIR$/lib/motifnet_model.py" />
+        <option value="$PROJECT_DIR$/lib/kern_model_original.py" />
+        <option value="$PROJECT_DIR$/models/eval_rels_original.py" />
+        <option value="$PROJECT_DIR$/scripts/eval_kern_predcls_original_1.sh" />
+        <option value="$PROJECT_DIR$/lib/utils.py" />
+        <option value="$PROJECT_DIR$/config.py" />
+        <option value="$PROJECT_DIR$/scripts/eval_motifnet_glat.sh" />
+        <option value="$PROJECT_DIR$/scripts/eval_stanford_motif_glat.sh" />
+        <option value="$PROJECT_DIR$/scripts/eval_kern_predcls.sh" />
+        <option value="$PROJECT_DIR$/models/eval_stanford_motif_glat_copy_copy.py" />
+        <option value="$PROJECT_DIR$/models/train_rels.py" />
+        <option value="$PROJECT_DIR$/scripts/train_kern_stanford.sh" />
+        <option value="$PROJECT_DIR$/lib/evaluation/sg_eval.py" />
+        <option value="$PROJECT_DIR$/models/eval_stanford_motif_glat_copy.py" />
+        <option value="$PROJECT_DIR$/lib/linear_merge.py" />
+        <option value="$PROJECT_DIR$/models/train_rels_motifnet.py" />
+        <option value="$PROJECT_DIR$/models/eval_baseModel_glat.py" />
+        <option value="$PROJECT_DIR$/models/train_rels_stanford.py" />
         <option value="$PROJECT_DIR$/lib/surgery.py" />
-        <option value="$PROJECT_DIR$/scripts/train_kern_sgcls.sh" />
-        <option value="$PROJECT_DIR$/scripts/train_glat_motifnet_mbz_sgcls.sh" />
-        <option value="$PROJECT_DIR$/dataloaders/visual_genome_test.py" />
-        <option value="$PROJECT_DIR$/models/train_rels_kern_save_base_sgcls_test.py" />
-        <option value="$PROJECT_DIR$/dataloaders/visual_genome_hy.py" />
-        <option value="$PROJECT_DIR$/lib/motifnet_model_sgcls.py" />
-        <option value="$PROJECT_DIR$/lib/glat_logit.py" />
-        <option value="$PROJECT_DIR$/lib/glat.py" />
-        <option value="$PROJECT_DIR$/models/train_rels_motifnet_save_base_original_modified_logit.py" />
-        <option value="$PROJECT_DIR$/models/train_rels_motifnet_save_base_original_modified.py" />
-        <option value="$PROJECT_DIR$/dataloaders/visual_genome.py" />
-        <option value="$PROJECT_DIR$/models/train_rels_kern_save_base_sgcls.py" />
-        <option value="$PROJECT_DIR$/models/train_rels_motifnet_save_base_original_modified_sgcls.py" />
-        <option value="$PROJECT_DIR$/lib/kern_model_sgcls.py" />
+        <option value="$PROJECT_DIR$/lib/stanford_model.py" />
+        <option value="$PROJECT_DIR$/models/eval_stanford_motif_glat.py" />
+        <option value="$PROJECT_DIR$/lib/motifnet_model.py" />
+        <option value="$PROJECT_DIR$/lib/motifnet_model_working.py" />
+        <option value="$PROJECT_DIR$/lib/surgery_working.py" />
         <option value="$PROJECT_DIR$/lib/surgery_sgcls.py" />
+        <option value="$PROJECT_DIR$/models/eval_rels.py" />
+        <option value="$PROJECT_DIR$/lib/kern_model.py" />
+        <option value="$PROJECT_DIR$/lib/glat.py" />
+        <option value="$PROJECT_DIR$/lib/glat_logit.py" />
+        <option value="$PROJECT_DIR$/dataloaders/visual_genome.py" />
+        <option value="$PROJECT_DIR$/models/eval_rels_sgcls_copy.py" />
+        <option value="$PROJECT_DIR$/analyze_train_triplet_freq.py" />
+        <option value="$PROJECT_DIR$/prob3.py" />
+        <option value="$PROJECT_DIR$/prob2.py" />
+        <option value="$PROJECT_DIR$/prob1.py" />
+        <option value="$PROJECT_DIR$/models/eval_stanford_motif_glat_working.py" />
+        <option value="$PROJECT_DIR$/lib/motifnet_model_sgcls.py" />
+        <option value="$PROJECT_DIR$/cal_new_triplet_eval_accuracy_copy.py" />
+        <option value="$PROJECT_DIR$/lib/kern_model_sgcls.py" />
         <option value="$PROJECT_DIR$/lib/stanford_model_sgcls.py" />
         <option value="$PROJECT_DIR$/models/train_rels_stanford_save_base_sgcls.py" />
+        <option value="$PROJECT_DIR$/lib/stanford_model_sgcls_gt.py" />
+        <option value="$PROJECT_DIR$/models/train_rels_stanford_save_base_sgcls_gt.py" />
+        <option value="$PROJECT_DIR$/models/eval_rels_sgcls.py" />
+        <option value="$PROJECT_DIR$/cal_new_triplet_eval_accuracy.py" />
+        <option value="$PROJECT_DIR$/cal_new_triplet_eval_accuracy_ranking.py" />
+        <option value="$PROJECT_DIR$/models/eval_stanford_motif_glat_working_sgcls.py" />
+        <option value="$PROJECT_DIR$/models/train_rels_motifnet_save_base_original_modified_sgcls.py" />
+        <option value="$PROJECT_DIR$/lib/rel_model_linknet.py" />
       </list>
     </option>
   </component>
@@ -264,13 +230,17 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
             <path>
               <item name="KERN" type="b2602c69:ProjectViewProjectNode" />
               <item name="KERN" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="KERN" type="b2602c69:ProjectViewProjectNode" />
+              <item name="KERN" type="462c0819:PsiDirectoryNode" />
+              <item name="data" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="KERN" type="b2602c69:ProjectViewProjectNode" />
@@ -287,48 +257,30 @@
               <item name="KERN" type="462c0819:PsiDirectoryNode" />
               <item name="models" type="462c0819:PsiDirectoryNode" />
             </path>
-            <path>
-              <item name="KERN" type="b2602c69:ProjectViewProjectNode" />
-              <item name="KERN" type="462c0819:PsiDirectoryNode" />
-              <item name="prior_matrices" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="KERN" type="b2602c69:ProjectViewProjectNode" />
-              <item name="KERN" type="462c0819:PsiDirectoryNode" />
-              <item name="scripts" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="KERN" type="b2602c69:ProjectViewProjectNode" />
-              <item name="KERN" type="462c0819:PsiDirectoryNode" />
-              <item name="visualization" type="462c0819:PsiDirectoryNode" />
-            </path>
           </expand>
           <select />
         </subPane>
       </pane>
+      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
     <property name="SearchEverywhereHistoryKey" value="find in path&#9;ACTION&#9;FindInPath&#10;find in &#9;ACTION&#9;FindInPath&#10;Somehow&#9;null&#9;null&#10;increase font&#9;ACTION&#9;EditorIncreaseFontSize" />
-    <property name="WebServerToolWindowFactoryState" value="true" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="WebServerToolWindowPanel.toolwindow.highlight.mappings" value="true" />
     <property name="WebServerToolWindowPanel.toolwindow.highlight.symlinks" value="true" />
     <property name="WebServerToolWindowPanel.toolwindow.show.date" value="false" />
     <property name="WebServerToolWindowPanel.toolwindow.show.permissions" value="false" />
     <property name="WebServerToolWindowPanel.toolwindow.show.size" value="false" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
-    <property name="two.files.diff.last.used.file" value="$PROJECT_DIR$/models/train_rels_motifnet_save_base_original_modified_sgcls.py" />
+    <property name="settings.editor.selected.configurable" value="web.server" />
+    <property name="two.files.diff.last.used.file" value="$PROJECT_DIR$/lib/motifnet_model_sgcls.py" />
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$" />
       <recent name="$PROJECT_DIR$/lib" />
       <recent name="$PROJECT_DIR$/models" />
-      <recent name="$PROJECT_DIR$/dataloaders" />
-      <recent name="$PROJECT_DIR$/scripts" />
-      <recent name="$PROJECT_DIR$/visualization" />
-    </key>
-    <key name="MoveFile.RECENT_KEYS">
-      <recent name="$PROJECT_DIR$/lib" />
     </key>
   </component>
   <component name="RunDashboard">
@@ -343,8 +295,30 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.train_rels_stanford_save_base_sgcls">
-    <configuration name="test" type="PythonConfigurationType" factoryName="Python" temporary="true">
+  <component name="RunManager" selected="Python.cal_new_triplet_eval_accuracy_ranking">
+    <configuration name="cal_new_triplet_eval_accuracy" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="KERN" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="sftp://tangtangwzc@mango.cs.columbia.edu:22/dvmm-filer2/users/james/anaconda3/envs/KERN_env/bin/python" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/cal_new_triplet_eval_accuracy.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="cal_new_triplet_eval_accuracy_copy" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="KERN" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -357,7 +331,7 @@
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/test.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/cal_new_triplet_eval_accuracy_copy.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -366,28 +340,21 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="train_rels_kern_save_base_sgcls" type="PythonConfigurationType" factoryName="Python" temporary="true">
+    <configuration name="cal_new_triplet_eval_accuracy_ranking" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="KERN" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <envs>
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
-      <option name="SDK_HOME" value="sftp://tangtangwzc@mango.cs.columbia.edu:22/dvmm-filer2/users/james/anaconda3/envs/KERN_env/bin/python" />
-      <option name="WORKING_DIRECTORY" value="/home/tangtangwzc/KERN" />
-      <option name="IS_MODULE_SDK" value="false" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <PathMappingSettings>
-        <option name="pathMappings">
-          <list>
-            <mapping local-root="$PROJECT_DIR$" remote-root="/home/tangtangwzc/KERN" />
-          </list>
-        </option>
-      </PathMappingSettings>
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/models/train_rels_kern_save_base_sgcls.py" />
-      <option name="PARAMETERS" value="-m sgcls -p 500 -clip 5 -ckpt checkpoints/kern_sgcls_predcls.tar -val_size 5000 -adam -b 20 -lr 1e-4 -use_ggnn_obj -ggnn_obj_time_step_num 3 -ggnn_obj_hidden_dim 512 -ggnn_obj_output_dim 512 -use_obj_knowledge -obj_knowledge prior_matrices/obj_matrix.npy -use_ggnn_rel -ggnn_rel_time_step_num 3 -ggnn_rel_hidden_dim 512 -ggnn_rel_output_dim 512 -use_rel_knowledge -rel_knowledge prior_matrices/rel_matrix.npy" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/cal_new_triplet_eval_accuracy_ranking.py" />
+      <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
       <option name="MODULE_MODE" value="false" />
@@ -395,7 +362,7 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="train_rels_motifnet_save_base_original_modified_logit" type="PythonConfigurationType" factoryName="Python" temporary="true">
+    <configuration name="eval_stanford_motif_glat.py" type="PythonConfigurationType" factoryName="Python">
       <module name="KERN" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -415,8 +382,8 @@
           </list>
         </option>
       </PathMappingSettings>
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/models/train_rels_motifnet_save_base_original_modified_logit.py" />
-      <option name="PARAMETERS" value="-m predcls -p 100 -lr 1e-4 -ngpu 1 -ckpt checkpoints/motifnet/vgrel-motifnet-sgcls.tar -adam -b 20" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/models/eval_stanford_motif_glat.py" />
+      <option name="PARAMETERS" value="-m predcls -model_s_m motifnet -b 1 -clip 5 -p 100 -pooling_dim 4096 -lr 1e-3 -test -ckpt checkpoints/motifnet/vgrel-motifnet-sgcls.tar -nepoch 50" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
       <option name="MODULE_MODE" value="false" />
@@ -424,14 +391,14 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="train_rels_motifnet_save_base_original_modified_sgcls" type="PythonConfigurationType" factoryName="Python" temporary="true">
+    <configuration name="eval_stanford_motif_glat_working_sgcls" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="KERN" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <envs>
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
-      <option name="SDK_HOME" value="sftp://tangtangwzc@mango.cs.columbia.edu:22/dvmm-filer2/users/james/anaconda3/envs/KERN_env/bin/python" />
+      <option name="SDK_HOME" value="sftp://tangtangwzc@pineapple.cs.columbia.edu:22/dvmm-filer2/users/james/anaconda3/envs/KERN_env/bin/python" />
       <option name="WORKING_DIRECTORY" value="/home/tangtangwzc/KERN" />
       <option name="IS_MODULE_SDK" value="false" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
@@ -444,8 +411,8 @@
           </list>
         </option>
       </PathMappingSettings>
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/models/train_rels_motifnet_save_base_original_modified_sgcls.py" />
-      <option name="PARAMETERS" value="-m sgcls -p 100 -tb_log_dir summaries/motifnet_glat_predcls_mbz_v2 -lr 1e-4 -ngpu 1 -ckpt checkpoints/motifnet/vgrel-motifnet-sgcls.tar -save_dir checkpoints/motifnet_glat_predcls_mbz_v2 -adam -b 20" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/models/eval_stanford_motif_glat_working_sgcls.py" />
+      <option name="PARAMETERS" value="-m sgcls -model_s_m motifnet -b 1 -clip 5 -p 100 -pooling_dim 4096 -lr 1e-3 -test -ckpt checkpoints/motifnet/vgrel-motifnet-sgcls.tar -nepoch 50" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
       <option name="MODULE_MODE" value="false" />
@@ -460,7 +427,7 @@
       <envs>
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
-      <option name="SDK_HOME" value="sftp://tangtangwzc@kiwi.cs.columbia.edu:22/dvmm-filer2/users/james/anaconda3/envs/KERN_env/bin/python" />
+      <option name="SDK_HOME" value="sftp://tangtangwzc@pineapple.cs.columbia.edu:22/dvmm-filer2/users/james/anaconda3/envs/KERN_env/bin/python" />
       <option name="WORKING_DIRECTORY" value="/home/tangtangwzc/KERN" />
       <option name="IS_MODULE_SDK" value="false" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
@@ -474,7 +441,7 @@
         </option>
       </PathMappingSettings>
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/models/train_rels.py" />
-      <option name="PARAMETERS" value="-m predcls -p 100 -clip 5 -tb_log_dir summaries/kern_predcls -save_dir checkpoints/kern_predcls -ckpt checkpoints/kern_sgcls_predcls.tar -val_size 5000 -adam -b 1 -lr 1e-5 -use_ggnn_rel -ggnn_rel_time_step_num 3 -ggnn_rel_hidden_dim 512 -ggnn_rel_output_dim 512 -use_rel_knowledge -rel_knowledge prior_matrices/rel_matrix.npy" />
+      <option name="PARAMETERS" value="-m predcls -p 100 -clip 5 -tb_log_dir summaries/kern_predcls -save_dir checkpoints/kern_predcls -ckpt checkpoints/kern_sgcls_predcls.tar -val_size 5000 -adam -b 1 -lr 1e-4 -use_ggnn_rel -ggnn_rel_time_step_num 3 -ggnn_rel_hidden_dim 512 -ggnn_rel_output_dim 512 -use_rel_knowledge -rel_knowledge prior_matrices/rel_matrix.npy" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
       <option name="MODULE_MODE" value="false" />
@@ -482,14 +449,14 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="train_rels_stanford_save_base_sgcls" type="PythonConfigurationType" factoryName="Python" temporary="true">
+    <configuration name="train_rels_stanford.py" type="PythonConfigurationType" factoryName="Python">
       <module name="KERN" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <envs>
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
-      <option name="SDK_HOME" value="sftp://tangtangwzc@mango.cs.columbia.edu:22/dvmm-filer2/users/james/anaconda3/envs/KERN_env/bin/python" />
+      <option name="SDK_HOME" value="sftp://tangtangwzc@pineapple.cs.columbia.edu:22/dvmm-filer2/users/james/anaconda3/envs/KERN_env/bin/python" />
       <option name="WORKING_DIRECTORY" value="/home/tangtangwzc/KERN" />
       <option name="IS_MODULE_SDK" value="false" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
@@ -502,8 +469,30 @@
           </list>
         </option>
       </PathMappingSettings>
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/models/train_rels_stanford_save_base_sgcls.py" />
-      <option name="PARAMETERS" value="-m sgcls -p 100 -lr 1e-4 -ngpu 1 -ckpt checkpoints/stanford_1/vgrel-7.tar -adam -b 20" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/models/train_rels_stanford.py" />
+      <option name="PARAMETERS" value="-m predcls -p 400 -tb_log_dir summaries/stanford_glat_1 -lr 1e-4 -ngpu 1 -ckpt checkpoints/stanford_1/vgrel-7.tar -save_dir checkpoints/stanford_glat_2 -adam -b 1 -nepoch 50" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="train_rels_stanford_save_base_sgcls_gt" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="KERN" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/models" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/models/train_rels_stanford_save_base_sgcls_gt.py" />
+      <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
       <option name="MODULE_MODE" value="false" />
@@ -513,19 +502,21 @@
     </configuration>
     <list>
       <item itemvalue="Python.train_rels.py" />
-      <item itemvalue="Python.test" />
-      <item itemvalue="Python.train_rels_motifnet_save_base_original_modified_sgcls" />
-      <item itemvalue="Python.train_rels_kern_save_base_sgcls" />
-      <item itemvalue="Python.train_rels_motifnet_save_base_original_modified_logit" />
-      <item itemvalue="Python.train_rels_stanford_save_base_sgcls" />
+      <item itemvalue="Python.train_rels_stanford.py" />
+      <item itemvalue="Python.eval_stanford_motif_glat.py" />
+      <item itemvalue="Python.eval_stanford_motif_glat_working_sgcls" />
+      <item itemvalue="Python.cal_new_triplet_eval_accuracy" />
+      <item itemvalue="Python.cal_new_triplet_eval_accuracy_copy" />
+      <item itemvalue="Python.train_rels_stanford_save_base_sgcls_gt" />
+      <item itemvalue="Python.cal_new_triplet_eval_accuracy_ranking" />
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.train_rels_stanford_save_base_sgcls" />
-        <item itemvalue="Python.train_rels_kern_save_base_sgcls" />
-        <item itemvalue="Python.train_rels_motifnet_save_base_original_modified_sgcls" />
-        <item itemvalue="Python.train_rels_motifnet_save_base_original_modified_logit" />
-        <item itemvalue="Python.test" />
+        <item itemvalue="Python.cal_new_triplet_eval_accuracy_ranking" />
+        <item itemvalue="Python.cal_new_triplet_eval_accuracy" />
+        <item itemvalue="Python.train_rels_stanford_save_base_sgcls_gt" />
+        <item itemvalue="Python.cal_new_triplet_eval_accuracy_copy" />
+        <item itemvalue="Python.eval_stanford_motif_glat_working_sgcls" />
       </list>
     </recent_temporary>
   </component>
@@ -542,34 +533,68 @@
     </task>
     <servers />
   </component>
+  <component name="TodoView" selected-index="3">
+    <todo-panel id="selected-file">
+      <is-autoscroll-to-source value="true" />
+    </todo-panel>
+    <todo-panel id="all">
+      <are-packages-shown value="true" />
+      <is-autoscroll-to-source value="true" />
+    </todo-panel>
+  </component>
   <component name="ToolWindowManager">
     <frame x="0" y="0" width="1440" height="900" extended-state="0" />
     <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.8193277" visible="true" weight="0.17986111" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.21736111" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
-      <window_info id="Favorites" order="2" sideWeight="0.18067227" side_tool="true" weight="0.13136457" />
+      <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
-      <window_info anchor="bottom" id="Find" order="1" weight="0.32807016" />
+      <window_info anchor="bottom" id="Find" order="1" weight="0.32891566" />
       <window_info anchor="bottom" id="Run" order="2" weight="0.3987952" />
-      <window_info anchor="bottom" id="Debug" order="3" visible="true" weight="0.3548766" />
+      <window_info anchor="bottom" id="Debug" order="3" sideWeight="0.4987163" weight="0.53701526" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
-      <window_info anchor="bottom" id="TODO" order="6" />
+      <window_info anchor="bottom" id="TODO" order="6" weight="0.32891566" />
       <window_info anchor="bottom" id="Docker" order="7" show_stripe_button="false" />
       <window_info anchor="bottom" id="Version Control" order="8" />
-      <window_info anchor="bottom" id="File Transfer" order="9" weight="0.1891892" />
+      <window_info anchor="bottom" id="File Transfer" order="9" sideWeight="0.49807444" visible="true" weight="0.28907168" />
       <window_info anchor="bottom" id="Database Changes" order="10" show_stripe_button="false" />
-      <window_info anchor="bottom" id="Terminal" order="11" />
-      <window_info anchor="bottom" id="Event Log" order="12" side_tool="true" />
+      <window_info anchor="bottom" id="Terminal" order="11" weight="0.32891566" />
+      <window_info anchor="bottom" id="Event Log" order="12" sideWeight="0.5012837" side_tool="true" weight="0.34698796" />
       <window_info anchor="bottom" id="Python Console" order="13" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
-      <window_info anchor="right" id="Remote Host" order="3" weight="0.32991013" />
-      <window_info anchor="right" id="SciView" order="4" weight="0.03494837" />
+      <window_info anchor="right" id="Remote Host" order="3" weight="0.3297568" />
+      <window_info active="true" anchor="right" x="198" y="184" width="838" height="463" id="SciView" order="4" visible="true" weight="0.03125" />
       <window_info anchor="right" id="Database" order="5" weight="0.32991013" />
     </layout>
+    <layout-to-restore>
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.0" />
+      <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
+      <window_info id="Favorites" order="2" side_tool="true" />
+      <window_info anchor="bottom" id="Message" order="0" />
+      <window_info anchor="bottom" id="Find" order="1" weight="0.32891566" />
+      <window_info anchor="bottom" id="Run" order="2" weight="0.3987952" />
+      <window_info active="true" anchor="bottom" id="Debug" order="3" sideWeight="0.4987163" visible="true" weight="0.026506023" />
+      <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
+      <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
+      <window_info anchor="bottom" id="TODO" order="6" weight="0.32891566" />
+      <window_info anchor="bottom" id="Docker" order="7" show_stripe_button="false" />
+      <window_info anchor="bottom" id="Version Control" order="8" />
+      <window_info anchor="bottom" id="File Transfer" order="9" sideWeight="0.49807444" weight="0.20722891" />
+      <window_info anchor="bottom" id="Database Changes" order="10" show_stripe_button="false" />
+      <window_info anchor="bottom" id="Terminal" order="11" weight="0.32891566" />
+      <window_info anchor="bottom" id="Event Log" order="12" sideWeight="0.5012837" side_tool="true" weight="0.34698796" />
+      <window_info anchor="bottom" id="Python Console" order="13" />
+      <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
+      <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
+      <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
+      <window_info anchor="right" id="Remote Host" order="3" weight="0.3297568" />
+      <window_info anchor="right" id="SciView" order="4" weight="0.034334764" />
+      <window_info anchor="right" id="Database" order="5" weight="0.32991013" />
+    </layout-to-restore>
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="1" />
@@ -581,209 +606,959 @@
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/models/train_rels_motifnet_save_base.py</url>
-          <line>423</line>
-          <option name="timeStamp" value="84" />
+          <url>file://$PROJECT_DIR$/models/train_rels_stanford.py</url>
+          <line>648</line>
+          <option name="timeStamp" value="212" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/models/train_rels_motifnet_save_base.py</url>
-          <line>422</line>
-          <option name="timeStamp" value="85" />
+          <url>file://$PROJECT_DIR$/models/train_rels_stanford.py</url>
+          <line>646</line>
+          <option name="timeStamp" value="213" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/models/train_rels_motifnet_save_base.py</url>
-          <line>418</line>
-          <option name="timeStamp" value="86" />
+          <url>file://$PROJECT_DIR$/models/eval_stanford_motif_glat.py</url>
+          <line>615</line>
+          <option name="timeStamp" value="214" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/models/train_rels_motifnet_save_base.py</url>
-          <line>707</line>
-          <option name="timeStamp" value="89" />
+          <url>file://$PROJECT_DIR$/models/eval_stanford_motif_glat.py</url>
+          <line>488</line>
+          <option name="timeStamp" value="215" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/models/train_rels_motifnet_save_base.py</url>
-          <line>717</line>
-          <option name="timeStamp" value="94" />
+          <url>file://$PROJECT_DIR$/models/eval_stanford_motif_glat.py</url>
+          <line>489</line>
+          <option name="timeStamp" value="216" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/models/train_rels_motifnet_save_base.py</url>
-          <line>631</line>
-          <option name="timeStamp" value="95" />
+          <url>file://$PROJECT_DIR$/models/eval_stanford_motif_glat.py</url>
+          <line>491</line>
+          <option name="timeStamp" value="217" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/models/train_rels_motifnet_save_base.py</url>
-          <line>534</line>
-          <option name="timeStamp" value="101" />
+          <url>file://$PROJECT_DIR$/models/eval_stanford_motif_glat.py</url>
+          <line>493</line>
+          <option name="timeStamp" value="218" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/lib/motifnet_model_original.py</url>
-          <line>599</line>
-          <option name="timeStamp" value="102" />
+          <url>file://$PROJECT_DIR$/models/eval_stanford_motif_glat.py</url>
+          <line>492</line>
+          <option name="timeStamp" value="219" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/lib/surgery.py</url>
-          <line>110</line>
-          <option name="timeStamp" value="104" />
+          <url>file://$PROJECT_DIR$/models/eval_stanford_motif_glat.py</url>
+          <line>494</line>
+          <option name="timeStamp" value="220" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/models/train_rels_motifnet_save_base_original_modified.py</url>
-          <line>635</line>
-          <option name="timeStamp" value="134" />
+          <url>file://$PROJECT_DIR$/models/eval_stanford_motif_glat.py</url>
+          <line>496</line>
+          <option name="timeStamp" value="222" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/models/train_rels_motifnet_save_base_original_modified.py</url>
-          <line>568</line>
-          <option name="timeStamp" value="135" />
+          <url>file://$PROJECT_DIR$/models/eval_stanford_motif_glat.py</url>
+          <line>497</line>
+          <option name="timeStamp" value="223" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/models/train_rels_motifnet_save_base_original_modified.py</url>
-          <line>572</line>
-          <option name="timeStamp" value="138" />
+          <url>file://$PROJECT_DIR$/models/eval_stanford_motif_glat.py</url>
+          <line>499</line>
+          <option name="timeStamp" value="224" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/models/train_rels_motifnet_save_base_original_modified.py</url>
-          <line>576</line>
-          <option name="timeStamp" value="139" />
+          <url>file://$PROJECT_DIR$/models/eval_stanford_motif_glat.py</url>
+          <line>501</line>
+          <option name="timeStamp" value="225" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/models/train_rels_motifnet_save_base_original_modified.py</url>
+          <url>file://$PROJECT_DIR$/models/eval_stanford_motif_glat.py</url>
+          <line>503</line>
+          <option name="timeStamp" value="226" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_stanford_motif_glat.py</url>
+          <line>504</line>
+          <option name="timeStamp" value="227" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_stanford_motif_glat.py</url>
+          <line>506</line>
+          <option name="timeStamp" value="228" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_stanford_motif_glat.py</url>
+          <line>507</line>
+          <option name="timeStamp" value="229" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_stanford_motif_glat.py</url>
+          <line>509</line>
+          <option name="timeStamp" value="230" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_stanford_motif_glat.py</url>
+          <line>511</line>
+          <option name="timeStamp" value="231" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_stanford_motif_glat.py</url>
+          <line>514</line>
+          <option name="timeStamp" value="232" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_stanford_motif_glat.py</url>
+          <line>459</line>
+          <option name="timeStamp" value="233" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_stanford_motif_glat.py</url>
+          <line>460</line>
+          <option name="timeStamp" value="234" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_stanford_motif_glat.py</url>
+          <line>462</line>
+          <option name="timeStamp" value="235" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_stanford_motif_glat.py</url>
+          <line>463</line>
+          <option name="timeStamp" value="236" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_stanford_motif_glat.py</url>
+          <line>465</line>
+          <option name="timeStamp" value="237" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_stanford_motif_glat.py</url>
+          <line>466</line>
+          <option name="timeStamp" value="238" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_stanford_motif_glat.py</url>
+          <line>468</line>
+          <option name="timeStamp" value="239" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_stanford_motif_glat.py</url>
+          <line>470</line>
+          <option name="timeStamp" value="240" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_stanford_motif_glat.py</url>
+          <line>472</line>
+          <option name="timeStamp" value="241" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_stanford_motif_glat.py</url>
+          <line>473</line>
+          <option name="timeStamp" value="242" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_stanford_motif_glat.py</url>
+          <line>475</line>
+          <option name="timeStamp" value="243" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_stanford_motif_glat.py</url>
+          <line>476</line>
+          <option name="timeStamp" value="244" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_stanford_motif_glat.py</url>
+          <line>478</line>
+          <option name="timeStamp" value="245" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_stanford_motif_glat.py</url>
+          <line>480</line>
+          <option name="timeStamp" value="246" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_stanford_motif_glat.py</url>
+          <line>483</line>
+          <option name="timeStamp" value="247" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_rels.py</url>
           <line>577</line>
-          <option name="timeStamp" value="140" />
+          <option name="timeStamp" value="274" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/models/train_rels_motifnet_save_base_original_modified.py</url>
-          <line>600</line>
-          <option name="timeStamp" value="141" />
+          <url>file://$PROJECT_DIR$/models/eval_stanford_motif_glat_copy.py</url>
+          <line>403</line>
+          <option name="timeStamp" value="307" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/models/train_rels_motifnet_save_base_original_modified_lm.py</url>
-          <line>658</line>
-          <option name="timeStamp" value="142" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/models/train_rels_motifnet_save_base_original_modified.py</url>
-          <line>690</line>
-          <option name="timeStamp" value="167" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/models/train_rels_motifnet_save_base_original_modified_lm.py</url>
-          <line>659</line>
-          <option name="timeStamp" value="200" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/models/train_rels_motifnet_save_base_original_modified_lm.py</url>
-          <line>666</line>
-          <option name="timeStamp" value="208" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/models/train_rels_motifnet_save_base_original_modified_lm.py</url>
-          <line>664</line>
-          <option name="timeStamp" value="209" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/models/train_rels_motifnet_save_base_original_modified_sgcls.py</url>
-          <line>629</line>
-          <option name="timeStamp" value="286" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/lib/glat_logit.py</url>
-          <line>266</line>
-          <option name="timeStamp" value="291" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/lib/glat_logit.py</url>
-          <line>291</line>
-          <option name="timeStamp" value="292" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/lib/glat_logit.py</url>
-          <line>295</line>
-          <option name="timeStamp" value="293" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/lib/glat_logit.py</url>
-          <line>292</line>
-          <option name="timeStamp" value="294" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/lib/glat_logit.py</url>
-          <line>276</line>
-          <option name="timeStamp" value="296" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/lib/glat_logit.py</url>
-          <line>274</line>
-          <option name="timeStamp" value="298" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/models/train_rels_motifnet_save_base_original_modified_sgcls.py</url>
-          <line>911</line>
-          <option name="timeStamp" value="299" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/models/train_rels_motifnet_save_base_original_modified_sgcls.py</url>
-          <line>732</line>
-          <option name="timeStamp" value="300" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/models/train_rels_motifnet_save_base_original_modified_sgcls.py</url>
-          <line>673</line>
-          <option name="timeStamp" value="301" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/models/train_rels_motifnet_save_base_original_modified_sgcls.py</url>
-          <line>666</line>
-          <option name="timeStamp" value="302" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/models/train_rels_motifnet_save_base_original_modified_sgcls.py</url>
-          <line>667</line>
-          <option name="timeStamp" value="303" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/models/train_rels_motifnet_save_base_original_modified_sgcls.py</url>
-          <line>734</line>
-          <option name="timeStamp" value="304" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/models/train_rels_motifnet_save_base_original_modified_sgcls.py</url>
-          <line>726</line>
-          <option name="timeStamp" value="308" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/lib/surgery_sgcls.py</url>
-          <line>102</line>
-          <option name="timeStamp" value="310" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/lib/motifnet_model_sgcls.py</url>
-          <line>705</line>
-          <option name="timeStamp" value="315" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/lib/motifnet_model_sgcls.py</url>
-          <line>697</line>
-          <option name="timeStamp" value="316" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/lib/motifnet_model_sgcls.py</url>
-          <line>703</line>
-          <option name="timeStamp" value="317" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/lib/stanford_model_sgcls.py</url>
-          <line>400</line>
-          <option name="timeStamp" value="320" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/lib/stanford_model_sgcls.py</url>
-          <line>339</line>
+          <url>file://$PROJECT_DIR$/models/eval_stanford_motif_glat_copy.py</url>
+          <line>407</line>
           <option name="timeStamp" value="324" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/lib/stanford_model_sgcls.py</url>
-          <line>281</line>
-          <option name="timeStamp" value="325" />
+          <url>file://$PROJECT_DIR$/models/eval_stanford_motif_glat.py</url>
+          <line>712</line>
+          <option name="timeStamp" value="328" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_stanford_motif_glat_copy.py</url>
+          <line>406</line>
+          <option name="timeStamp" value="329" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_stanford_motif_glat_copy.py</url>
+          <line>402</line>
+          <option name="timeStamp" value="330" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_stanford_motif_glat_copy_copy.py</url>
+          <line>535</line>
+          <option name="timeStamp" value="334" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_stanford_motif_glat_copy_copy.py</url>
+          <line>536</line>
+          <option name="timeStamp" value="335" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_stanford_motif_glat_copy_copy.py</url>
+          <line>233</line>
+          <option name="timeStamp" value="336" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_stanford_motif_glat_copy_copy.py</url>
+          <line>232</line>
+          <option name="timeStamp" value="337" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_stanford_motif_glat_copy.py</url>
+          <line>408</line>
+          <option name="timeStamp" value="338" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_stanford_motif_glat_copy_copy.py</url>
+          <line>236</line>
+          <option name="timeStamp" value="339" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_stanford_motif_glat_copy_copy.py</url>
+          <line>235</line>
+          <option name="timeStamp" value="340" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_stanford_motif_glat_copy_copy.py</url>
+          <line>239</line>
+          <option name="timeStamp" value="344" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_stanford_motif_glat_copy_copy.py</url>
+          <line>478</line>
+          <option name="timeStamp" value="345" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_stanford_motif_glat_copy.py</url>
+          <line>411</line>
+          <option name="timeStamp" value="350" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_stanford_motif_glat_copy.py</url>
+          <line>438</line>
+          <option name="timeStamp" value="351" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_stanford_motif_glat_copy.py</url>
+          <line>491</line>
+          <option name="timeStamp" value="352" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_stanford_motif_glat_copy.py</url>
+          <line>495</line>
+          <option name="timeStamp" value="353" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_stanford_motif_glat_copy_copy.py</url>
+          <line>430</line>
+          <option name="timeStamp" value="358" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_stanford_motif_glat_copy_copy.py</url>
+          <line>168</line>
+          <option name="timeStamp" value="359" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_stanford_motif_glat_copy_copy.py</url>
+          <line>180</line>
+          <option name="timeStamp" value="360" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_stanford_motif_glat_copy_copy.py</url>
+          <line>171</line>
+          <option name="timeStamp" value="361" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_stanford_motif_glat_copy_copy.py</url>
+          <line>226</line>
+          <option name="timeStamp" value="362" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_stanford_motif_glat_copy_copy.py</url>
+          <line>229</line>
+          <option name="timeStamp" value="375" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_stanford_motif_glat_copy_copy.py</url>
+          <line>244</line>
+          <option name="timeStamp" value="376" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_stanford_motif_glat_copy_copy.py</url>
+          <line>469</line>
+          <option name="timeStamp" value="379" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_stanford_motif_glat_copy_copy.py</url>
+          <line>242</line>
+          <option name="timeStamp" value="380" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_stanford_motif_glat_copy_copy.py</url>
+          <line>238</line>
+          <option name="timeStamp" value="382" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_stanford_motif_glat.py</url>
+          <line>531</line>
+          <option name="timeStamp" value="390" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_stanford_motif_glat.py</url>
+          <line>533</line>
+          <option name="timeStamp" value="391" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_stanford_motif_glat_copy.py</url>
+          <line>513</line>
+          <option name="timeStamp" value="438" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_stanford_motif_glat_copy.py</url>
+          <line>506</line>
+          <option name="timeStamp" value="439" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_baseModel_glat.py</url>
+          <line>667</line>
+          <option name="timeStamp" value="449" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_baseModel_glat.py</url>
+          <line>478</line>
+          <option name="timeStamp" value="450" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_baseModel_glat.py</url>
+          <line>488</line>
+          <option name="timeStamp" value="451" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_baseModel_glat.py</url>
+          <line>479</line>
+          <option name="timeStamp" value="452" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_baseModel_glat.py</url>
+          <line>480</line>
+          <option name="timeStamp" value="453" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_baseModel_glat.py</url>
+          <line>484</line>
+          <option name="timeStamp" value="454" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_baseModel_glat.py</url>
+          <line>486</line>
+          <option name="timeStamp" value="455" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_baseModel_glat.py</url>
+          <line>487</line>
+          <option name="timeStamp" value="456" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_baseModel_glat.py</url>
+          <line>481</line>
+          <option name="timeStamp" value="457" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_baseModel_glat.py</url>
+          <line>446</line>
+          <option name="timeStamp" value="468" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_baseModel_glat.py</url>
+          <line>590</line>
+          <option name="timeStamp" value="469" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_baseModel_glat.py</url>
+          <line>525</line>
+          <option name="timeStamp" value="470" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_baseModel_glat.py</url>
+          <line>526</line>
+          <option name="timeStamp" value="471" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_baseModel_glat.py</url>
+          <line>531</line>
+          <option name="timeStamp" value="472" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_baseModel_glat.py</url>
+          <line>518</line>
+          <option name="timeStamp" value="473" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_baseModel_glat.py</url>
+          <line>520</line>
+          <option name="timeStamp" value="474" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_stanford_motif_glat.py</url>
+          <line>289</line>
+          <option name="timeStamp" value="479" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_stanford_motif_glat.py</url>
+          <line>331</line>
+          <option name="timeStamp" value="484" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_stanford_motif_glat.py</url>
+          <line>294</line>
+          <option name="timeStamp" value="485" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_stanford_motif_glat.py</url>
+          <line>292</line>
+          <option name="timeStamp" value="486" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_stanford_motif_glat.py</url>
+          <line>301</line>
+          <option name="timeStamp" value="491" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_stanford_motif_glat.py</url>
+          <line>330</line>
+          <option name="timeStamp" value="494" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_stanford_motif_glat.py</url>
+          <line>385</line>
+          <option name="timeStamp" value="495" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_stanford_motif_glat.py</url>
+          <line>397</line>
+          <option name="timeStamp" value="496" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_stanford_motif_glat.py</url>
+          <line>394</line>
+          <option name="timeStamp" value="497" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_stanford_motif_glat.py</url>
+          <line>407</line>
+          <option name="timeStamp" value="498" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_stanford_motif_glat.py</url>
+          <line>403</line>
+          <option name="timeStamp" value="499" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_stanford_motif_glat.py</url>
+          <line>336</line>
+          <option name="timeStamp" value="531" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_stanford_motif_glat.py</url>
+          <line>642</line>
+          <option name="timeStamp" value="532" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_stanford_motif_glat.py</url>
+          <line>380</line>
+          <option name="timeStamp" value="533" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_stanford_motif_glat.py</url>
+          <line>376</line>
+          <option name="timeStamp" value="534" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_stanford_motif_glat.py</url>
+          <line>644</line>
+          <option name="timeStamp" value="537" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_stanford_motif_glat.py</url>
+          <line>640</line>
+          <option name="timeStamp" value="538" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_stanford_motif_glat.py</url>
+          <line>373</line>
+          <option name="timeStamp" value="543" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_stanford_motif_glat.py</url>
+          <line>374</line>
+          <option name="timeStamp" value="544" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_stanford_motif_glat.py</url>
+          <line>605</line>
+          <option name="timeStamp" value="545" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_stanford_motif_glat.py</url>
+          <line>674</line>
+          <option name="timeStamp" value="551" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_stanford_motif_glat.py</url>
+          <line>682</line>
+          <option name="timeStamp" value="552" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_stanford_motif_glat.py</url>
+          <line>676</line>
+          <option name="timeStamp" value="553" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_stanford_motif_glat.py</url>
+          <line>679</line>
+          <option name="timeStamp" value="554" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_stanford_motif_glat.py</url>
+          <line>685</line>
+          <option name="timeStamp" value="556" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_stanford_motif_glat.py</url>
+          <line>681</line>
+          <option name="timeStamp" value="557" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_stanford_motif_glat.py</url>
+          <line>684</line>
+          <option name="timeStamp" value="558" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/lib/surgery.py</url>
+          <line>97</line>
+          <option name="timeStamp" value="560" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/lib/surgery.py</url>
+          <line>94</line>
+          <option name="timeStamp" value="561" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/lib/motifnet_model.py</url>
+          <line>655</line>
+          <option name="timeStamp" value="563" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/lib/surgery.py</url>
+          <line>113</line>
+          <option name="timeStamp" value="564" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/lib/motifnet_model.py</url>
+          <line>653</line>
+          <option name="timeStamp" value="565" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/lib/motifnet_model.py</url>
+          <line>635</line>
+          <option name="timeStamp" value="567" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/lib/motifnet_model.py</url>
+          <line>567</line>
+          <option name="timeStamp" value="568" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/lib/motifnet_model.py</url>
+          <line>551</line>
+          <option name="timeStamp" value="569" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/lib/motifnet_model.py</url>
+          <line>643</line>
+          <option name="timeStamp" value="570" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/lib/motifnet_model.py</url>
+          <line>536</line>
+          <option name="timeStamp" value="571" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/lib/motifnet_model.py</url>
+          <line>538</line>
+          <option name="timeStamp" value="572" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/lib/motifnet_model.py</url>
+          <line>547</line>
+          <option name="timeStamp" value="573" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/lib/surgery.py</url>
+          <line>93</line>
+          <option name="timeStamp" value="574" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/lib/motifnet_model.py</url>
+          <line>638</line>
+          <option name="timeStamp" value="575" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/lib/motifnet_model.py</url>
+          <line>540</line>
+          <option name="timeStamp" value="576" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/lib/motifnet_model.py</url>
+          <line>541</line>
+          <option name="timeStamp" value="577" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/lib/motifnet_model.py</url>
+          <line>543</line>
+          <option name="timeStamp" value="578" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/lib/motifnet_model.py</url>
+          <line>542</line>
+          <option name="timeStamp" value="579" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/lib/motifnet_model.py</url>
+          <line>644</line>
+          <option name="timeStamp" value="580" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/lib/motifnet_model.py</url>
+          <line>647</line>
+          <option name="timeStamp" value="581" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/lib/motifnet_model.py</url>
+          <line>648</line>
+          <option name="timeStamp" value="582" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/lib/motifnet_model.py</url>
+          <line>649</line>
+          <option name="timeStamp" value="583" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/lib/motifnet_model.py</url>
+          <line>651</line>
+          <option name="timeStamp" value="584" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/lib/surgery.py</url>
+          <line>82</line>
+          <option name="timeStamp" value="585" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/lib/motifnet_model.py</url>
+          <line>566</line>
+          <option name="timeStamp" value="586" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/lib/motifnet_model.py</url>
+          <line>594</line>
+          <option name="timeStamp" value="587" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/lib/motifnet_model.py</url>
+          <line>593</line>
+          <option name="timeStamp" value="588" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/lib/surgery.py</url>
+          <line>84</line>
+          <option name="timeStamp" value="589" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/lib/surgery.py</url>
+          <line>88</line>
+          <option name="timeStamp" value="591" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/lib/surgery.py</url>
+          <line>85</line>
+          <option name="timeStamp" value="592" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/lib/surgery.py</url>
+          <line>89</line>
+          <option name="timeStamp" value="593" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/lib/surgery_original.py</url>
+          <line>13</line>
+          <option name="timeStamp" value="594" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/lib/motifnet_model_sgcls.py</url>
+          <line>729</line>
+          <option name="timeStamp" value="603" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/lib/motifnet_model_sgcls.py</url>
+          <line>724</line>
+          <option name="timeStamp" value="604" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/lib/motifnet_model_sgcls.py</url>
+          <line>718</line>
+          <option name="timeStamp" value="605" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/dataloaders/visual_genome.py</url>
+          <line>538</line>
+          <option name="timeStamp" value="623" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/lib/kern_model_sgcls.py</url>
+          <line>514</line>
+          <option name="timeStamp" value="671" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_rels_sgcls.py</url>
+          <line>656</line>
+          <option name="timeStamp" value="672" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_rels_sgcls.py</url>
+          <line>663</line>
+          <option name="timeStamp" value="673" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_rels_sgcls.py</url>
+          <line>688</line>
+          <option name="timeStamp" value="677" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_rels_sgcls.py</url>
+          <line>687</line>
+          <option name="timeStamp" value="678" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_rels_sgcls.py</url>
+          <line>513</line>
+          <option name="timeStamp" value="683" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_rels_sgcls.py</url>
+          <line>517</line>
+          <option name="timeStamp" value="684" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_rels_sgcls.py</url>
+          <line>519</line>
+          <option name="timeStamp" value="685" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_rels_sgcls.py</url>
+          <line>708</line>
+          <option name="timeStamp" value="743" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_rels_sgcls.py</url>
+          <line>790</line>
+          <option name="timeStamp" value="745" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_rels_sgcls.py</url>
+          <line>787</line>
+          <option name="timeStamp" value="746" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_rels_sgcls.py</url>
+          <line>741</line>
+          <option name="timeStamp" value="747" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_rels_sgcls.py</url>
+          <line>742</line>
+          <option name="timeStamp" value="748" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_rels_sgcls.py</url>
+          <line>743</line>
+          <option name="timeStamp" value="749" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_rels_sgcls.py</url>
+          <line>744</line>
+          <option name="timeStamp" value="750" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_rels_sgcls.py</url>
+          <line>731</line>
+          <option name="timeStamp" value="751" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_rels_sgcls.py</url>
+          <line>322</line>
+          <option name="timeStamp" value="753" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_rels_sgcls.py</url>
+          <line>636</line>
+          <option name="timeStamp" value="754" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_rels_sgcls_copy.py</url>
+          <line>367</line>
+          <option name="timeStamp" value="771" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_rels_sgcls_copy.py</url>
+          <line>352</line>
+          <option name="timeStamp" value="772" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_rels_sgcls_copy.py</url>
+          <line>357</line>
+          <option name="timeStamp" value="773" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_rels_sgcls_copy.py</url>
+          <line>359</line>
+          <option name="timeStamp" value="774" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_rels_sgcls_copy.py</url>
+          <line>360</line>
+          <option name="timeStamp" value="775" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_rels_sgcls_copy.py</url>
+          <line>361</line>
+          <option name="timeStamp" value="776" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_rels_sgcls.py</url>
+          <line>681</line>
+          <option name="timeStamp" value="814" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_rels_sgcls.py</url>
+          <line>680</line>
+          <option name="timeStamp" value="815" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_rels_sgcls.py</url>
+          <line>509</line>
+          <option name="timeStamp" value="816" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_rels_sgcls.py</url>
+          <line>502</line>
+          <option name="timeStamp" value="818" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/lib/surgery.py</url>
+          <line>109</line>
+          <option name="timeStamp" value="838" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_stanford_motif_glat_working_sgcls.py</url>
+          <line>971</line>
+          <option name="timeStamp" value="942" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_stanford_motif_glat_working_sgcls.py</url>
+          <line>963</line>
+          <option name="timeStamp" value="947" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_stanford_motif_glat_working_sgcls.py</url>
+          <line>1095</line>
+          <option name="timeStamp" value="948" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_stanford_motif_glat_working_sgcls.py</url>
+          <line>1123</line>
+          <option name="timeStamp" value="961" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_stanford_motif_glat_working_sgcls.py</url>
+          <line>1119</line>
+          <option name="timeStamp" value="963" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_stanford_motif_glat_working_sgcls.py</url>
+          <line>1025</line>
+          <option name="timeStamp" value="967" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_stanford_motif_glat_working_sgcls.py</url>
+          <line>992</line>
+          <option name="timeStamp" value="969" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_stanford_motif_glat_working_sgcls.py</url>
+          <line>1003</line>
+          <option name="timeStamp" value="970" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_stanford_motif_glat_working_sgcls.py</url>
+          <line>952</line>
+          <option name="timeStamp" value="973" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_stanford_motif_glat_working_sgcls.py</url>
+          <line>953</line>
+          <option name="timeStamp" value="974" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_stanford_motif_glat_working_sgcls.py</url>
+          <line>1009</line>
+          <option name="timeStamp" value="987" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/eval_stanford_motif_glat_working_sgcls.py</url>
+          <line>1008</line>
+          <option name="timeStamp" value="988" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/train_rels_stanford_save_base_sgcls_gt.py</url>
+          <line>327</line>
+          <option name="timeStamp" value="992" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/train_rels_stanford_save_base_sgcls_gt.py</url>
+          <line>330</line>
+          <option name="timeStamp" value="993" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/train_rels_stanford_save_base_sgcls_gt.py</url>
+          <line>332</line>
+          <option name="timeStamp" value="994" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>
@@ -798,464 +1573,355 @@
   <component name="debuggerHistoryManager">
     <expressions id="evaluateCodeFragment">
       <expression>
-        <expression-string>logit_glat</expression-string>
+        <expression-string>dict_pred_list = torch.cat((extra_entry['pred_rel_inds'],
+                                (extra_entry['rel_scores'][:, 1:].max(1)[1] + 1).data.unsqueeze(-1)),
+                               dim=1).cpu().numpy()dict_pred_list = torch.cat((extra_entry['pred_rel_inds'],
+                                (extra_entry['rel_scores'][:, 1:].max(1)[1] + 1).data.unsqueeze(-1)),
+                               dim=1).cpu().numpy()</expression-string>
         <language-id>Python</language-id>
         <evaluation-mode>CODE_FRAGMENT</evaluation-mode>
       </expression>
       <expression>
-        <expression-string>logit_glat.backward()</expression-string>
+        <expression-string>len(dict_gt.keys())</expression-string>
         <language-id>Python</language-id>
         <evaluation-mode>CODE_FRAGMENT</evaluation-mode>
       </expression>
       <expression>
-        <expression-string>logit_base</expression-string>
+        <expression-string>dict_gt.keys()</expression-string>
         <language-id>Python</language-id>
         <evaluation-mode>CODE_FRAGMENT</evaluation-mode>
       </expression>
       <expression>
-        <expression-string>output_logit_predicate</expression-string>
+        <expression-string>dict_gt</expression-string>
         <language-id>Python</language-id>
         <evaluation-mode>CODE_FRAGMENT</evaluation-mode>
       </expression>
       <expression>
-        <expression-string>logit_base[index].view(-1, 52)</expression-string>
+        <expression-string>gt_entry['gt_relations'].shape</expression-string>
         <language-id>Python</language-id>
         <evaluation-mode>CODE_FRAGMENT</evaluation-mode>
       </expression>
       <expression>
-        <expression-string>torch.cat(node_logits, 0)</expression-string>
+        <expression-string>gt_entry['gt_relations'].size()</expression-string>
         <language-id>Python</language-id>
         <evaluation-mode>CODE_FRAGMENT</evaluation-mode>
       </expression>
       <expression>
-        <expression-string>input_class.size()</expression-string>
+        <expression-string>build_graph_structure(pred_entry, ind_to_classes, ind_to_predicates,if_predicting=if_predicting,sgclsdet=True)</expression-string>
         <language-id>Python</language-id>
         <evaluation-mode>CODE_FRAGMENT</evaluation-mode>
       </expression>
       <expression>
-        <expression-string>pad_input_class.size()</expression-string>
+        <expression-string>build_graph_structure(pred_entry, ind_to_classes, ind_to_predicates,
+                                                              if_predicting=if_predicting,
+                                                              sgclsdet=True)</expression-string>
         <language-id>Python</language-id>
         <evaluation-mode>CODE_FRAGMENT</evaluation-mode>
       </expression>
       <expression>
-        <expression-string>pad_input_class</expression-string>
+        <expression-string>build_graph_structure(pred_entry, ind_to_classes, ind_to_predicates,
+                                                              if_predicting=if_predicting,
+                                                              sgclsdet=True)build_graph_structure(pred_entry, ind_to_classes, ind_to_predicates,
+                                                              if_predicting=if_predicting,
+                                                              sgclsdet=True)</expression-string>
         <language-id>Python</language-id>
         <evaluation-mode>CODE_FRAGMENT</evaluation-mode>
       </expression>
     </expressions>
     <expressions id="evaluateExpression">
       <expression>
-        <expression-string>rel_dists[rel_scores_idx]</expression-string>
+        <expression-string>triplets</expression-string>
         <language-id>Python</language-id>
         <evaluation-mode>EXPRESSION</evaluation-mode>
       </expression>
       <expression>
-        <expression-string>entries['rel_dists'][rel_dists_idx_cur_img].view(-1, 51)</expression-string>
+        <expression-string>len(triplets)</expression-string>
         <language-id>Python</language-id>
         <evaluation-mode>EXPRESSION</evaluation-mode>
       </expression>
       <expression>
-        <expression-string>det_res[-1].size()</expression-string>
+        <expression-string>train_triplet_freq</expression-string>
         <language-id>Python</language-id>
         <evaluation-mode>EXPRESSION</evaluation-mode>
       </expression>
       <expression>
-        <expression-string>det_res[-3].size()</expression-string>
+        <expression-string>train_triplet_freq[key]</expression-string>
         <language-id>Python</language-id>
         <evaluation-mode>EXPRESSION</evaluation-mode>
       </expression>
       <expression>
-        <expression-string>det_res</expression-string>
+        <expression-string>triplet</expression-string>
         <language-id>Python</language-id>
         <evaluation-mode>EXPRESSION</evaluation-mode>
       </expression>
       <expression>
-        <expression-string>rel_dists_b_all.size()</expression-string>
+        <expression-string>key</expression-string>
         <language-id>Python</language-id>
         <evaluation-mode>EXPRESSION</evaluation-mode>
       </expression>
       <expression>
-        <expression-string>det_res[-2].size()</expression-string>
+        <expression-string>y</expression-string>
         <language-id>Python</language-id>
         <evaluation-mode>EXPRESSION</evaluation-mode>
       </expression>
       <expression>
-        <expression-string>rel_b_dists.size()</expression-string>
+        <expression-string>tuple((pred[0], pred[1], pred[-1]))</expression-string>
         <language-id>Python</language-id>
         <evaluation-mode>EXPRESSION</evaluation-mode>
       </expression>
       <expression>
-        <expression-string>rel_b_dists</expression-string>
+        <expression-string>tuple(pred[0], pred[1], pred[-1])</expression-string>
         <language-id>Python</language-id>
         <evaluation-mode>EXPRESSION</evaluation-mode>
       </expression>
     </expressions>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/lib/sparse_targets.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="270">
-          <caret line="25" column="42" selection-start-line="25" selection-start-column="42" selection-end-line="25" selection-end-column="42" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/lib/get_dataset_counts.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="120">
-          <caret line="11" column="4" selection-start-line="11" selection-start-column="4" selection-end-line="11" selection-end-column="4" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/visualization/visualize_predcls_mask.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="3585">
-          <caret line="254" selection-start-line="254" selection-end-line="254" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/lib/stanford_model.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="279">
-          <caret line="346" column="38" selection-start-line="346" selection-start-column="38" selection-end-line="346" selection-end-column="38" />
-        </state>
-      </provider>
-    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/utils.py" />
     <entry file="file://$PROJECT_DIR$/models/train_rels_motifnet.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="466">
-          <caret line="90" selection-start-line="90" selection-end-line="90" />
+        <state relative-caret-position="125">
+          <caret line="644" column="25" selection-start-line="644" selection-start-column="25" selection-end-line="644" selection-end-column="25" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/models/train_rels_motifnet_mask.py">
+    <entry file="file://$PROJECT_DIR$/scripts/eval_kern_predcls.sh">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="466">
-          <caret line="343" column="21" selection-start-line="343" selection-start-column="15" selection-end-line="343" selection-end-column="21" />
+        <state relative-caret-position="15">
+          <caret line="1" selection-start-line="1" selection-end-line="12" selection-end-column="52" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/models/train_rels_motifnet_mask_mat_mbz.py">
+    <entry file="file://$PROJECT_DIR$/models/train_rels_stanford.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="466">
-          <caret line="106" column="13" selection-start-line="106" selection-start-column="13" selection-end-line="106" selection-end-column="13" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/models/eval_stat_stanford_motif_glat_mask.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="466">
-          <caret line="451" column="15" selection-start-line="451" selection-start-column="15" selection-end-line="451" selection-end-column="15" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/models/train_rels_motifnet_aemask.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="6585">
-          <caret line="470" column="24" selection-start-line="470" selection-start-column="24" selection-end-line="470" selection-end-column="24" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/lib/fpn/proposal_assignments/proposal_assignments_gtbox.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="194">
-          <caret line="163" column="24" selection-start-line="163" selection-start-column="24" selection-end-line="163" selection-end-column="24" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/models/eval_stanford_motif_glat_mask.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="90">
-          <caret line="270" column="27" lean-forward="true" selection-start-line="270" selection-start-column="27" selection-end-line="270" selection-end-column="27" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/scripts/train_glat_motifnet_mbz_v2now.sh">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="60">
-          <caret line="4" column="9" lean-forward="true" selection-start-line="4" selection-start-column="9" selection-end-line="4" selection-end-column="9" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/lib/surgery_originaly.py" />
-    <entry file="file://$PROJECT_DIR$/dataloaders/visual_genome_original.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="259">
-          <caret line="514" column="55" selection-start-line="514" selection-start-column="55" selection-end-line="514" selection-end-column="55" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/models/train_rels_motifnet_save_base_original_1.py" />
-    <entry file="file://$PROJECT_DIR$/models/train_rels_motifnet_save_base_original.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="195">
-          <caret line="538" column="21" lean-forward="true" selection-start-line="538" selection-start-column="21" selection-end-line="538" selection-end-column="21" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/lib/surgery_original.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="184">
-          <caret line="34" column="43" lean-forward="true" selection-start-line="34" selection-start-column="43" selection-end-line="34" selection-end-column="43" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/lib/motifnet_model_original.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="129">
-          <caret line="567" column="25" selection-start-line="567" selection-start-column="25" selection-end-line="567" selection-end-column="25" />
-          <folding>
-            <element signature="e#40#58#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/models/train_rels_motifnet_save_base.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="221">
-          <caret line="643" selection-start-line="643" selection-end-line="644" />
+        <state relative-caret-position="532">
+          <caret line="218" column="32" lean-forward="true" selection-start-line="218" selection-start-column="32" selection-end-line="218" selection-end-column="32" />
           <folding>
             <element signature="e#94#171#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/lib/linear_merge.py" />
-    <entry file="file://$PROJECT_DIR$/test.py">
+    <entry file="file://$PROJECT_DIR$/models/eval_stanford_motif_glat_copy_copy.py" />
+    <entry file="file://$PROJECT_DIR$/scripts/eval_motifnet_glat.sh">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="140">
-          <caret line="16" column="24" lean-forward="true" selection-start-line="16" selection-start-column="24" selection-end-line="16" selection-end-column="24" />
+        <state relative-caret-position="465">
+          <caret line="31" selection-start-line="31" selection-end-line="33" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/models/train_rels_motifnet_save_base_original_modified_lm.py">
+    <entry file="file://$PROJECT_DIR$/models/eval_stanford_motif_glat_intermediate.py" />
+    <entry file="file://$PROJECT_DIR$/models/eval_stanford_motif_glat_copy.py" />
+    <entry file="file://$PROJECT_DIR$/models/eval_stanford_motif.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="274">
-          <caret line="360" lean-forward="true" selection-start-line="360" selection-end-line="360" />
-          <folding>
-            <element signature="e#183#260#0" expanded="true" />
-          </folding>
+        <state relative-caret-position="285">
+          <caret line="29" column="55" selection-start-line="29" selection-start-column="55" selection-end-line="29" selection-end-column="55" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/lib/linear_merge_node.py">
+    <entry file="file://$PROJECT_DIR$/lib/stanford_model.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="75">
-          <caret line="5" selection-start-line="5" selection-end-line="5" selection-end-column="21" />
+        <state relative-caret-position="241">
+          <caret line="225" column="34" selection-start-line="225" selection-start-column="34" selection-end-line="225" selection-end-column="34" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/config.py">
+    <entry file="file://$PROJECT_DIR$/models/train_rels_baseline_2.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="3150">
-          <caret line="212" column="36" selection-start-line="212" selection-start-column="34" selection-end-line="212" selection-end-column="36" />
+        <state relative-caret-position="222">
+          <caret line="607" column="36" selection-start-line="607" selection-start-column="36" selection-end-line="607" selection-end-column="36" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/models/train_rels_stanford_save_base.py">
+    <entry file="file://$PROJECT_DIR$/lib/surgery_original.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="150">
-          <caret line="350" column="19" lean-forward="true" selection-start-line="350" selection-start-column="19" selection-end-line="350" selection-end-column="19" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/scripts/train_kern_sgdet.sh">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="15">
-          <caret line="1" column="27" lean-forward="true" selection-start-line="1" selection-start-column="27" selection-end-line="20" selection-end-column="44" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/scripts/train_glat_motifnet_mbz_sgcls.sh">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="120">
-          <caret line="8" column="7" lean-forward="true" selection-start-line="8" selection-start-column="7" selection-end-line="8" selection-end-column="7" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/scripts/train_glat_motifnet_mbz_v1.sh">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="135">
-          <caret line="9" lean-forward="true" selection-start-line="9" selection-end-line="9" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/dataloaders/visual_genome_test.py" />
-    <entry file="file://$PROJECT_DIR$/lib/kern_model.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="135">
-          <caret line="28" lean-forward="true" selection-start-line="28" selection-end-line="28" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/scripts/train_kern_sgcls.sh">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="15">
-          <caret line="1" column="14" selection-start-line="1" selection-start-column="14" selection-end-line="1" selection-end-column="27" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/models/train_rels_kern_save_base_sgcls_test.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-52">
-          <caret line="190" column="15" selection-start-line="190" selection-end-line="190" selection-end-column="15" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/lib/surgery.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-237">
-          <caret line="25" column="87" selection-start-line="25" selection-start-column="87" selection-end-line="25" selection-end-column="87" />
+        <state relative-caret-position="195">
+          <caret line="13" selection-start-line="13" selection-end-line="13" />
           <folding>
             <element signature="e#266#284#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/dataloaders/visual_genome_hy.py">
+    <entry file="file://$PROJECT_DIR$/models/eval_stanford_motif_glat.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="263">
-          <caret line="518" column="16" selection-start-line="518" selection-start-column="8" selection-end-line="518" selection-end-column="16" />
+        <state relative-caret-position="10110">
+          <caret line="674" selection-start-line="674" selection-end-line="674" />
+          <folding>
+            <element signature="e#1#78#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/scripts/train_glat_motifnet_mask_rank_mbz_1.sh">
+    <entry file="file://$PROJECT_DIR$/lib/surgery_working.py" />
+    <entry file="file://$PROJECT_DIR$/lib/motifnet_model_working.py" />
+    <entry file="file://$PROJECT_DIR$/models/eval_rels_ori.py">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/models/eval_rels.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="150">
-          <caret line="10" selection-start-line="10" selection-end-line="10" />
+        <state relative-caret-position="-179">
+          <caret line="442" column="9" lean-forward="true" selection-start-line="442" selection-start-column="9" selection-end-line="442" selection-end-column="9" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/models/train_rels.py">
+    <entry file="file://$PROJECT_DIR$/lib/kern_model.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-1264">
-          <caret line="9" column="11" lean-forward="true" selection-start-line="9" selection-start-column="11" selection-end-line="9" selection-end-column="11" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/models/train_rels_motifnet_save_base_modified.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="204">
-          <caret line="696" column="9" lean-forward="true" selection-start-line="696" selection-start-column="9" selection-end-line="696" selection-end-column="9" />
+        <state relative-caret-position="78">
+          <caret line="469" lean-forward="true" selection-start-line="469" selection-end-line="469" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/lib/motifnet_model.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="164">
-          <caret line="546" selection-start-line="546" selection-end-line="546" />
+        <state relative-caret-position="126">
+          <caret line="544" lean-forward="true" selection-start-line="544" selection-end-line="544" />
           <folding>
             <element signature="e#40#58#0" expanded="true" />
-            <element signature="e#23551#23616#0" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/lib/glat.py">
+    <entry file="file://$PROJECT_DIR$/models/train_rels.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="15">
-          <caret line="295" column="27" selection-start-line="295" selection-start-column="27" selection-end-line="295" selection-end-column="27" />
+        <state relative-caret-position="796">
+          <caret line="645" selection-start-line="645" selection-end-line="646" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/models/train_rels_motifnet_save_base_original_modified_logit.py">
+    <entry file="file://$PROJECT_DIR$/scripts/eval_kern_sgcls.sh">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="84">
-          <caret line="16" column="35" selection-start-line="16" selection-start-column="35" selection-end-line="16" selection-end-column="35" />
+        <state relative-caret-position="270">
+          <caret line="18" column="50" lean-forward="true" selection-start-line="18" selection-start-column="50" selection-end-line="18" selection-end-column="50" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/scripts/eval_stanford_sgcls.sh">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="303">
+          <caret line="29" column="59" selection-start-line="29" selection-start-column="59" selection-end-line="29" selection-end-column="59" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/lib/glat_logit.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="599">
-          <caret line="271" selection-start-line="271" selection-end-line="271" />
+        <state relative-caret-position="8595">
+          <caret line="580" selection-start-line="580" selection-end-line="580" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/models/train_rels_motifnet_save_base_original_modified.py">
+    <entry file="file://$PROJECT_DIR$/lib/surgery.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="287">
-          <caret line="632" column="29" selection-start-line="632" selection-start-column="29" selection-end-line="632" selection-end-column="29" />
-          <folding>
-            <element signature="e#183#260#0" expanded="true" />
-          </folding>
+        <state relative-caret-position="1350">
+          <caret line="97" selection-start-line="97" selection-end-line="97" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/dataloaders/visual_genome.py">
+    <entry file="file://$PROJECT_DIR$/models/eval_rels_sgcls_copy.py" />
+    <entry file="file://$PROJECT_DIR$/lib/glat.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="209">
-          <caret line="480" column="12" selection-start-line="480" selection-start-column="12" selection-end-line="480" selection-end-column="12" />
+        <state relative-caret-position="4035">
+          <caret line="276" column="8" lean-forward="true" selection-start-line="276" selection-start-column="8" selection-end-line="276" selection-end-column="8" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/models/train_rels_kern_save_base_sgcls.py">
+    <entry file="file://$PROJECT_DIR$/prob3.py" />
+    <entry file="file://$PROJECT_DIR$/prob2.py" />
+    <entry file="file://$PROJECT_DIR$/prob1.py" />
+    <entry file="file://$PROJECT_DIR$/models/eval_baseModel_glat.py" />
+    <entry file="file://$PROJECT_DIR$/models/eval_stanford_motif_glat_working.py" />
+    <entry file="file://$PROJECT_DIR$/lib/evaluation/sg_eval.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="159">
-          <caret line="202" column="9" selection-start-line="202" selection-start-column="9" selection-end-line="202" selection-end-column="9" />
+        <state relative-caret-position="5220">
+          <caret line="354" column="9" selection-start-line="354" selection-start-column="9" selection-end-line="354" selection-end-column="9" />
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/lib/evaluation/test_sg_eval.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="75">
+          <caret line="5" column="38" selection-start-line="5" selection-start-column="38" selection-end-line="5" selection-end-column="38" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/analyze_train_triplet_freq.py" />
+    <entry file="file://$PROJECT_DIR$/lib/surgery_sgcls.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="64">
+          <caret line="63" column="28" lean-forward="true" selection-start-line="63" selection-start-column="28" selection-end-line="63" selection-end-column="28" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/stanford_model_sgcls.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="134">
+          <caret line="115" column="16" selection-start-line="115" selection-start-column="16" selection-end-line="115" selection-end-column="16" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/models/train_rels_stanford_save_base_sgcls.py" />
+    <entry file="file://$PROJECT_DIR$/lib/stanford_model_sgcls_gt.py" />
+    <entry file="file://$PROJECT_DIR$/cal_new_triplet_eval_accuracy_copy.py" />
+    <entry file="file://$PROJECT_DIR$/Makefile_ori">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="165">
+          <caret line="11" column="30" lean-forward="true" selection-start-line="11" selection-start-column="30" selection-end-line="11" selection-end-column="30" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/cal_new_triplet_eval_accuracy.py" />
+    <entry file="file://$PROJECT_DIR$/cal_new_triplet_eval_accuracy_ranking.py" />
     <entry file="file://$PROJECT_DIR$/lib/kern_model_sgcls.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="159">
-          <caret line="435" column="22" selection-start-line="435" selection-start-column="22" selection-end-line="435" selection-end-column="22" />
+        <state relative-caret-position="514">
+          <caret line="414" column="61" selection-start-line="414" selection-start-column="61" selection-end-line="414" selection-end-column="61" />
           <folding>
             <element signature="e#21#39#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/models/train_rels_motifnet_save_base_original_modified_sgcls.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="71">
-          <caret line="128" lean-forward="true" selection-start-line="128" selection-end-line="128" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/lib/object_detector.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-175">
-          <caret line="421" lean-forward="true" selection-start-line="421" selection-end-line="421" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/lib/surgery_sgcls.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="279">
-          <caret line="26" column="42" lean-forward="true" selection-start-line="26" selection-start-column="42" selection-end-line="26" selection-end-column="42" />
-          <folding>
-            <element signature="e#266#284#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/lib/motifnet_model_sgcls.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="276">
-          <caret line="758" column="103" lean-forward="true" selection-start-line="756" selection-end-line="758" selection-end-column="103" />
-          <folding>
-            <element signature="e#40#58#0" expanded="true" />
-          </folding>
+        <state relative-caret-position="514">
+          <caret line="545" selection-start-line="545" selection-end-line="561" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/lib/stanford_model_sgcls.py">
+    <entry file="file://$PROJECT_DIR$/models/eval_rels_sgcls.py" />
+    <entry file="file://$PROJECT_DIR$/models/eval_stanford_motif_glat_working_sgcls.py" />
+    <entry file="file://$PROJECT_DIR$/Makefile">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="326">
-          <caret line="402" lean-forward="true" selection-start-line="402" selection-end-line="402" />
-          <folding>
-            <element signature="e#40#52#0" expanded="true" />
-          </folding>
+        <state relative-caret-position="30">
+          <caret line="2" column="9" selection-start-line="2" selection-start-column="9" selection-end-line="2" selection-end-column="9" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/models/train_rels_stanford_save_base_sgcls.py">
+    <entry file="file://$PROJECT_DIR$/lib/rel_model_linknet.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="315">
-          <caret line="957" column="14" lean-forward="true" selection-start-line="957" selection-start-column="14" selection-end-line="957" selection-end-column="14" />
-          <folding>
-            <element signature="e#94#171#0" expanded="true" />
-          </folding>
+        <state relative-caret-position="427">
+          <caret line="524" lean-forward="true" selection-start-line="524" selection-end-line="524" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/models/train_rels_stanford_save_base_sgcls_gt.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="270">
+          <caret line="18" column="17" selection-start-line="18" selection-start-column="17" selection-end-line="18" selection-end-column="17" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/models/train_rels_motifnet_save_base_original_modified_sgcls.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="255">
+          <caret line="51" column="20" selection-start-line="51" selection-start-column="20" selection-end-line="51" selection-end-column="27" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/dataloaders/visual_genome.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="210">
+          <caret line="14" column="25" lean-forward="true" selection-start-line="14" selection-start-column="25" selection-end-line="14" selection-end-column="25" />
         </state>
       </provider>
     </entry>
