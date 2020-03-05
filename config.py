@@ -107,7 +107,7 @@ class ModelConfig(object):
 
         self.resume_training = None
         self.resume_ckpt = None
-        self.model_s_m = None
+        # self.model_s_m = None
 
         self.parser = self.setup_parser()
         self.args = vars(self.parser.parse_args())
@@ -217,7 +217,7 @@ class ModelConfig(object):
 
         parser.add_argument('-resume', dest='resume_training', help='Continue training', type=bool, default=False)
         parser.add_argument('-resume_ckpt', dest='resume_ckpt', help='Resume training ckpt', type=str, default='')
-        parser.add_argument('-model_s_m', dest='model_s_m', help='Stanford model or MotifNet model', type=str, default='')
+        parser.add_argument('-model', dest='model', help='Stanford model or MotifNet model', type=str, default='')
 
 
         parser.add_argument('-use_ggnn_obj', dest='use_ggnn_obj', help='use GGNN_obj module', action='store_true')

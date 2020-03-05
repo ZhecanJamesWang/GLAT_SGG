@@ -115,9 +115,7 @@ detector = RelModel(classes=train.ind_to_classes, rel_classes=train.ind_to_predi
                     rec_dropout=rec_dropout,
                     use_bias=use_bias,
                     use_tanh=use_tanh,
-                    limit_vision=limit_vision,
-                    return_top100=True
-                    )
+                    limit_vision=limit_vision)
 
 
 model = GLATNET(vocab_num=[52, 153],

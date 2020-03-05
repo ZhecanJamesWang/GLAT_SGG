@@ -16,7 +16,9 @@ from config import BATCHNORM_MOMENTUM
 from lib.fpn.box_utils import bbox_overlaps, center_size, nms_overlaps
 from lib.get_union_boxes import UnionBoxesAndFeats
 from lib.fpn.proposal_assignments.rel_assignments import rel_assignments
-from lib.object_detector_2 import ObjectDetector, gather_res, load_vgg
+# from lib.object_detector_2 import ObjectDetector, gather_res, load_vgg
+from lib.object_detector import ObjectDetector, gather_res, load_vgg
+
 from lib.pytorch_misc import to_onehot, arange, diagonal_inds, Flattener
 from lib.sparse_targets import FrequencyBias
 from lib.surgery import filter_dets
