@@ -636,13 +636,15 @@ def glat_postprocess(pred_entry, mask_idx, if_predicting=False):
 
     # For SGCLS
     # pred_entry['entity_scores'] = pred_label_entities
-    # For bug0
-    pred_entry['obj_scores_rm'] = pred_label_entities
-    pred_entry['obj_scores'] = F.softmax(pred_label_entities, dim=1).max(1)[0]
 
-    pred_entry['pred_classes'] = pred_label_entities.max(1)[1]
 
     if conf.mode == "sgcls" or conf.mode == "sgdet":
+        # For bug0
+        pred_entry['obj_scores_rm'] = pred_label_entities
+        pred_entry['obj_scores'] = F.softmax(pred_label_entities, dim=1).max(1)[0]
+
+        pred_entry['pred_classes'] = pred_label_entities.max(1)[1]
+
         return pred_entry, useless_entity_id
     else:
         return pred_entry

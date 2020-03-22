@@ -16,6 +16,9 @@ from lib.pytorch_misc import optimistic_restore, de_chunkize, clip_grad_norm
 from lib.evaluation.sg_eval import BasicSceneGraphEvaluator
 from lib.pytorch_misc import print_para
 from torch.optim.lr_scheduler import ReduceLROnPlateau
+import pickle
+from torch.autograd import Variable
+
 
 conf = ModelConfig()
 # if conf.model == 'motifnet':
@@ -121,6 +124,15 @@ else:
 detector.cuda()
 
 
+def get_rel_class_weights(num_rels=len(train.ind_to_predicates), class_volume=1000, rel_counts_path=conf.rel_knowledge):
+    with open(rel_counts_path, 'rb') as fin:
+        rel_counts = pickle.load(fin)
+    beta = (class_volume - 1.0) / class_volume
+    rel_class_weights = (1.0 - beta) / (1 - (beta ** rel_counts))
+    rel_class_weights *= float(num_rels) / np.sum(rel_class_weights)
+    return rel_class_weights
+
+
 def train_epoch(epoch_num):
     detector.train()
     tr = []
@@ -136,6 +148,10 @@ def train_epoch(epoch_num):
             print(mn)
             print('-----------', flush=True)
             start = time.time()
+
+        # if b == 100:
+        #     break
+
     return pd.concat(tr, axis=1)
 
 
@@ -161,8 +177,12 @@ def train_batch(b, verbose=False):
     result = detector[b]
 
     losses = {}
+    # Bal weight >>>>>>>
+    rel_class_weights = get_rel_class_weights()
+    rel_class_weights = Variable(torch.from_numpy(rel_class_weights)).float().cuda()
+    # <<<<<<<<<<
     losses['class_loss'] = F.cross_entropy(result.rm_obj_dists, result.rm_obj_labels)
-    losses['rel_loss'] = F.cross_entropy(result.rel_dists, result.rel_labels[:, -1])
+    losses['rel_loss'] = F.cross_entropy(result.rel_dists, result.rel_labels[:, -1], weight=rel_class_weights)
     loss = sum(losses.values())
 
     optimizer.zero_grad()
@@ -181,6 +201,9 @@ def val_epoch():
     evaluator = BasicSceneGraphEvaluator.all_modes()
     for val_b, batch in enumerate(val_loader):
         val_batch(conf.num_gpus * val_b, batch, evaluator)
+
+        # if val_b == 100:
+        #     break
     evaluator[conf.mode].print_stats()
     return np.mean(evaluator[conf.mode].result_dict[conf.mode + '_recall'][100])
 

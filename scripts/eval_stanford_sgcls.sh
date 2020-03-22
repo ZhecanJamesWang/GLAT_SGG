@@ -30,7 +30,7 @@ echo "EVALING STANFORD"
 #    -p 100 -hidden_dim 512 -pooling_dim 4096 -lr 1e-3 -ngpu 1 -test -ckpt checkpoints/motifnet/vgrel-motifnet-sgcls.tar -nepoch 50 -use_bias -cache motifnet_sgcls
 
 python models/eval_stanford_motif.py -m sgcls -model_s_m stanford -b 6 -clip 5 \
-    -p 100 -pooling_dim 4096 -lr 1e-3 -ngpu 1 -test -ckpt checkpoints/stanford_1/vgrel-7.tar -nepoch 50 -cache ./cache/stanford_sgcls
+    -p 100 -pooling_dim 4096 -lr 1e-3 -ngpu 1 -test -ckpt checkpoints/stanford_1/vgrel-7.tar -nepoch 50 -cache ./cache/stanford_sgcls_same | tee ./logs/eval_stanford_sgcls.txt
 
 
 #python models/eval_rels.py -m predcls -model motifnet -order leftright -nl_obj 2 -nl_edge 4 -b 6 -clip 5 \

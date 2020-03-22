@@ -22,11 +22,13 @@ import pdb
 # from lib.kern_model import KERN
 
 #--------updated--------
-# from lib.stanford_model import RelModelStanford as RelModel
-from lib.motifnet_model import RelModel
-# from lib.kern_model import KERN
+from lib.kern_model import KERN
 
-from lib.glat import GLATNET
+
+# Adding vis fea
+# from lib.glat import GLATNET
+from lib.glat_fea import GLATNET
+
 import pdb
 from torch.autograd import Variable
 import copy
@@ -80,6 +82,63 @@ train_loader, val_loader = VGDataLoader.splits(train, val, mode='rel',
 
 # python models/train_rels.py -m sgcls -model stanford -b 4 -p 400 -lr 1e-4 -ngpu 1 -ckpt checkpoints/vgdet/vg-24.tar -save_dir checkpoints/stanford -adam
 
+if conf.model_s_m == 'stanford':
+    order = 'confidence'
+    nl_edge = 2
+    nl_obj = 1
+    hidden_dim = 256
+    rec_dropout = 0.1
+    pass_in_obj_feats_to_decoder = False
+    pass_in_obj_feats_to_edge = False
+    use_bias = False
+    use_tanh = False
+    limit_vision = False
+    from lib.stanford_model import RelModelStanford as RelModel
+elif conf.model_s_m == 'motifnet':
+    order = 'leftright'
+    nl_obj = 2
+    nl_edge = 4
+    hidden_dim = 512
+    pass_in_obj_feats_to_decoder = False
+    pass_in_obj_feats_to_edge = False
+    rec_dropout = 0.1
+    use_bias = True
+    use_tanh = False
+    limit_vision = False
+    from lib.motifnet_model import RelModel
+
+
+if conf.model_s_m == 'motifnet' or conf.model_s_m == 'stanford':
+    detector = RelModel(classes=train.ind_to_classes, rel_classes=train.ind_to_predicates,
+                        num_gpus=conf.num_gpus, mode=conf.mode, require_overlap_det=True,
+                        use_resnet=conf.use_resnet, order=order,
+                        nl_edge=nl_edge, nl_obj=nl_obj, hidden_dim=hidden_dim,
+                        use_proposals=conf.use_proposals,
+                        pass_in_obj_feats_to_decoder=pass_in_obj_feats_to_decoder,
+                        pass_in_obj_feats_to_edge=pass_in_obj_feats_to_edge,
+                        pooling_dim=conf.pooling_dim,
+                        rec_dropout=rec_dropout,
+                        use_bias=use_bias,
+                        use_tanh=use_tanh,
+                        limit_vision=limit_vision,
+                        return_top100=True,
+                        return_unbias_logit=True,
+                        )
+elif conf.model_s_m =='kern':
+    detector = KERN(classes=train.ind_to_classes, rel_classes=train.ind_to_predicates,
+                    num_gpus=conf.num_gpus, mode=conf.mode, require_overlap_det=True,
+                    use_resnet=conf.use_resnet, use_proposals=conf.use_proposals,
+                    use_ggnn_obj=conf.use_ggnn_obj, ggnn_obj_time_step_num=conf.ggnn_obj_time_step_num,
+                    ggnn_obj_hidden_dim=conf.ggnn_obj_hidden_dim, ggnn_obj_output_dim=conf.ggnn_obj_output_dim,
+                    use_obj_knowledge=conf.use_obj_knowledge, obj_knowledge=conf.obj_knowledge,
+                    use_ggnn_rel=conf.use_ggnn_rel, ggnn_rel_time_step_num=conf.ggnn_rel_time_step_num,
+                    ggnn_rel_hidden_dim=conf.ggnn_rel_hidden_dim, ggnn_rel_output_dim=conf.ggnn_rel_output_dim,
+                    use_rel_knowledge=conf.use_rel_knowledge, rel_knowledge=conf.rel_knowledge,
+                    return_top100=True, return_unbias_logit=True, return_vis_fea=True)
+else:
+    print('wrong model name')
+
+
 order = 'leftright'
 nl_obj = 2
 nl_edge = 4
@@ -90,41 +149,6 @@ rec_dropout = 0.1
 use_bias = True
 use_tanh = False
 limit_vision = False
-
-
-detector = RelModel(classes=train.ind_to_classes, rel_classes=train.ind_to_predicates,
-                    num_gpus=conf.num_gpus, mode=conf.mode, require_overlap_det=True,
-                    use_resnet=conf.use_resnet, order=order,
-                    nl_edge=nl_edge, nl_obj=nl_obj, hidden_dim=hidden_dim,
-                    use_proposals=conf.use_proposals,
-                    pass_in_obj_feats_to_decoder=pass_in_obj_feats_to_decoder,
-                    pass_in_obj_feats_to_edge=pass_in_obj_feats_to_edge,
-                    pooling_dim=conf.pooling_dim,
-                    rec_dropout=rec_dropout,
-                    use_bias=use_bias,
-                    use_tanh=use_tanh,
-                    limit_vision=limit_vision,
-                    return_top100=True,
-                    return_unbias_logit=True
-                    )
-
-
-# detector = RelModel(classes=train.ind_to_classes, rel_classes=train.ind_to_predicates,
-#                     num_gpus=conf.num_gpus, mode=conf.mode, require_overlap_det=True,
-#                     use_resnet=conf.use_resnet, order=order,
-#                     nl_edge=nl_edge, nl_obj=nl_obj, hidden_dim=hidden_dim,
-#                     use_proposals=conf.use_proposals,
-#                     pass_in_obj_feats_to_decoder=pass_in_obj_feats_to_decoder,
-#                     pass_in_obj_feats_to_edge=pass_in_obj_feats_to_edge,
-#                     pooling_dim=conf.pooling_dim,
-#                     rec_dropout=rec_dropout,
-#                     use_bias=use_bias,
-#                     use_tanh=use_tanh,
-#                     limit_vision=limit_vision,
-#                     return_top100=True,
-#                     return_unbias_logit=True
-#                     )
-
 
 model = GLATNET(vocab_num=[52, 153],
                 feat_dim=300,
@@ -235,6 +259,9 @@ def train_epoch(epoch_num, train_results, train_bias_logits, train_det_ress):
     accs = [0, 0]
 
     for b, batch in enumerate(train_loader):
+        # if b < 3300:
+        #     continue
+
         tr.append(train_batch(batch, train_results, train_bias_logits, train_det_ress, epoch_num=epoch_num, batch_num=b, accs=accs,
                               verbose=b % (conf.print_interval*10) == 0)) #b == 0))
 
@@ -244,12 +271,16 @@ def train_epoch(epoch_num, train_results, train_bias_logits, train_det_ress):
             print("\ne{:2d}b{:5d}/{:5d} {:.3f}s/batch, {:.1f}m/epoch".format(
                 epoch_num, b, len(train_loader), time_per_batch, len(train_loader) * time_per_batch / 60))
             print(mn)
-            print('acc of mask:', accs[0]*1.0 / accs[1])
-            print('num of mask:', accs[1])
+            # print('acc of mask:', accs[0]*1.0 / accs[1])
+            # print('num of mask:', accs[1])
             print('-----------', flush=True)
             start = time.time()
 
-            # break
+
+        # if b == 400:
+        #     break
+
+        # torch.cuda.empty_cache()
 
     return pd.concat(tr, axis=1)
 
@@ -265,6 +296,13 @@ def transfer_result_cpu(result):
 
     result_cpu.rm_obj_dists = result.rm_obj_dists.cpu()
     result_cpu.rm_obj_labels = result.rm_obj_labels.cpu()
+
+    # pdb.set_trace()
+    # Adding vis fea
+    result_cpu.obj_visfea = result.obj_visfea.data.cpu()
+    result_cpu.rel_visfea = result.rel_visfea.data.cpu()
+
+    # pdb.set_trace()
     return result_cpu
 
 def transfer_logit_cpu(bias_logit):
@@ -288,6 +326,10 @@ def transfer_result_gpu(result):
 
     result_gpu.rm_obj_dists = result.rm_obj_dists.cuda()
     result_gpu.rm_obj_labels = result.rm_obj_labels.cuda()
+
+    result_gpu.obj_visfea = result.obj_visfea.cuda()
+    result_gpu.rel_visfea = result.rel_visfea.cuda()
+
     return result_gpu
 
 def transfer_logit_gpu(bias_logit):
@@ -321,6 +363,9 @@ def train_batch(b, train_results, train_bias_logits, train_det_ress, epoch_num, 
     # t0 = time.time()
     if epoch_num == 0:
         result, bias_logit, det_res = detector[b]
+        # Adding vis fea
+        result.rel_visfea = result.rel_visfea[det_res[-2]]
+
         train_results.append(transfer_result_cpu(result))
         train_bias_logits.append(transfer_logit_cpu(bias_logit))
         train_det_ress.append(transfer_det_cpu(det_res))
@@ -329,22 +374,16 @@ def train_batch(b, train_results, train_bias_logits, train_det_ress, epoch_num, 
         bias_logit = transfer_logit_gpu(train_bias_logits[batch_num])
         det_res = transfer_det_gpu(train_det_ress[batch_num])
 
-    # pdb.set_trace()
-    # result.rm_obj_dists(num_entities, 151)  result.obj_preds(num_entities)  result.rm_obj_labels(num_entities)
-    # result.rel_dists(num_predicates, 51)  result.rel_labels(num_predicates)
-    # result.rel_inds(num_predicates, 3) 3
-    # pdb.set_trace()
-    # rel_inds obj_idx?-> global idx
-
-    # t1 = time.time()
-    # print('base model time', t1-t0)
-
     if conf.return_top100 and len(det_res) != 0:
 
         pred_entry = {
             'pred_classes': result.obj_preds,  # (num_entities) Tensor Variable
             'pred_rel_inds': det_res[3],  # (num_predicates, 3) Tensor Variable
             'rel_scores': det_res[4],  # (num_predicates, 51) Tensor Variable
+            # adding vis fea >>>>>>>
+            'entity_visfea': result.obj_visfea,  # (num_entities, 4096) Tensor Variable
+            'rel_visfea': result.rel_visfea, # (num_predicate, 4096) Tensor Variable
+            # <<<<<<<<<<<<<<<<<
         }
     else:
         pred_entry = {
@@ -352,76 +391,9 @@ def train_batch(b, train_results, train_bias_logits, train_det_ress, epoch_num, 
             'pred_rel_inds': result.rel_inds,  # (num_predicates, 3) Tensor Variable
             'rel_scores': result.rel_dists,   # (num_predicates, 51) Tensor Variable
         }
-
-    threshold = 0.35
     b_100_idx = det_res[-2]
-    bias_logit_norm = F.softmax(bias_logit[:, 1:], dim=1)
-    bias_logit_norm_inalltop = bias_logit_norm[b_100_idx]
 
-    num_predicates = []
-    idx_predicates_inalltop = []
-    for i in range(conf.batch_size):
-        idx_predicates_inalltop.append(torch.nonzero(det_res[3][:, 0] == i)[:, 0].tolist())
-        num_predicate = int((result.rel_inds[:, 0] == i).sum())
-        if num_predicate >= 100:
-            num_predicates.append(100)
-        else:
-            num_predicates.append(num_predicate)
-        assert num_predicates[i] == int((det_res[3][:, 0] == i).sum())
-
-    keep_nums = []
-    for i in range(len(num_predicates)):
-        keep_num = math.ceil(num_predicates[i]*0.3) if num_predicates[i] <= 100 else 30
-        keep_nums.append(keep_num)
-
-    mask_idxs_inalltop = []
-    input_pred_idxs_inalltop = []
-
-    for i in range(len(num_predicates)):
-        keep_idx_inalltop = list(range(keep_nums[i]))
-        keep_idx_inalltop = [keep_idx+sum(num_predicates[:i]) for keep_idx in keep_idx_inalltop] if i>0 else keep_idx_inalltop
-
-        idx_predicates_inalltop_i = idx_predicates_inalltop[i]
-        mask_idx_initop = torch.nonzero(bias_logit_norm_inalltop[idx_predicates_inalltop_i, :].max(1)[0] < threshold)
-        if len(mask_idx_initop) != 0:
-            mask_idx_initop = mask_idx_initop[:, 0].data
-            mask_idx_inalltop = mask_idx_initop + sum(num_predicates[:i]) if i > 0 else mask_idx_initop
-            mask_idx_inalltop = mask_idx_inalltop.tolist()
-            mask_idxs_inalltop += mask_idx_inalltop
-            mask_in_keep_num = len(torch.nonzero(mask_idx_initop < keep_nums[i]))
-            input_pred_num = len(mask_idx_initop) + keep_nums[i] - mask_in_keep_num
-        else:
-            mask_idx_inalltop = []
-            mask_in_keep_num = 0
-            input_pred_num = keep_nums[i]
-
-
-        for pred_id in range(input_pred_num):
-            if pred_id < keep_nums[i]:
-                input_pred_idxs_inalltop.append(keep_idx_inalltop[pred_id])
-            else:
-                input_pred_idxs_inalltop.append(mask_idx_inalltop[pred_id-keep_nums[i]+mask_in_keep_num])
-
-    pred_entry['pred_rel_inds'] = pred_entry['pred_rel_inds'][input_pred_idxs_inalltop]
-    pred_entry['rel_scores'] = pred_entry['rel_scores'][input_pred_idxs_inalltop]
-
-    mask_idxs_ininput = torch.nonzero(bias_logit_norm_inalltop[input_pred_idxs_inalltop, :].max(1)[0] < threshold)[:, 0].data
-    # mask_idxs_ininput = mask_idxs_ininput.tolist()
-
-    # pdb.set_trace()
-
-    assert len(mask_idxs_inalltop) == mask_idxs_ininput.size(0)
-
-    # assert sum(num_predicates) == b_100_idx.size(0)
-    # mask_idx = []
-    # for b_idx, num_predicate in enumerate(num_predicates):
-    #     start = sum(num_predicates[:b_idx])
-    #     start = int(start + (1-0.3)*num_predicate)
-    #     end = sum(num_predicates[:b_idx]) + num_predicate
-    #     mask_idx.append(torch.Tensor(range(start, end)).long().cuda())
-    # mask_idx = torch.cat(mask_idx)
-
-    pred_entry = glat_postprocess(pred_entry, if_predicting=False, mask_idx=mask_idxs_ininput)
+    pred_entry = glat_postprocess(pred_entry, if_predicting=False, mask_idx=None)
 
     # For SGCLS
     if conf.mode == "sgcls" or conf.mode == "sgdet":
@@ -431,31 +403,14 @@ def train_batch(b, train_results, train_bias_logits, train_det_ress, epoch_num, 
     rels_b_100 = pred_entry['pred_rel_inds']
     pred_scores_sorted_b_100 = pred_entry['rel_scores'][:, :-1]
 
-    # For SGCLS
-    # result.rm_obj_dists = pred_entry['entity_scores']
-    # result.obj_preds = pred_entry['pred_classes']
     # For bug0
     result.rm_obj_dists = pred_entry['obj_scores_rm']
     result.obj_preds = pred_entry['pred_classes']
 
-    # t2 = time.time()
-    # print('glat model time', t2-t1)
-
-    #
-    # rels_total = sorted(set(zip(totla_idx, rels_total)))
-    # rels_total = [rels[1] for rels in rels_total]
-    #
-    # pred_scores_sorted_total = sorted(set(zip(totla_idx, pred_scores_sorted_total)))
-    # pred_scores_sorted_total = [pred_scores[1] for pred_scores in pred_scores_sorted_total]
-
-    # merge two lists
-
-    # if conf.return_top100:
-    #     result.rel_inds = rels_total
-    #     result.rel_dists = pred_scores_sorted_total
-    # else:
-    #     result.rel_inds = pred_entry['pred_rel_inds']
-    #     result.rel_dists = pred_entry['rel_scores']
+    for i in range(int(b_100_idx.size()[0])):
+        idx = b_100_idx[i]
+        result.rel_dists[idx] = pred_scores_sorted_b_100[i]
+        assert (result.rel_inds[idx] == rels_b_100[i]).all()
 
     # For SGCLS
     useful_entity_id = list(range(result.rm_obj_labels.size(0)))
@@ -467,8 +422,9 @@ def train_batch(b, train_results, train_bias_logits, train_det_ress, epoch_num, 
     # For SGCLS
     if conf.mode == "sgcls" or conf.mode == "sgdet":
         losses['class_loss'] = F.cross_entropy(result.rm_obj_dists, result.rm_obj_labels[useful_entity_id])
+    losses['rel_loss'] = F.cross_entropy(result.rel_dists, result.rel_labels[:, -1])
+    # losses['rel_loss'] = F.cross_entropy(pred_scores_sorted_b_100, result.rel_labels[b_100_idx[input_pred_idxs_inalltop]][:, -1])
 
-    losses['rel_loss'] = F.cross_entropy(pred_scores_sorted_b_100, result.rel_labels[b_100_idx[input_pred_idxs_inalltop]][:, -1])
     loss = sum(losses.values())
 
     optimizer.zero_grad()
@@ -479,19 +435,8 @@ def train_batch(b, train_results, train_bias_logits, train_det_ress, epoch_num, 
     losses['total'] = loss
     optimizer.step()
 
-    # pdb.set_trace()
-
-    if mask_idxs_inalltop is not None:
-        abs_mask_idx = b_100_idx[mask_idxs_inalltop]
-        gt = result.rel_labels.data[abs_mask_idx][:, -1]
-        pred = pred_scores_sorted_b_100[mask_idxs_ininput][:, 1:].max(1)[1].data + 1
-        # pred = pred.type_as(gt)
-
-        correct = int((pred == gt).sum())
-        total = int(pred.size(0))
-        accs[0] = accs[0] + correct
-        accs[1] = accs[1] + total
-
+    # del result.obj_visfea
+    # del result.rel_visfea
     res = pd.Series({x: y.data[0] for x, y in losses.items()})
     return res
 
@@ -526,8 +471,8 @@ def val_epoch(epoch, eval_results, eval_logits, eval_det_ress):
 
     mean_recall = calculate_mR_from_evaluator_list(evaluator_list, conf.mode)
     mean_recall_mp = calculate_mR_from_evaluator_list(evaluator_multiple_preds_list, conf.mode, multiple_preds=True)
-    print('test acc of mask:', accs[0] * 1.0 / accs[1])
-    writer.add_scalar('test acc of mask', accs[0] * 1.0 / accs[1], epoch)
+    # print('test acc of mask:', accs[0] * 1.0 / accs[1])
+    # writer.add_scalar('test acc of mask', accs[0] * 1.0 / accs[1], epoch)
 
     return recall, recall_mp, mean_recall, mean_recall_mp
 
@@ -575,22 +520,18 @@ def glat_wrapper(total_data):
     if torch.is_tensor(adjs_con):
         adj_con = Variable(adjs_con)
 
-    pred_label, pred_connect = model(input_class, adj_con, node_type)
+    # Adding vis fea >>>>>>>>>>
+    entity_visfea = total_data['entity_visfea']
+    if torch.is_tensor(total_data['entity_visfea']):
+        entity_visfea = Variable(total_data['entity_visfea'])
+    rel_visfea = total_data['rel_visfea']
+    if torch.is_tensor(total_data['rel_visfea']):
+        rel_visfea = Variable(total_data['rel_visfea'])
+    # <<<<<<<<<<<<<<<<<<
 
-    # pred_label_predicate = input_class[node_type == 0]
-    # pred_label_entities = input_class[node_type == 1]
-
-    # if input_class.size(0) ==1:
-    #     pred_label_predicate = pred_label[0]  # flatten predicate (B*N, 51)
-    #     pred_label_entities = pred_label[1]  # flatten entities
-    # else:
-    #     pred_label_predicate = []
-    #     pred_label_entities = []
-    #     predicate_num_list = [torch.nonzero(node_type[i] == 0).size(0) for i in range(node_type.size(0))]
-    #     for i in range(len(predicate_num_list)):
-    #         predicate_num_list[i] = predicate_num_list[i] + predicate_num_list[i-1] if i != 0 else predicate_num_list[i]
-    #     for i in range(len(predicate_num_list)):
-    #         pred_label_predicate.append()
+    # Adding vis fea >>>>>>>>>>
+    pred_label, pred_connect = model(input_class, adj_con, node_type, entity_visfea, rel_visfea)
+    # <<<<<<<<<<<<<<<<<<
 
     pred_label_predicate = pred_label[0]  # flatten predicate (B*N, 51)
     pred_label_entities = pred_label[1]  # flatten entities
@@ -640,6 +581,13 @@ def glat_postprocess(pred_entry, mask_idx, if_predicting=False):
     pred_entry['rel_scores'] = tensor2variable(pred_entry['rel_scores'])
     pred_entry['pred_classes'] = tensor2variable(pred_entry['pred_classes'])
 
+    # adding vis fea >>>>>>>
+    pred_entry['entity_visfea'] = tensor2variable(pred_entry['entity_visfea'])
+    pred_entry['rel_visfea'] = tensor2variable(pred_entry['rel_visfea'])
+    assert pred_entry['rel_visfea'].size(0) == pred_entry['rel_scores'].size(0)
+    assert pred_entry['entity_visfea'].size(0) == pred_entry['pred_classes'].size(0)
+    # <<<<<<<
+
     pred_entry['rel_classes'] = torch.max(pred_entry['rel_scores'][:, 1:], dim=1)[1].unsqueeze(1) + 1
     if mask_idx is not None:
         pred_entry['rel_classes'][mask_idx] = 51
@@ -657,8 +605,8 @@ def glat_postprocess(pred_entry, mask_idx, if_predicting=False):
     pred_label_predicate, pred_label_entities = glat_wrapper(total_data)
 
     pred_entry['rel_scores'] = pred_label_predicate
-    # pdb.set_trace()
     # For SGCLS
+
 
     if conf.mode == "sgcls" or conf.mode == "sgdet":
         # For bug0
@@ -691,16 +639,21 @@ def val_batch(batch_num, b, evaluator, evaluator_multiple_preds, evaluator_list,
     # det_res = detector[b]
     # dict_gt, det_res = detector[b]
 
+    # Adding vis fea
     if epoch_num == 0:
-        dict_gt, bias_logit, det_res = detector[b]
-        eval_results.append(dict_gt)
+        vis_result, bias_logit, det_res = detector[b]
+
+        # Adding vis fea
+        vis_result[1] = vis_result[1][det_res[-2]]
+        obj_visfea, rel_visfea = vis_result
+
+        eval_results.append(vis_result)
         eval_logits.append(bias_logit)
         eval_det_ress.append(det_res)
     else:
-        dict_gt = eval_results[batch_num]
+        obj_visfea, rel_visfea = eval_results[batch_num]
         bias_logit = eval_logits[batch_num]
         det_res = eval_det_ress[batch_num]
-
 
     # if conf.num_gpus == 1:
     det_res = [det_res]
@@ -730,7 +683,12 @@ def val_batch(batch_num, b, evaluator, evaluator_multiple_preds, evaluator_list,
                 'pred_rel_inds': rels_i_b100, #(506, 2) (240, 2)
                 'obj_scores': obj_scores_i, #(23,) (16,)
                 'rel_scores': pred_scores_i_b100,  # hack for now. (506, 51) (240, 51)
+                # adding vis fea >>>>>>>
+                'entity_visfea': obj_visfea,  # (num_entities, 4096) Tensor Variable
+                'rel_visfea': rel_visfea, # (num_predicate, 4096) Tensor Variable
+                # <<<<<<<<<<<<<<<<<
             }
+
         else:
             pred_entry = {
                 'pred_boxes': boxes_i * BOX_SCALE/IM_SCALE, #(23, 4) (16, 4)
@@ -739,47 +697,9 @@ def val_batch(batch_num, b, evaluator, evaluator_multiple_preds, evaluator_list,
                 'obj_scores': obj_scores_i, #(23,) (16,)
                 'rel_scores': pred_scores_i,  # hack for now. (506, 51) (240, 51)
             }
-        # pdb.set_trace()
-        threshold = 0.35
-        num_predicate = rel_scores_idx_b100.shape[0]
-        keep_num = math.ceil(num_predicate*0.3) if num_predicate <= 100 else 30
-        keep_idx_intop100 = list(range(int(keep_num)))
 
-        bias_logit_norm = F.softmax(bias_logit[:, 1:], dim=1).data.cpu().numpy()
-        mask_idxs_intop100 = np.nonzero(bias_logit_norm[rel_scores_idx_b100, :].max(1) < threshold)[0]
-        mask_in_keep_num = np.where(mask_idxs_intop100<keep_num)[0].shape[0]
-        mask_idxs_intop100 = mask_idxs_intop100.tolist()
+        pred_entry = glat_postprocess(pred_entry, if_predicting=True, mask_idx=None)
 
-        input_pred_num = len(mask_idxs_intop100) + keep_num - mask_in_keep_num
-        input_pred_idxs_intop100 = np.zeros(input_pred_num, dtype=int)
-
-        keep_idx_ininput = []
-        mask_idx_ininput = []
-
-        # pdb.set_trace()
-
-        for i in range(input_pred_num):
-            if i < keep_num:
-                input_pred_idxs_intop100[i] = i
-                if i not in mask_idxs_intop100:
-                    keep_idx_ininput.append(i)
-                else:
-                    mask_idx_ininput.append(i)
-            else:
-                input_pred_idxs_intop100[i] = mask_idxs_intop100[i-keep_num+mask_in_keep_num]
-                mask_idx_ininput.append(i)
-
-        if len(mask_idx_ininput) == 0:
-            mask_idx_ininput = None
-
-        pred_entry['pred_rel_inds'] = rels_i_b100[input_pred_idxs_intop100]
-        pred_entry['rel_scores'] = pred_scores_i_b100[input_pred_idxs_intop100]
-        mask_idx = mask_idx_ininput
-
-        # if batch_num == 32 or batch_num == 33:
-        #     pdb.set_trace()
-
-        pred_entry = glat_postprocess(pred_entry, if_predicting=True, mask_idx=mask_idx)
 
         # For SGCLS
         if conf.mode == "sgcls" or conf.mode == "sgdet":
@@ -788,36 +708,11 @@ def val_batch(batch_num, b, evaluator, evaluator_multiple_preds, evaluator_list,
 
         pred_entry = cuda2numpy_dict(pred_entry)
 
-        pred_scores_i_b100_updated = copy.deepcopy(pred_scores_i_b100)
-        rels_i_b100_updated = copy.deepcopy(rels_i_b100)
-
-        # pdb.set_trace()
-
-        for i_ininput, i_intop100 in enumerate(input_pred_idxs_intop100):
-            if mask_idx is not None:
-                if i_ininput in mask_idx_ininput:
-                    pred_scores_i_b100_updated[i_intop100] = pred_entry['rel_scores'][i_ininput, :-1]
-                    rels_i_b100_updated[i_intop100] = pred_entry['pred_rel_inds'][i_ininput]
-
-        pred_entry['rel_scores'] = pred_scores_i_b100_updated
-        pred_entry['pred_rel_inds'] = rels_i_b100_updated
-
         if len(rels_i_a100.shape) == 1:
-            pred_entry['rel_scores'] = pred_entry['rel_scores']
+            pred_entry['rel_scores'] = pred_entry['rel_scores'][:, :-1]
         else:
             pred_entry['pred_rel_inds'] = np.concatenate((pred_entry['pred_rel_inds'], rels_i_a100), axis=0)
-            pred_entry['rel_scores'] = np.concatenate((pred_entry['rel_scores'], pred_scores_i_a100), axis=0)
-
-
-        if mask_idx is not None:
-            for idx in range(len(mask_idx)):
-                sub = rels_i_b100.data[mask_idxs_intop100[idx], 0]
-                obj = rels_i_b100.data[mask_idxs_intop100[idx], 1]
-                pred_class = pred_entry['rel_scores'][mask_idxs_intop100[idx], 1:].argmax()+1
-                if (int(sub), int(obj)) in dict_gt.keys():
-                    accs[1] += 1
-                    if int(pred_class) in dict_gt[(int(sub), int(obj))]:
-                        accs[0] += 1
+            pred_entry['rel_scores'] = np.concatenate((pred_entry['rel_scores'][:, :-1], pred_scores_i_a100), axis=0)
 
         eval_entry(conf.mode, gt_entry, pred_entry, evaluator, evaluator_multiple_preds,
                    evaluator_list, evaluator_multiple_preds_list)

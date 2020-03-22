@@ -1,5 +1,7 @@
 """
-Training script for scene graph detection. Integrated with my faster rcnn setup
+Adapted from https://github.com/rowanz/neural-motifs/blob/master/models/train_rels.py
+
+Add gce_loss to losses
 """
 
 from dataloaders.visual_genome import VGDataLoader, VG
@@ -13,19 +15,37 @@ import os
 from config import ModelConfig, BOX_SCALE, IM_SCALE
 from torch.nn import functional as F
 from lib.pytorch_misc import optimistic_restore, de_chunkize, clip_grad_norm
-from lib.evaluation.sg_eval import BasicSceneGraphEvaluator
+# from lib.evaluation.sg_eval import BasicSceneGraphEvaluator
+from lib.evaluation.sg_eval import BasicSceneGraphEvaluator, calculate_mR_from_evaluator_list, eval_entry
+
 from lib.pytorch_misc import print_para
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 
 conf = ModelConfig()
-# if conf.model == 'motifnet':
-#     from lib.rel_model import RelModel
-# elif conf.model == 'stanford':
-#     from lib.rel_model_stanford import RelModelStanford as RelModel
-# else:
-#     raise ValueError()
 
-from lib.stanford_model import RelModelStanford as RelModel
+if conf.tb_log_dir is not None:
+    from tensorboardX import SummaryWriter
+    if not os.path.exists(conf.tb_log_dir):
+        os.makedirs(conf.tb_log_dir)
+    writer = SummaryWriter(log_dir=conf.tb_log_dir)
+    use_tb = True
+else:
+    use_tb = False
+
+
+if conf.model == 'motifnet':
+    from lib.rel_model import RelModel
+elif conf.model == 'linknet':
+    from lib.rel_model_linknet import RelModelLinknet as RelModel
+elif conf.model == 'stanford':
+    from lib.rel_model_stanford import RelModelStanford as RelModel
+
+else:
+    raise ValueError()
+
+ind_to_predicates = train.ind_to_predicates # ind_to_predicates[0] means no relationship
+ind_to_classes = train.ind_to_classes
+
 
 train, val, _ = VG.splits(num_val_im=conf.val_size, filter_duplicate_rels=True,
                           use_proposals=conf.use_proposals,
@@ -35,40 +55,18 @@ train_loader, val_loader = VGDataLoader.splits(train, val, mode='rel',
                                                num_workers=conf.num_workers,
                                                num_gpus=conf.num_gpus)
 
-order = 'confidence'
-nl_edge = 2
-nl_obj = 1
-hidden_dim = 256
-rec_dropout = 0.1
-
-pass_in_obj_feats_to_decoder = False
-pass_in_obj_feats_to_edge = False
-use_bias = False
-use_tanh = False
-limit_vision = False
-
-# pass_in_obj_feats_to_decoder = True
-# pass_in_obj_feats_to_edge = True
-# use_bias = True
-# use_tanh = True
-# limit_vision = True
-
-
 detector = RelModel(classes=train.ind_to_classes, rel_classes=train.ind_to_predicates,
                     num_gpus=conf.num_gpus, mode=conf.mode, require_overlap_det=True,
-                    use_resnet=conf.use_resnet, order=order,
-                    nl_edge=nl_edge, nl_obj=nl_obj, hidden_dim=hidden_dim,
+                    use_resnet=conf.use_resnet, order=conf.order,
+                    nl_edge=conf.nl_edge, nl_obj=conf.nl_obj, hidden_dim=conf.hidden_dim,
                     use_proposals=conf.use_proposals,
-                    pass_in_obj_feats_to_decoder=pass_in_obj_feats_to_decoder,
-                    pass_in_obj_feats_to_edge=pass_in_obj_feats_to_edge,
+                    pass_in_obj_feats_to_decoder=conf.pass_in_obj_feats_to_decoder,
+                    pass_in_obj_feats_to_edge=conf.pass_in_obj_feats_to_edge,
                     pooling_dim=conf.pooling_dim,
-                    rec_dropout=rec_dropout,
-                    use_bias=use_bias,
-                    use_tanh=use_tanh,
-                    limit_vision=limit_vision,
-                    return_unbias_logit=False,
-                    return_top100=False,
-                    return_vis_fea=False,
+                    rec_dropout=conf.rec_dropout,
+                    use_bias=conf.use_bias,
+                    use_tanh=conf.use_tanh,
+                    limit_vision=conf.limit_vision
                     )
 
 # Freeze the detector
@@ -161,6 +159,7 @@ def train_batch(b, verbose=False):
     result = detector[b]
 
     losses = {}
+    losses['gce_loss'] = torch.nn.BCELoss()(result.gce_obj_dists, result.gce_obj_labels)
     losses['class_loss'] = F.cross_entropy(result.rm_obj_dists, result.rm_obj_labels)
     losses['rel_loss'] = F.cross_entropy(result.rel_dists, result.rel_labels[:, -1])
     loss = sum(losses.values())
@@ -176,16 +175,34 @@ def train_batch(b, verbose=False):
     return res
 
 
+
 def val_epoch():
     detector.eval()
-    evaluator = BasicSceneGraphEvaluator.all_modes()
+    evaluator_list = []  # for calculating recall of each relationship except no relationship
+    evaluator_multiple_preds_list = []
+    for index, name in enumerate(ind_to_predicates):
+        if index == 0:
+            continue
+        evaluator_list.append((index, name, BasicSceneGraphEvaluator.all_modes()))
+        evaluator_multiple_preds_list.append((index, name, BasicSceneGraphEvaluator.all_modes(multiple_preds=True)))
+    evaluator = BasicSceneGraphEvaluator.all_modes()  # for calculating recall
+    evaluator_multiple_preds = BasicSceneGraphEvaluator.all_modes(multiple_preds=True)
     for val_b, batch in enumerate(val_loader):
-        val_batch(conf.num_gpus * val_b, batch, evaluator)
-    evaluator[conf.mode].print_stats()
-    return np.mean(evaluator[conf.mode].result_dict[conf.mode + '_recall'][100])
+        val_batch(conf.num_gpus * val_b, batch, evaluator, evaluator_multiple_preds, evaluator_list,
+                  evaluator_multiple_preds_list)
+        # if val_b == 100:
+        #     break
+
+    recall = evaluator[conf.mode].print_stats()
+    recall_mp = evaluator_multiple_preds[conf.mode].print_stats()
+
+    mean_recall = calculate_mR_from_evaluator_list(evaluator_list, conf.mode)
+    mean_recall_mp = calculate_mR_from_evaluator_list(evaluator_multiple_preds_list, conf.mode, multiple_preds=True)
+
+    return recall, recall_mp, mean_recall, mean_recall_mp
 
 
-def val_batch(batch_num, b, evaluator):
+def val_batch(batch_num, b, evaluator, evaluator_multiple_preds, evaluator_list, evaluator_multiple_preds_list):
     det_res = detector[b]
     if conf.num_gpus == 1:
         det_res = [det_res]
@@ -206,17 +223,58 @@ def val_batch(batch_num, b, evaluator):
             'rel_scores': pred_scores_i,  # hack for now.
         }
 
-        evaluator[conf.mode].evaluate_scene_graph_entry(
-            gt_entry,
-            pred_entry,
-        )
+        eval_entry(conf.mode, gt_entry, pred_entry, evaluator, evaluator_multiple_preds,
+                   evaluator_list, evaluator_multiple_preds_list)
 
 
-print('Stanford Model Training Now!!!')
+# def val_epoch():
+#     detector.eval()
+#     evaluator = BasicSceneGraphEvaluator.all_modes()
+#     for val_b, batch in enumerate(val_loader):
+#         val_batch(conf.num_gpus * val_b, batch, evaluator)
+#     evaluator[conf.mode].print_stats()
+#     return np.mean(evaluator[conf.mode].result_dict[conf.mode + '_recall'][100])
+#
+#
+# def val_batch(batch_num, b, evaluator):
+#     det_res = detector[b]
+#     if conf.num_gpus == 1:
+#         det_res = [det_res]
+#
+#     for i, (boxes_i, objs_i, obj_scores_i, rels_i, pred_scores_i) in enumerate(det_res):
+#         gt_entry = {
+#             'gt_classes': val.gt_classes[batch_num + i].copy(),
+#             'gt_relations': val.relationships[batch_num + i].copy(),
+#             'gt_boxes': val.gt_boxes[batch_num + i].copy(),
+#         }
+#         assert np.all(objs_i[rels_i[:, 0]] > 0) and np.all(objs_i[rels_i[:, 1]] > 0)
+#
+#         pred_entry = {
+#             'pred_boxes': boxes_i * BOX_SCALE/IM_SCALE,
+#             'pred_classes': objs_i,
+#             'pred_rel_inds': rels_i,
+#             'obj_scores': obj_scores_i,
+#             'rel_scores': pred_scores_i,  # hack for now.
+#         }
+#
+#         evaluator[conf.mode].evaluate_scene_graph_entry(
+#             gt_entry,
+#             pred_entry,
+#         )
+
+
+print("Training starts now!")
 optimizer, scheduler = get_optim(conf.lr * conf.num_gpus * conf.batch_size)
 for epoch in range(start_epoch + 1, start_epoch + 1 + conf.num_epochs):
     rez = train_epoch(epoch)
     print("overall{:2d}: ({:.3f})\n{}".format(epoch, rez.mean(1)['total'], rez.mean(1)), flush=True)
+
+    if use_tb:
+        writer.add_scalar('loss/rel_loss', rez.mean(1)['rel_loss'], epoch)
+        if conf.use_ggnn_obj:
+            writer.add_scalar('loss/class_loss', rez.mean(1)['class_loss'], epoch)
+        writer.add_scalar('loss/total', rez.mean(1)['total'], epoch)
+
     if conf.save_dir is not None:
         torch.save({
             'epoch': epoch,
@@ -224,8 +282,17 @@ for epoch in range(start_epoch + 1, start_epoch + 1 + conf.num_epochs):
             # 'optimizer': optimizer.state_dict(),
         }, os.path.join(conf.save_dir, '{}-{}.tar'.format('vgrel', epoch)))
 
-    mAp = val_epoch()
-    scheduler.step(mAp)
+    recall, recall_mp, mean_recall, mean_recall_mp = val_epoch()
+    if use_tb:
+        for key, value in recall.items():
+            writer.add_scalar('eval_' + conf.mode + '_with_constraint/' + key, value, epoch)
+        for key, value in recall_mp.items():
+            writer.add_scalar('eval_' + conf.mode + '_without_constraint/' + key, value, epoch)
+        for key, value in mean_recall.items():
+            writer.add_scalar('eval_' + conf.mode + '_with_constraint/mean ' + key, value, epoch)
+        for key, value in mean_recall_mp.items():
+            writer.add_scalar('eval_' + conf.mode + '_without_constraint/mean ' + key, value, epoch)
+
     if any([pg['lr'] <= (conf.lr * conf.num_gpus * conf.batch_size)/99.0 for pg in optimizer.param_groups]):
         print("exiting training early", flush=True)
         break

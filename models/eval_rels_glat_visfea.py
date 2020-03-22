@@ -10,7 +10,11 @@ from tqdm import tqdm
 from config import BOX_SCALE, IM_SCALE
 import dill as pkl
 import os
-from lib.glat import GLATNET
+
+# Adding vis fea
+# from lib.glat import GLATNET
+from lib.glat_fea import GLATNET
+
 from torch.autograd import Variable
 import pdb
 from torch.nn import functional as F
@@ -18,12 +22,6 @@ import copy
 import math
 
 conf = ModelConfig()
-if conf.model_s_m == 'motifnet':
-    from lib.motifnet_model import RelModel
-elif conf.model_s_m == 'stanford':
-    from lib.stanford_model import RelModelStanford as RelModel
-else:
-    raise ValueError()
 
 train, val, test = VG.splits(num_val_im=conf.val_size, filter_duplicate_rels=True,
                           use_proposals=conf.use_proposals,
@@ -38,7 +36,6 @@ train_loader, val_loader = VGDataLoader.splits(train, val, mode='rel',
 ind_to_predicates = train.ind_to_predicates # ind_to_predicates[0] means no relationship
 ind_to_classes = train.ind_to_classes
 
-
 if conf.model_s_m == 'stanford':
     order = 'confidence'
     nl_edge = 2
@@ -50,7 +47,7 @@ if conf.model_s_m == 'stanford':
     use_bias = False
     use_tanh = False
     limit_vision = False
-
+    from lib.stanford_model import RelModelStanford as RelModel
 elif conf.model_s_m == 'motifnet':
     order = 'leftright'
     nl_obj = 2
@@ -62,24 +59,39 @@ elif conf.model_s_m == 'motifnet':
     use_bias = True
     use_tanh = False
     limit_vision = False
+    from lib.motifnet_model import RelModel
 
 
-
-detector = RelModel(classes=train.ind_to_classes, rel_classes=train.ind_to_predicates,
+if conf.model_s_m == 'motifnet' or conf.model_s_m == 'stanford':
+    detector = RelModel(classes=train.ind_to_classes, rel_classes=train.ind_to_predicates,
+                        num_gpus=conf.num_gpus, mode=conf.mode, require_overlap_det=True,
+                        use_resnet=conf.use_resnet, order=order,
+                        nl_edge=nl_edge, nl_obj=nl_obj, hidden_dim=hidden_dim,
+                        use_proposals=conf.use_proposals,
+                        pass_in_obj_feats_to_decoder=pass_in_obj_feats_to_decoder,
+                        pass_in_obj_feats_to_edge=pass_in_obj_feats_to_edge,
+                        pooling_dim=conf.pooling_dim,
+                        rec_dropout=rec_dropout,
+                        use_bias=use_bias,
+                        use_tanh=use_tanh,
+                        limit_vision=limit_vision,
+                        return_top100=True,
+                        return_unbias_logit=True,
+                        )
+elif conf.model_s_m =='kern':
+    from lib.kern_model import KERN
+    detector = KERN(classes=train.ind_to_classes, rel_classes=train.ind_to_predicates,
                     num_gpus=conf.num_gpus, mode=conf.mode, require_overlap_det=True,
-                    use_resnet=conf.use_resnet, order=order,
-                    nl_edge=nl_edge, nl_obj=nl_obj, hidden_dim=hidden_dim,
-                    use_proposals=conf.use_proposals,
-                    pass_in_obj_feats_to_decoder=pass_in_obj_feats_to_decoder,
-                    pass_in_obj_feats_to_edge=pass_in_obj_feats_to_edge,
-                    pooling_dim=conf.pooling_dim,
-                    rec_dropout=rec_dropout,
-                    use_bias=use_bias,
-                    use_tanh=use_tanh,
-                    limit_vision=limit_vision,
-                    return_top100=True,
-                    return_unbias_logit=True,
-                    )
+                    use_resnet=conf.use_resnet, use_proposals=conf.use_proposals,
+                    use_ggnn_obj=conf.use_ggnn_obj, ggnn_obj_time_step_num=conf.ggnn_obj_time_step_num,
+                    ggnn_obj_hidden_dim=conf.ggnn_obj_hidden_dim, ggnn_obj_output_dim=conf.ggnn_obj_output_dim,
+                    use_obj_knowledge=conf.use_obj_knowledge, obj_knowledge=conf.obj_knowledge,
+                    use_ggnn_rel=conf.use_ggnn_rel, ggnn_rel_time_step_num=conf.ggnn_rel_time_step_num,
+                    ggnn_rel_hidden_dim=conf.ggnn_rel_hidden_dim, ggnn_rel_output_dim=conf.ggnn_rel_output_dim,
+                    use_rel_knowledge=conf.use_rel_knowledge, rel_knowledge=conf.rel_knowledge,
+                    return_top100=True, return_unbias_logit=True, return_vis_fea=True)
+else:
+    print('wrong model name')
 
 model = GLATNET(vocab_num=[52, 153],
                 feat_dim=300,
@@ -128,8 +140,15 @@ elif conf.model_s_m == 'motifnet':
     # ckpt_glat = torch.load('/home/haoxuan/code/KERN/checkpoints/motifnet_glat_predcls_mask_logit_thres_train_v2mbz/motifnet_glat-37.tar')
 
     # Finetuned model v3
-    print('loading Finetuned model v3')
-    ckpt_glat = torch.load('/home/haoxuan/code/KERN/checkpoints/motifnet_glat_sgdet_mask_logit_thres_train_v3/motifnet_glat-49.tar')
+    # print('loading Finetuned model v3')
+    # ckpt_glat = torch.load('/home/haoxuan/code/KERN/checkpoints/motifnet_glat_sgcls_mask_logit_thres_train_v3/motifnet_glat-26.tar')
+
+    # print('loading Finetuned model v3_1')
+    # ckpt_glat = torch.load('/home/haoxuan/code/KERN/checkpoints/motifnet_glat_sgcls_mask_logit_thres_train_v3_1/motifnet_glat-48.tar')
+
+    print('loading motif vis sgcls model')
+    ckpt_glat = torch.load('/home/haoxuan/code/KERN/checkpoints/motif_glat_visfea_train/motifnet_glat-48.tar')
+
 
     # Pretrained Model
     # print('loading pretrained model')
@@ -138,6 +157,11 @@ elif conf.model_s_m == 'motifnet':
 
     # ckpt_glat = torch.load(
     #     '/home/tangtangwzc/Common_sense/models/2019-11-03-17-28_2_2_2_2_2_2_concat_no_init_mask/best_test_node_mask_predicate_acc.pth')
+
+elif conf.model_s_m == 'kern':
+    print('loading kern vis sgcls model')
+    ckpt_glat = torch.load('/home/haoxuan/code/KERN/checkpoints/kern_glat_visfea_train/motifnet_glat-49.tar')
+
 
 # Finetuned model
 optimistic_restore(model, ckpt_glat['state_dict'])
@@ -238,11 +262,19 @@ def glat_wrapper(total_data):
     if torch.is_tensor(adjs_con):
         adj_con = Variable(adjs_con)
 
-    pred_label, pred_connect = model(input_class, adj_con, node_type)
-    # pred_label, pred_connect = model(input_class, adj_con, node_type, node_logit)
+    # Adding vis fea >>>>>>>>>>
+    entity_visfea = total_data['entity_visfea']
+    if torch.is_tensor(total_data['entity_visfea']):
+        entity_visfea = Variable(total_data['entity_visfea'])
+    rel_visfea = total_data['rel_visfea']
+    if torch.is_tensor(total_data['rel_visfea']):
+        rel_visfea = Variable(total_data['rel_visfea'])
+    # <<<<<<<<<<<<<<<<<<
 
-    # pred_label_predicate = input_class[node_type == 0]
-    # pred_label_entities = input_class[node_type == 1]
+    # Adding vis fea >>>>>>>>>>
+    pred_label, pred_connect = model(input_class, adj_con, node_type, entity_visfea, rel_visfea)
+    # <<<<<<<<<<<<<<<<<<
+
 
     pred_label_predicate = pred_label[0]  # flatten predicate (B*N, 51)
     pred_label_entities = pred_label[1]  # flatten entities
@@ -267,6 +299,14 @@ def glat_postprocess(pred_entry, mask_idx, if_predicting=False):
     pred_entry['rel_scores'] = tensor2variable(pred_entry['rel_scores'])
     pred_entry['pred_classes'] = tensor2variable(pred_entry['pred_classes'])
 
+    # adding vis fea >>>>>>>
+    pred_entry['entity_visfea'] = tensor2variable(pred_entry['entity_visfea'])
+    pred_entry['rel_visfea'] = tensor2variable(pred_entry['rel_visfea'])
+    assert pred_entry['rel_visfea'].size(0) == pred_entry['rel_scores'].size(0)
+    assert pred_entry['entity_visfea'].size(0) == pred_entry['pred_classes'].size(0)
+    # <<<<<<<
+
+
     pred_entry['rel_classes'] = torch.max(pred_entry['rel_scores'][:, 1:], dim=1)[1].unsqueeze(1) + 1
     if mask_idx is not None:
         pred_entry['rel_classes'][mask_idx] = 51
@@ -285,8 +325,14 @@ def glat_postprocess(pred_entry, mask_idx, if_predicting=False):
     pred_entry['rel_scores'] = pred_label_predicate
     # pdb.set_trace()
     # For SGCLS
-    # pred_entry['entity_scores'] = pred_label_entities
 
+    # pdb.set_trace()
+
+    # softmax
+    # pred_entry['obj_scores_rm'] = pred_label_entities
+    # pred_entry['obj_scores'] = F.softmax(pred_label_entities, dim=1).max(1)[0]
+
+    # For bug0
     if conf.mode == "sgcls" or conf.mode == "sgdet":
         pred_entry['obj_scores_rm'] = pred_label_entities
         pred_entry['obj_scores'] = F.softmax(pred_label_entities, dim=1).max(1)[0]
@@ -303,7 +349,10 @@ all_pred_entries = []
 def val_batch(batch_num, b, evaluator,evaluator_multiple_preds, evaluator_list, evaluator_multiple_preds_list, accs):
     # det_res = detector[b]
     # dict_gt, det_res = detector[b]
-    dict_gt, bias_logit, det_res = detector[b]
+    vis_result, bias_logit, det_res = detector[b]
+    # Adding vis fea
+    vis_result[1] = vis_result[1][det_res[-2]]
+    obj_visfea, rel_visfea = vis_result
 
     if conf.num_gpus == 1:
         det_res = [det_res]
@@ -312,150 +361,63 @@ def val_batch(batch_num, b, evaluator,evaluator_multiple_preds, evaluator_list, 
 
         if len(det) == 5 and not conf.return_top100:
             (boxes_i, objs_i, obj_scores_i, rels_i, pred_scores_i) = det
-            rels_i_a100 = np.asarray([])
         else:
             (boxes_i, objs_i, obj_scores_i, rels_i_b100, pred_scores_i_b100, rels_i_a100, pred_scores_i_a100,
              rel_scores_idx_b100, rel_scores_idx_a100) = det
 
-        # print("boxes_i.size(): ", boxes_i.shape)
-        # print("rels_i_b100.size(): ", rels_i_b100.shape)
-        # print("rels_i_a100.size(): ", rels_i_a100.shape)
-
         gt_entry = {
-            'gt_classes': val.gt_classes[batch_num + i].copy(),  # (23,) (16,)
-            'gt_relations': val.relationships[batch_num + i].copy(),  # (29, 3) (6, 3)
-            'gt_boxes': val.gt_boxes[batch_num + i].copy(),  # (23, 4) (16, 4)
+            'gt_classes': val.gt_classes[batch_num + i].copy(), #(23,) (16,)
+            'gt_relations': val.relationships[batch_num + i].copy(), #(29, 3) (6, 3)
+            'gt_boxes': val.gt_boxes[batch_num + i].copy(), #(23, 4) (16, 4)
         }
+
+        # val.relationships[batch_num + i]
+        # np.argmax(pred_scores_i_b100[:, 1:], axis=1)
+        # assert np.all(objs_i[rels_i[:, 0]] > 0) and np.all(objs_i[rels_i[:, 1]] > 0)
 
         if conf.return_top100:
             pred_entry = {
-                'pred_boxes': boxes_i * BOX_SCALE / IM_SCALE,  # (23, 4) (16, 4)
-                'pred_classes': objs_i,  # (23,) (16,)
-                'pred_rel_inds': rels_i_b100,  # (506, 2) (240, 2)
-                'obj_scores': obj_scores_i,  # (23,) (16,)
+                'pred_boxes': boxes_i * BOX_SCALE/IM_SCALE, #(23, 4) (16, 4)
+                'pred_classes': objs_i, #(23,) (16,)
+                'pred_rel_inds': rels_i_b100, #(506, 2) (240, 2)
+                'obj_scores': obj_scores_i, #(23,) (16,)
                 'rel_scores': pred_scores_i_b100,  # hack for now. (506, 51) (240, 51)
+                # adding vis fea >>>>>>>
+                'entity_visfea': obj_visfea,  # (num_entities, 4096) Tensor Variable
+                'rel_visfea': rel_visfea, # (num_predicate, 4096) Tensor Variable
+                # <<<<<<<<<<<<<<<<<
             }
+
         else:
             pred_entry = {
-                'pred_boxes': boxes_i * BOX_SCALE / IM_SCALE,  # (23, 4) (16, 4)
-                'pred_classes': objs_i,  # (23,) (16,)
-                'pred_rel_inds': rels_i,  # (506, 2) (240, 2)
-                'obj_scores': obj_scores_i,  # (23,) (16,)
+                'pred_boxes': boxes_i * BOX_SCALE/IM_SCALE, #(23, 4) (16, 4)
+                'pred_classes': objs_i, #(23,) (16,)
+                'pred_rel_inds': rels_i, #(506, 2) (240, 2)
+                'obj_scores': obj_scores_i, #(23,) (16,)
                 'rel_scores': pred_scores_i,  # hack for now. (506, 51) (240, 51)
             }
 
-        # wrong_idxs = []
-        # for i in range(len(rels_i_b100)):
-        #     if (int(rels_i_b100[i][0]), int(rels_i_b100[i][1])) in dict_gt:
-        #         pred_lbl = pred_scores_i_b100[i, 1:].argmax(0) + 1
-        #         if int(pred_lbl) not in dict_gt[(int(rels_i_b100[i][0]), int(rels_i_b100[i][1]))]:
-        #             wrong_idxs.append(i)
-        #
-        # if len(wrong_idxs) == 0:
-        #     mask_idx = None
-        # else:
-        #     mask_idx = wrong_idxs
+        pred_entry = glat_postprocess(pred_entry, if_predicting=True, mask_idx=None)
 
-        # num_predicate = rel_scores_idx_b100.shape[0]
-        # mask_idx = torch.Tensor(range(int(num_predicate*(1-0.3)),num_predicate)).long().cuda()
-        # if len(mask_idx) == 0:
-        #     mask_idx = None
 
-        # pdb.set_trace()
-        global threshold
-        # threshold = 0.35
-        num_predicate = rel_scores_idx_b100.shape[0]
-        keep_num = math.ceil(num_predicate*0.3) if num_predicate <= 100 else 30
-        keep_idx_intop100 = list(range(int(keep_num)))
-
-        bias_logit_norm = F.softmax(bias_logit[:, 1:], dim=1).data.cpu().numpy()
-        mask_idxs_intop100 = np.nonzero(bias_logit_norm[rel_scores_idx_b100, :].max(1) < threshold)[0]
-        mask_in_keep_num = np.where(mask_idxs_intop100<keep_num)[0].shape[0]
-        mask_idxs_intop100 = mask_idxs_intop100.tolist()
-
-        input_pred_num = len(mask_idxs_intop100) + keep_num - mask_in_keep_num
-        input_pred_idxs_intop100 = np.zeros(input_pred_num, dtype=int)
-
-        keep_idx_ininput = []
-        mask_idx_ininput = []
-
-        # pdb.set_trace()
-
-        for i in range(input_pred_num):
-            if i < keep_num:
-                input_pred_idxs_intop100[i] = i
-                if i not in mask_idxs_intop100:
-                    keep_idx_ininput.append(i)
-                else:
-                    mask_idx_ininput.append(i)
-            else:
-                input_pred_idxs_intop100[i] = mask_idxs_intop100[i-keep_num+mask_in_keep_num]
-                mask_idx_ininput.append(i)
-
-        if len(mask_idx_ininput) == 0:
-            mask_idx_ininput = None
-
-        pred_entry['pred_rel_inds'] = rels_i_b100[input_pred_idxs_intop100]
-        pred_entry['rel_scores'] = pred_scores_i_b100[input_pred_idxs_intop100]
-        mask_idx = mask_idx_ininput
-
-        pred_entry = glat_postprocess(pred_entry, if_predicting=True, mask_idx=mask_idx)
-
+        # For SGCLS
         if conf.mode == "sgcls" or conf.mode == "sgdet":
             useless_entity_id = pred_entry[1]
             pred_entry = pred_entry[0]
 
         pred_entry = cuda2numpy_dict(pred_entry)
 
-        pred_scores_i_b100_updated = copy.deepcopy(pred_scores_i_b100)
-        rels_i_b100_updated = copy.deepcopy(rels_i_b100)
-
-        # pdb.set_trace()
-
-        for i_ininput, i_intop100 in enumerate(input_pred_idxs_intop100):
-            if mask_idx is not None:
-                if i_ininput in mask_idx_ininput:
-                    pred_scores_i_b100_updated[i_intop100] = pred_entry['rel_scores'][i_ininput, :-1]
-                    rels_i_b100_updated[i_intop100] = pred_entry['pred_rel_inds'][i_ininput]
-
-        pred_entry['rel_scores'] = pred_scores_i_b100_updated
-        pred_entry['pred_rel_inds'] = rels_i_b100_updated
-
         if len(rels_i_a100.shape) == 1:
-            pred_entry['rel_scores'] = pred_entry['rel_scores']
+            pred_entry['rel_scores'] = pred_entry['rel_scores'][:, :-1]
         else:
             pred_entry['pred_rel_inds'] = np.concatenate((pred_entry['pred_rel_inds'], rels_i_a100), axis=0)
-            pred_entry['rel_scores'] = np.concatenate((pred_entry['rel_scores'], pred_scores_i_a100), axis=0)
-
-
-        if mask_idx is not None:
-            for idx in range(len(mask_idx)):
-                sub = rels_i_b100.data[mask_idxs_intop100[idx], 0]
-                obj = rels_i_b100.data[mask_idxs_intop100[idx], 1]
-                pred_class = pred_entry['rel_scores'][mask_idxs_intop100[idx], 1:].argmax()+1
-                if (int(sub), int(obj)) in dict_gt.keys():
-                    accs[1] += 1
-                    if int(pred_class) in dict_gt[(int(sub), int(obj))]:
-                        accs[0] += 1
-
-        # if mask_idx is not None:
-        #     for idx in mask_idx:
-        #         accs[1] += 1
-        #         sub = rels_i_b100.data[idx, 0]
-        #         obj = rels_i_b100.data[idx, 1]
-        #         pred_class = pred_entry['rel_scores'][idx, 1:].argmax()+1
-        #         if int(pred_class) in dict_gt[(int(sub), int(obj))]:
-        #             accs[0] += 1
+            pred_entry['rel_scores'] = np.concatenate((pred_entry['rel_scores'][:, :-1], pred_scores_i_a100), axis=0)
 
         all_pred_entries.append(pred_entry)
 
-        # evaluator[conf.mode].evaluate_scene_graph_entry(
-        #     gt_entry,
-        #     pred_entry,
-        # )
-
         eval_entry(conf.mode, gt_entry, pred_entry, evaluator, evaluator_multiple_preds,
                    evaluator_list, evaluator_multiple_preds_list)
+
 
 
 evaluator = BasicSceneGraphEvaluator.all_modes()
@@ -472,22 +434,21 @@ for index, name in enumerate(ind_to_predicates):
 
 detector.eval()
 accs = [0, 0]
-number_mask = [0]
+# number_mask = [0]
 
-threshold = conf.threshold
-print('Threshold is', threshold)
+# threshold = conf.threshold
+# print('Threshold is', threshold)
 # rel_matrix = np.load('./prior_matrices/rel_matrix.npy')
 for val_b, batch in enumerate(tqdm(val_loader)):
     # val_batch(conf.num_gpus*val_b, batch, evaluator)
     val_batch(conf.num_gpus * val_b, batch, evaluator, evaluator_multiple_preds, evaluator_list,
               evaluator_multiple_preds_list, accs)
-    # pdb.set_trace()
 
     torch.cuda.empty_cache()
 
-print('test acc of mask:', accs[0] * 1.0 / accs[1])
-print('number of mask:', accs[1])
-print('total number of mask:', number_mask)
+# print('test acc of mask:', accs[0] * 1.0 / accs[1])
+# print('number of mask:', accs[1])
+# print('total number of mask:', number_mask)
 
 recall = evaluator[conf.mode].print_stats()
 recall_mp = evaluator_multiple_preds[conf.mode].print_stats()

@@ -440,7 +440,7 @@ def train_batch(b, train_results, train_bias_logits, train_det_ress, epoch_num, 
     #     result.rel_dists = pred_entry['rel_scores']
 
     losses = {}
-    if conf.use_ggnn_obj: # if not use ggnn obj, we just use scores of faster rcnn as their scores, there is no need to train
+    if conf.mode == "sgcls" or conf.mode == "sgdet":
         losses['class_loss'] = F.cross_entropy(result.rm_obj_dists, result.rm_obj_labels)
     # losses['rel_loss'] = F.cross_entropy(result.rel_dists, result.rel_labels[:, -1])
     # pdb.set_trace()
@@ -640,12 +640,13 @@ def glat_postprocess(pred_entry, mask_idx, if_predicting=False):
 
     # For SGCLS
     # pred_entry['entity_scores'] = pred_label_entities
-    pred_entry['obj_scores_rm'] = pred_label_entities
-    pred_entry['obj_scores'] = F.softmax(pred_label_entities, dim=1).max(1)[0]
 
-    pred_entry['pred_classes'] = pred_label_entities.max(1)[1]
 
     if conf.mode == "sgcls" or conf.mode == "sgdet":
+        pred_entry['obj_scores_rm'] = pred_label_entities
+        pred_entry['obj_scores'] = F.softmax(pred_label_entities, dim=1).max(1)[0]
+        pred_entry['pred_classes'] = pred_label_entities.max(1)[1]
+
         return pred_entry, useless_entity_id
     else:
         return pred_entry

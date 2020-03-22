@@ -295,7 +295,8 @@ class GraphAtt_Mutlihead_Basic(nn.Module):
     Simple GAT layer, similar to https://arxiv.org/abs/1710.10903
     """
 
-    def __init__(self, n_head, d_model, d_k, d_v, foc_type, dropout=0.1):
+    # def __init__(self, n_head, d_model, d_k, d_v, foc_type, dropout=0.1):
+    def __init__(self, n_head, d_model, d_out, d_k, d_v, foc_type, dropout=0.1):
         super(GraphAtt_Mutlihead_Basic, self).__init__()
 
         self.n_head = n_head
@@ -308,14 +309,17 @@ class GraphAtt_Mutlihead_Basic(nn.Module):
 
         self.attention = GraphAtt_ScaledDotProduct(np.power(d_k, 0.5), dropout, foc_type)
         # self.layer_norm = nn.LayerNorm(d_model)
-        self.layer_norm = LayerNormalization(d_model)
+        # self.layer_norm = LayerNormalization(d_model)
+        self.layer_norm = LayerNormalization(d_out)
 
-        self.fc = nn.Linear(n_head * d_v, d_model)
+        self.fc = nn.Linear(n_head * d_v, d_out)
+        # self.fc = nn.Linear(n_head * d_v, d_model)
         # nn.init.xavier_normal_(self.fc.weight)
 
         self.dropout = nn.Dropout(dropout)
 
-        self.fc1 = nn.Linear(2 * d_model, d_model)
+        self.fc1 = nn.Linear(d_model+d_out, d_out)
+        # self.fc1 = nn.Linear(2 * d_model, d_model)
 
     def forward(self, q, k, v, adj, mask=None):
 
@@ -386,6 +390,7 @@ class GraphAtt_ScaledDotProduct(nn.Module):
 
         if self.foc_type == "local":
             # adj => (b, N_n, N_n) => (b*n, N_n, N_n)
+            # pdb.set_trace()
             adj = adj.unsqueeze(0)
             adj = adj.repeat(nhead, 1, 1, 1)
             adj = adj.view(-1, N_n, N_n)

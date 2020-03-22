@@ -108,6 +108,10 @@ class ModelConfig(object):
         self.resume_training = None
         self.resume_ckpt = None
         self.model_s_m = None
+        self.reweight_matrix_ent = None
+        self.reweight_matrix_pred = None
+        self.ckpt_glat = None
+
 
         self.threshold = None
 
@@ -130,6 +134,11 @@ class ModelConfig(object):
             self.ckpt = os.path.join(ROOT_PATH, self.ckpt)
         else:
             self.ckpt = None
+
+        if len(self.ckpt_glat) != 0:
+            self.ckpt_glat = os.path.join(ROOT_PATH, self.ckpt_glat)
+        else:
+            self.ckpt_glat = None
 
         if len(self.cache) != 0:
             if len(self.cache.split('/')) > 1:
@@ -186,6 +195,8 @@ class ModelConfig(object):
 
 
         parser.add_argument('-ckpt', dest='ckpt', help='Filename to load from', type=str, default='')
+        parser.add_argument('-ckpt_glat', dest='ckpt_glat', help='Filename to load glat model from', type=str, default='')
+
         parser.add_argument('-save_dir', dest='save_dir',
                             help='Directory to save things to, such as checkpoints/save', default='', type=str)
 
@@ -239,6 +250,9 @@ class ModelConfig(object):
         parser.add_argument('-ggnn_rel_output_dim', dest='ggnn_rel_output_dim', help='node output feature dimension of GGNN_rel', type=int, default=512)
         parser.add_argument('-use_rel_knowledge', dest='use_rel_knowledge', help='use cooccurrence knowledge of object pairs and relationships', action='store_true')
         parser.add_argument('-rel_knowledge', dest='rel_knowledge', help='Filename to load matrix of cooccurrence knowledge of object pairs and relationships', type=str, default='')
+
+        parser.add_argument('-reweight_matrix_ent', dest='reweight_matrix_ent', help='Filename to load matrix of entity relation counting', type=str, default='')
+        parser.add_argument('-reweight_matrix_pred', dest='reweight_matrix_pred', help='Filename to load matrix of predicate relation counting', type=str, default='')
 
 
         parser.add_argument('-tb_log_dir', dest='tb_log_dir', help='dir to save tensorboard summaries', type=str, default='')

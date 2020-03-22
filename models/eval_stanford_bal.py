@@ -12,12 +12,8 @@ import dill as pkl
 import os
 
 conf = ModelConfig()
-if conf.model_s_m == 'motifnet':
-    from lib.motifnet_model import RelModel
-elif conf.model_s_m == 'stanford':
-    from lib.stanford_model import RelModelStanford as RelModel
-else:
-    raise ValueError()
+
+from lib.stanford_model import RelModelStanford as RelModel
 
 train, val, test = VG.splits(num_val_im=conf.val_size, filter_duplicate_rels=True,
                           use_proposals=conf.use_proposals,
@@ -31,31 +27,18 @@ train_loader, val_loader = VGDataLoader.splits(train, val, mode='rel',
 ind_to_predicates = train.ind_to_predicates # ind_to_predicates[0] means no relationship
 ind_to_classes = train.ind_to_classes
 
-if conf.model_s_m == 'stanford':
-    order = 'confidence'
-    nl_edge = 2
-    nl_obj = 1
-    hidden_dim = 256
-    rec_dropout = 0.1
+order = 'confidence'
+nl_edge = 2
+nl_obj = 1
+hidden_dim = 256
+rec_dropout = 0.1
 
-    pass_in_obj_feats_to_decoder = False
-    pass_in_obj_feats_to_edge = False
-    use_bias = False
-    use_tanh = False
-    limit_vision = False
-elif conf.model_s_m == 'motifnet':
-    order = 'leftright'
-    nl_obj = 2
-    nl_edge = 4
-    hidden_dim = 512
-    pass_in_obj_feats_to_decoder = False
-    pass_in_obj_feats_to_edge = False
-    rec_dropout = 0.1
-    use_bias = True
-    use_tanh = False
-    limit_vision = False
+pass_in_obj_feats_to_decoder = False
+pass_in_obj_feats_to_edge = False
+use_bias = False
+use_tanh = False
+limit_vision = False
 
-conf.return_top100=False
 
 detector = RelModel(classes=train.ind_to_classes, rel_classes=train.ind_to_predicates,
                     num_gpus=conf.num_gpus, mode=conf.mode, require_overlap_det=True,
@@ -68,7 +51,10 @@ detector = RelModel(classes=train.ind_to_classes, rel_classes=train.ind_to_predi
                     rec_dropout=rec_dropout,
                     use_bias=use_bias,
                     use_tanh=use_tanh,
-                    limit_vision=limit_vision
+                    limit_vision=limit_vision,
+                    return_unbias_logit=False,
+                    return_top100=False,
+                    return_vis_fea=False,
                     )
 
 
@@ -76,12 +62,6 @@ detector.cuda()
 ckpt = torch.load(conf.ckpt)
 
 optimistic_restore(detector, ckpt['state_dict'])
-# if conf.mode == 'sgdet':
-#     det_ckpt = torch.load('checkpoints/new_vgdet/vg-19.tar')['state_dict']
-#     detector.detector.bbox_fc.weight.data.copy_(det_ckpt['bbox_fc.weight'])
-#     detector.detector.bbox_fc.bias.data.copy_(det_ckpt['bbox_fc.bias'])
-#     detector.detector.score_fc.weight.data.copy_(det_ckpt['score_fc.weight'])
-#     detector.detector.score_fc.bias.data.copy_(det_ckpt['score_fc.bias'])
 
 all_pred_entries = []
 # def val_batch(batch_num, b, evaluator, thrs=(20, 50, 100)):
@@ -90,6 +70,7 @@ def val_batch(batch_num, b, evaluator, evaluator_multiple_preds, evaluator_list,
     # det_res, _ = detector[b]
     # dict_gt, det_res = detector[b]
     det_res = detector[b]
+
 
     if conf.num_gpus == 1:
         det_res = [det_res]
@@ -100,24 +81,48 @@ def val_batch(batch_num, b, evaluator, evaluator_multiple_preds, evaluator_list,
             'gt_relations': val.relationships[batch_num + i].copy(),
             'gt_boxes': val.gt_boxes[batch_num + i].copy(),
         }
-        assert np.all(objs_i[rels_i[:,0]] > 0) and np.all(objs_i[rels_i[:,1]] > 0)
-        # assert np.all(rels_i[:,2] > 0)
+        assert np.all(objs_i[rels_i[:, 0]] > 0) and np.all(objs_i[rels_i[:, 1]] > 0)
 
         pred_entry = {
             'pred_boxes': boxes_i * BOX_SCALE/IM_SCALE,
             'pred_classes': objs_i,
             'pred_rel_inds': rels_i,
             'obj_scores': obj_scores_i,
-            'rel_scores': pred_scores_i,
+            'rel_scores': pred_scores_i,  # hack for now.
         }
         all_pred_entries.append(pred_entry)
 
-        # evaluator[conf.mode].evaluate_scene_graph_entry(
-        #     gt_entry,
-        #     pred_entry,
-        # )
         eval_entry(conf.mode, gt_entry, pred_entry, evaluator, evaluator_multiple_preds,
                    evaluator_list, evaluator_multiple_preds_list)
+
+# def val_batch(batch_num, b, evaluator):
+#     det_res = detector[b]
+#     if conf.num_gpus == 1:
+#         det_res = [det_res]
+#
+#     for i, (boxes_i, objs_i, obj_scores_i, rels_i, pred_scores_i) in enumerate(det_res):
+#         gt_entry = {
+#             'gt_classes': val.gt_classes[batch_num + i].copy(),
+#             'gt_relations': val.relationships[batch_num + i].copy(),
+#             'gt_boxes': val.gt_boxes[batch_num + i].copy(),
+#         }
+#         assert np.all(objs_i[rels_i[:, 0]] > 0) and np.all(objs_i[rels_i[:, 1]] > 0)
+#
+#         pred_entry = {
+#             'pred_boxes': boxes_i * BOX_SCALE/IM_SCALE,
+#             'pred_classes': objs_i,
+#             'pred_rel_inds': rels_i,
+#             'obj_scores': obj_scores_i,
+#             'rel_scores': pred_scores_i,  # hack for now.
+#         }
+#         all_pred_entries.append(pred_entry)
+#
+#
+#         evaluator[conf.mode].evaluate_scene_graph_entry(
+#             gt_entry,
+#             pred_entry,
+#         )
+
 
 evaluator = BasicSceneGraphEvaluator.all_modes()
 evaluator_multiple_preds = BasicSceneGraphEvaluator.all_modes(multiple_preds=True)

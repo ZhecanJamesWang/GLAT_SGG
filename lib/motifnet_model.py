@@ -308,7 +308,7 @@ class RelModel(nn.Module):
                  nl_obj=1, nl_edge=2, use_resnet=False, order='confidence', thresh=0.01,
                  use_proposals=False, pass_in_obj_feats_to_decoder=True,
                  pass_in_obj_feats_to_edge=True, rec_dropout=0.0, use_bias=True, use_tanh=True,
-                 limit_vision=True, return_top100=False, inter_fea=False, return_unbias_logit=False):
+                 limit_vision=True, return_top100=False, inter_fea=False, return_unbias_logit=False, return_vis_fea=False):
 
         """
         :param classes: Object classes
@@ -331,6 +331,7 @@ class RelModel(nn.Module):
         self.return_top100 = return_top100
         self.inter_fea = inter_fea
         self.return_unbias_logit = return_unbias_logit
+        self.return_vis_fea = return_vis_fea
 
         self.pooling_size = 7
         self.embed_dim = embed_dim
@@ -544,6 +545,13 @@ class RelModel(nn.Module):
 
         result.rel_inds = rel_inds
 
+        # adding vis fea >>>>>>>
+        if self.return_vis_fea:
+            result.obj_visfea = result.obj_fmap  # (num_obj, 4096)
+            result.rel_visfea = vr  # (num_rel, 4096)
+        # <<<<<<<<<<<<<<<<<
+
+
 
         if self.training:
             # For bug0 >>>>>>>>>
@@ -581,22 +589,31 @@ class RelModel(nn.Module):
                 rel_rep = F.softmax(result.rel_dists, dim=1)
 
                 if rel_inds[:, 0].max() - rel_inds[:, 0].min() + 1 == 1:
-                    if self.inter_fea:
-                        if self.return_unbias_logit:
-                            return result, prod_rep, bias_logit, filter_dets(bboxes, result.obj_scores,
-                                                                 result.obj_preds, rel_inds[:, 1:], rel_rep,
-                                                                 self.return_top100, self.training)
-                        else:
-                            return result, prod_rep, filter_dets(bboxes, result.obj_scores,
-                                   result.obj_preds, rel_inds[:, 1:], rel_rep, self.return_top100, self.training)
-                    else:
-                        if self.return_unbias_logit:
-                            return result, bias_logit, filter_dets(bboxes, result.obj_scores,
-                                                       result.obj_preds, rel_inds[:, 1:], rel_rep, self.return_top100,
-                                                       self.training)
-                        else:
-                            return result, filter_dets(bboxes, result.obj_scores,
-                                   result.obj_preds, rel_inds[:, 1:], rel_rep, self.return_top100, self.training)
+                    return_result = []
+                    return_result.append(result)
+                    if self.return_unbias_logit:
+                        return_result.append(bias_logit)
+                    return_result.append(filter_dets(bboxes, result.obj_scores,
+                                               result.obj_preds, rel_inds[:, 1:], rel_rep, self.return_top100,
+                                               self.training))
+                    return return_result
+
+                    # if self.inter_fea:
+                    #     if self.return_unbias_logit:
+                    #         return result, prod_rep, bias_logit, filter_dets(bboxes, result.obj_scores,
+                    #                                              result.obj_preds, rel_inds[:, 1:], rel_rep,
+                    #                                              self.return_top100, self.training)
+                    #     else:
+                    #         return result, prod_rep, filter_dets(bboxes, result.obj_scores,
+                    #                result.obj_preds, rel_inds[:, 1:], rel_rep, self.return_top100, self.training)
+                    # else:
+                    #     if self.return_unbias_logit:
+                    #         return result, bias_logit, filter_dets(bboxes, result.obj_scores,
+                    #                                    result.obj_preds, rel_inds[:, 1:], rel_rep, self.return_top100,
+                    #                                    self.training)
+                    #     else:
+                    #         return result, filter_dets(bboxes, result.obj_scores,
+                    #                result.obj_preds, rel_inds[:, 1:], rel_rep, self.return_top100, self.training)
 
                 # -----------------------------------Above: 1 batch_size, Below: Multiple batch_size------------------
                 #  assume rel_inds[:, 0] is from 0 to num_img-1
@@ -665,27 +682,38 @@ class RelModel(nn.Module):
                 except:
                     rel_scores_idx_a_100_all = torch.Tensor([]).long().cuda()
 
-                if self.inter_fea:
-                    if self.return_unbias_logit:
-                        return result, prod_rep, bias_logit,\
-                               [boxes, obj_classes, obj_scores, rels_b_100_all,
-                                                  pred_scores_sorted_b_100_all,
-                                                  rels_a_100_all,
-                                                  pred_scores_sorted_a_100_all, rel_scores_idx_b_100_all,
-                                                  rel_scores_idx_a_100_all]
-                    else:
-                        return result, prod_rep, [boxes, obj_classes, obj_scores, rels_b_100_all, pred_scores_sorted_b_100_all,
-                                    rels_a_100_all,
-                                    pred_scores_sorted_a_100_all, rel_scores_idx_b_100_all, rel_scores_idx_a_100_all]
-                else:
-                    if self.return_unbias_logit:
-                        return result, bias_logit, [boxes, obj_classes, obj_scores, rels_b_100_all, pred_scores_sorted_b_100_all, rels_a_100_all,
-                                pred_scores_sorted_a_100_all, rel_scores_idx_b_100_all, rel_scores_idx_a_100_all]
-                    else:
-                        return result, [boxes, obj_classes, obj_scores, rels_b_100_all, pred_scores_sorted_b_100_all, rels_a_100_all,
-                                pred_scores_sorted_a_100_all, rel_scores_idx_b_100_all, rel_scores_idx_a_100_all]
+
+                return_result = []
+                return_result.append(result)
+                if self.return_unbias_logit:
+                    return_result.append(bias_logit)
+                return_result.append([boxes, obj_classes, obj_scores, rels_b_100_all, pred_scores_sorted_b_100_all,
+                                rels_a_100_all,
+                                pred_scores_sorted_a_100_all, rel_scores_idx_b_100_all, rel_scores_idx_a_100_all])
+                return return_result
+
+                # if self.inter_fea:
+                #     if self.return_unbias_logit:
+                #         return result, prod_rep, bias_logit,\
+                #                [boxes, obj_classes, obj_scores, rels_b_100_all,
+                #                                   pred_scores_sorted_b_100_all,
+                #                                   rels_a_100_all,
+                #                                   pred_scores_sorted_a_100_all, rel_scores_idx_b_100_all,
+                #                                   rel_scores_idx_a_100_all]
+                #     else:
+                #         return result, prod_rep, [boxes, obj_classes, obj_scores, rels_b_100_all, pred_scores_sorted_b_100_all,
+                #                     rels_a_100_all,
+                #                     pred_scores_sorted_a_100_all, rel_scores_idx_b_100_all, rel_scores_idx_a_100_all]
+                # else:
+                #     if self.return_unbias_logit:
+                #         return result, bias_logit, [boxes, obj_classes, obj_scores, rels_b_100_all, pred_scores_sorted_b_100_all, rels_a_100_all,
+                #                 pred_scores_sorted_a_100_all, rel_scores_idx_b_100_all, rel_scores_idx_a_100_all]
+                #     else:
+                #         return result, [boxes, obj_classes, obj_scores, rels_b_100_all, pred_scores_sorted_b_100_all, rels_a_100_all,
+                #                 pred_scores_sorted_a_100_all, rel_scores_idx_b_100_all, rel_scores_idx_a_100_all]
             else:
-                return result, []
+                # return result, []
+                return result
 
 
         #validation here~~~~~~~~~~~~~~~~
@@ -713,21 +741,42 @@ class RelModel(nn.Module):
             else:
                 dict_gt[(int(gt_rels[i, 1]), int(gt_rels[i, 2]))] = [int(gt_rels[i, 3])]
 
-        # pdb.set_trace()
-        if self.inter_fea:
-            if self.return_unbias_logit:
-                return dict_gt, prod_rep, bias_logit, filter_dets(bboxes, result.obj_scores,
-                                                      result.obj_preds, rel_inds[:, 1:], rel_rep, self.return_top100)
-            else:
-                return dict_gt, prod_rep, filter_dets(bboxes, result.obj_scores,
-                           result.obj_preds, rel_inds[:, 1:], rel_rep, self.return_top100)
+        return_result = []
+        #  Adding vis fea
+        if self.return_vis_fea:
+            return_result.append([result.obj_visfea.data.cpu().numpy(), result.rel_visfea.data.cpu().numpy()])
+        if self.return_unbias_logit:
+            return_result.append(bias_logit)
+
+        if len(return_result) == 0:
+            return filter_dets(bboxes, result.obj_scores,result.obj_preds, rel_inds[:, 1:], rel_rep, self.return_top100)
         else:
-            if self.return_unbias_logit:
-                return dict_gt, bias_logit, filter_dets(bboxes, result.obj_scores,
-                           result.obj_preds, rel_inds[:, 1:], rel_rep, self.return_top100)
-            else:
-                return dict_gt, filter_dets(bboxes, result.obj_scores,
-                           result.obj_preds, rel_inds[:, 1:], rel_rep, self.return_top100)
+            return_result.append(filter_dets(bboxes, result.obj_scores,
+                                    result.obj_preds, rel_inds[:, 1:], rel_rep, self.return_top100))
+            return return_result
+
+        # if self.return_unbias_logit:
+        #     return [result.obj_visfea.data.cpu().numpy(), result.rel_visfea.data.cpu().numpy()], bias_logit, filter_dets(bboxes, result.obj_scores,
+        #                    result.obj_preds, rel_inds[:, 1:], rel_rep, self.return_top100, self.training)
+        # else:
+        #     return [result.obj_visfea.data.cpu().numpy(), result.rel_visfea.data.cpu().numpy()], filter_dets(bboxes, result.obj_scores,
+        #                    result.obj_preds, rel_inds[:, 1:], rel_rep, self.return_top100, self.training)
+
+        # pdb.set_trace()
+        # if self.inter_fea:
+        #     if self.return_unbias_logit:
+        #         return dict_gt, prod_rep, bias_logit, filter_dets(bboxes, result.obj_scores,
+        #                                               result.obj_preds, rel_inds[:, 1:], rel_rep, self.return_top100)
+        #     else:
+        #         return dict_gt, prod_rep, filter_dets(bboxes, result.obj_scores,
+        #                    result.obj_preds, rel_inds[:, 1:], rel_rep, self.return_top100)
+        # else:
+        #     if self.return_unbias_logit:
+        #         return dict_gt, bias_logit, filter_dets(bboxes, result.obj_scores,
+        #                    result.obj_preds, rel_inds[:, 1:], rel_rep, self.return_top100)
+        #     else:
+        #         return dict_gt, filter_dets(bboxes, result.obj_scores,
+        #                    result.obj_preds, rel_inds[:, 1:], rel_rep, self.return_top100)
 
         # if self.training:
         #     return result

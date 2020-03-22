@@ -198,7 +198,8 @@ class KERN(nn.Module):
                  obj_knowledge='',
                  rel_knowledge='',
                  return_top100=False,
-                 return_unbias_logit=False):
+                 return_unbias_logit=False,
+                 return_vis_fea=False):
 
         """
         :param classes: Object classes
@@ -225,6 +226,7 @@ class KERN(nn.Module):
         self.use_ggnn_rel = use_ggnn_rel
 
         self.return_unbias_logit = return_unbias_logit
+        self.return_vis_fea = return_vis_fea
 
 
         self.require_overlap = require_overlap_det and self.mode == 'sgdet'
@@ -409,6 +411,12 @@ class KERN(nn.Module):
 
         result.rel_inds = rel_inds
         # pdb.set_trace()
+        # adding vis fea >>>>>>>
+        if self.return_vis_fea:
+            result.obj_visfea = result.obj_fmap  # (num_obj, 4096)
+            result.rel_visfea = vr  # (num_rel, 4096)
+        # <<<<<<<<<<<<<<<<<
+
 
         if self.training:
             # For bug0 ->>>>>>
@@ -445,12 +453,21 @@ class KERN(nn.Module):
                 rel_rep = F.softmax(result.rel_dists, dim=1)
 
                 if rel_inds[:, 0].max() - rel_inds[:, 0].min() + 1 == 1:
+                    return_result = []
+                    return_result.append(result)
                     if self.return_unbias_logit:
-                        return result, bias_logit, filter_dets(bboxes, result.obj_scores,
-                                   result.obj_preds, rel_inds[:, 1:], rel_rep, self.return_top100, self.training)
-                    else:
-                        return result, filter_dets(bboxes, result.obj_scores,
-                                   result.obj_preds, rel_inds[:, 1:], rel_rep, self.return_top100, self.training)
+                        return_result.append(bias_logit)
+                    return_result.append(filter_dets(bboxes, result.obj_scores,
+                                               result.obj_preds, rel_inds[:, 1:], rel_rep, self.return_top100,
+                                               self.training))
+                    return return_result
+
+                    # if self.return_unbias_logit:
+                    #     return result, bias_logit, filter_dets(bboxes, result.obj_scores,
+                    #                result.obj_preds, rel_inds[:, 1:], rel_rep, self.return_top100, self.training)
+                    # else:
+                    #     return result, filter_dets(bboxes, result.obj_scores,
+                    #                result.obj_preds, rel_inds[:, 1:], rel_rep, self.return_top100, self.training)
 
                 # -----------------------------------Above: 1 batch_size, Below: Multiple batch_size------------------
                 #  assume rel_inds[:, 0] is from 0 to num_img-1
@@ -523,16 +540,25 @@ class KERN(nn.Module):
                 except:
                     rel_scores_idx_a_100_all = torch.Tensor([]).long().cuda()
 
+                return_result = []
+                return_result.append(result)
                 if self.return_unbias_logit:
-                    return result, bias_logit, [boxes, obj_classes, obj_scores, rels_b_100_all, pred_scores_sorted_b_100_all,
-                                    rels_a_100_all,
-                                    pred_scores_sorted_a_100_all, rel_scores_idx_b_100_all, rel_scores_idx_a_100_all]
-                else:
-                    return result, [boxes, obj_classes, obj_scores, rels_b_100_all, pred_scores_sorted_b_100_all, rels_a_100_all,
-                                pred_scores_sorted_a_100_all, rel_scores_idx_b_100_all, rel_scores_idx_a_100_all]
+                    return_result.append(bias_logit)
+                return_result.append([boxes, obj_classes, obj_scores, rels_b_100_all, pred_scores_sorted_b_100_all,
+                                rels_a_100_all,
+                                pred_scores_sorted_a_100_all, rel_scores_idx_b_100_all, rel_scores_idx_a_100_all])
+                return return_result
+
+                # if self.return_unbias_logit:
+                #     return result, bias_logit, [boxes, obj_classes, obj_scores, rels_b_100_all, pred_scores_sorted_b_100_all,
+                #                     rels_a_100_all,
+                #                     pred_scores_sorted_a_100_all, rel_scores_idx_b_100_all, rel_scores_idx_a_100_all]
+                # else:
+                #     return result, [boxes, obj_classes, obj_scores, rels_b_100_all, pred_scores_sorted_b_100_all, rels_a_100_all,
+                #                 pred_scores_sorted_a_100_all, rel_scores_idx_b_100_all, rel_scores_idx_a_100_all]
 
             else:
-                return result, []
+                return result
 
         twod_inds = arange(result.obj_preds.data) * self.num_classes + result.obj_preds.data
         result.obj_scores = F.softmax(result.rm_obj_dists, dim=1).view(-1)[twod_inds]
@@ -553,12 +579,34 @@ class KERN(nn.Module):
             else:
                 dict_gt[(int(gt_rels[i, 1]), int(gt_rels[i, 2]))] = [int(gt_rels[i, 3])]
 
+        # if self.return_unbias_logit:
+        #     return dict_gt, bias_logit, filter_dets(bboxes, result.obj_scores,
+        #                    result.obj_preds, rel_inds[:, 1:], rel_rep, self.return_top100, self.training)
+        # else:
+        #     return dict_gt, filter_dets(bboxes, result.obj_scores,
+        #                    result.obj_preds, rel_inds[:, 1:], rel_rep, self.return_top100, self.training)
+
+        #  Adding vis fea
+        return_result = []
+        if self.return_vis_fea:
+            return_result.append([result.obj_visfea.data.cpu().numpy(), result.rel_visfea.data.cpu().numpy()])
         if self.return_unbias_logit:
-            return dict_gt, bias_logit, filter_dets(bboxes, result.obj_scores,
-                           result.obj_preds, rel_inds[:, 1:], rel_rep, self.return_top100, self.training)
+            return_result.append(bias_logit)
+
+        if len(return_result) == 0:
+            return filter_dets(bboxes, result.obj_scores,result.obj_preds, rel_inds[:, 1:], rel_rep, self.return_top100)
         else:
-            return dict_gt, filter_dets(bboxes, result.obj_scores,
-                           result.obj_preds, rel_inds[:, 1:], rel_rep, self.return_top100, self.training)
+            return_result.append(filter_dets(bboxes, result.obj_scores,
+                                    result.obj_preds, rel_inds[:, 1:], rel_rep, self.return_top100))
+            return return_result
+
+        # if self.return_unbias_logit:
+        #     return [result.obj_visfea.data.cpu().numpy(), result.rel_visfea.data.cpu().numpy()], bias_logit, filter_dets(bboxes, result.obj_scores,
+        #                    result.obj_preds, rel_inds[:, 1:], rel_rep, self.return_top100, self.training)
+        # else:
+        #     return [result.obj_visfea.data.cpu().numpy(), result.rel_visfea.data.cpu().numpy()], filter_dets(bboxes, result.obj_scores,
+        #                    result.obj_preds, rel_inds[:, 1:], rel_rep, self.return_top100, self.training)
+
 
     def __getitem__(self, batch):
         """ Hack to do multi-GPU training"""

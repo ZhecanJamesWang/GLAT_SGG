@@ -128,8 +128,11 @@ elif conf.model_s_m == 'motifnet':
     # ckpt_glat = torch.load('/home/haoxuan/code/KERN/checkpoints/motifnet_glat_predcls_mask_logit_thres_train_v2mbz/motifnet_glat-37.tar')
 
     # Finetuned model v3
-    print('loading Finetuned model v3')
-    ckpt_glat = torch.load('/home/haoxuan/code/KERN/checkpoints/motifnet_glat_predcls_mask_logit_thres_train_v3/motifnet_glat-49.tar')
+    # print('loading Finetuned model v3')
+    # ckpt_glat = torch.load('/home/haoxuan/code/KERN/checkpoints/motifnet_glat_predcls_mask_logit_thres_train_v3/motifnet_glat-49.tar')
+
+    print('loading Finetuned model v3_1')
+    ckpt_glat = torch.load('/home/haoxuan/code/KERN/checkpoints/motifnet_glat_predcls_mask_logit_thres_train_v3_1/motifnet_glat-49.tar')
 
 
     # Pretrained Model
@@ -278,6 +281,10 @@ def glat_postprocess(pred_entry, mask_idx, if_predicting=False):
     pred_label_predicate, pred_label_entities = glat_wrapper(total_data)
     pred_entry['rel_scores'] = pred_label_predicate
 
+    if conf.mode == "sgcls" or conf.mode == "sgdet":
+        pred_entry['obj_scores_rm'] = pred_label_entities
+        pred_entry['obj_scores'] = F.softmax(pred_label_entities, dim=1).max(1)[0]
+
     return pred_entry
 
 
@@ -419,6 +426,7 @@ def val_batch(batch_num, b, evaluator,evaluator_multiple_preds, evaluator_list, 
                     if int(pred_class) in dict_gt[(int(sub), int(obj))]:
                         accs[0] += 1
 
+        all_pred_entries.append(pred_entry)
 
         eval_entry(conf.mode, gt_entry, pred_entry, evaluator, evaluator_multiple_preds,
                    evaluator_list, evaluator_multiple_preds_list)
