@@ -184,24 +184,24 @@ class RelModelStanford(RelModel):
 
         if self.training:
 
-            # For bug0 >>>>>>>>>
-            if self.mode == "sgdet":
-                probs = F.softmax(result.rm_obj_dists, 1)
-                nms_mask = result.rm_obj_dists.data.clone()
-                nms_mask.zero_()
-                for c_i in range(1, result.rm_obj_dists.size(1)):
-                    scores_ci = probs.data[:, c_i]
-                    boxes_ci = result.boxes_all.data[:, c_i]
-
-                    keep = apply_nms(scores_ci, boxes_ci,
-                                     pre_nms_topn=scores_ci.size(0), post_nms_topn=scores_ci.size(0),
-                                     nms_thresh=0.3)
-                    nms_mask[:, c_i][keep] = 1
-
-                result.obj_preds = Variable(nms_mask * probs.data, volatile=True)[:, 1:].max(1)[1] + 1
-            else:
-                result.obj_preds = result.rm_obj_dists[:,1:].max(1)[1] + 1
-            # For bug0 <<<<<<<<
+            # # For bug0 >>>>>>>>>
+            # if self.mode == "sgdet":
+            #     probs = F.softmax(result.rm_obj_dists, 1)
+            #     nms_mask = result.rm_obj_dists.data.clone()
+            #     nms_mask.zero_()
+            #     for c_i in range(1, result.rm_obj_dists.size(1)):
+            #         scores_ci = probs.data[:, c_i]
+            #         boxes_ci = result.boxes_all.data[:, c_i]
+            #
+            #         keep = apply_nms(scores_ci, boxes_ci,
+            #                          pre_nms_topn=scores_ci.size(0), post_nms_topn=scores_ci.size(0),
+            #                          nms_thresh=0.3)
+            #         nms_mask[:, c_i][keep] = 1
+            #
+            #     result.obj_preds = Variable(nms_mask * probs.data, volatile=True)[:, 1:].max(1)[1] + 1
+            # else:
+            #     result.obj_preds = result.rm_obj_dists[:,1:].max(1)[1] + 1
+            # # For bug0 <<<<<<<<
 
             if self.return_top100:
                 if self.mode == 'predcls':

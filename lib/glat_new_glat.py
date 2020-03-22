@@ -1,10 +1,11 @@
 import torch.nn as nn
 import torch.nn.functional as F
-from lib.layers import GraphConvolution, EncoderLayer, GraphAttentionLayer, GraphAtt_Mutlihead_Basic, \
+from lib.layers_new_glat import GraphConvolution, EncoderLayer, GraphAttentionLayer, GraphAtt_Mutlihead_Basic, \
     PositionwiseFeedForward
 import torch
 # import Constants
 import pdb
+import copy
 from torch.autograd import Variable
 
 def get_non_pad_mask(seq, node_type):
@@ -272,6 +273,11 @@ class Pred_label(nn.Module):
 
         predicate, predicate_order_list, entity, entity_order_list, blank, blank_order_list = split(h, node_type)
 
+        # pdb.set_trace()
+
+        # predicate = self.decoder_predicate(predicate)
+        # entity = self.decoder_entity(entity)
+
         predicate_logits = self.decoder_predicate(predicate)
         entity_logits = self.decoder_entity(entity)
 
@@ -285,30 +291,38 @@ class Pred_label(nn.Module):
         # lm_logits = combine(predicate, predicate_order_list, entity, entity_order_list, b_size, n_num)
         # pdb.set_trace()
 
-        # lm = self.decoder(h_logits)
+        # lm_logits = self.decoder(h)
+        # pdb.set_trace()
+        # predicate_logits = self.softmax(predicate)
+        # entity_logits = self.softmax(entity)
+
         predicate = self.softmax(predicate_logits)
         entity = self.softmax(entity_logits)
+
+        # predicate_logits = predicate
+        # entity_logits = entity
 
         # pdb.set_trace()
         # if self.training:
         #     return predicate_logits, entity_logits
         # else:
-        _, predicate_labels = torch.max(predicate, dim=-1, keepdim=True)
-        _, entity_labels = torch.max(entity, dim=-1, keepdim=True)
+        _, predicate_labels = torch.max(predicate_logits, dim=-1, keepdim=True)
+        _, entity_labels = torch.max(entity_logits, dim=-1, keepdim=True)
 
         all_labels = combine(predicate_labels, predicate_order_list, entity_labels, entity_order_list, blank_labels, blank_order_list, b_size, n_num)
 
+        # return predicate_logits, entity_logits, all_labels
         return predicate, entity, predicate_logits, entity_logits, all_labels
 
 
 class GLAT_basic(nn.Module):
-    def __init__(self, foc_type, att_type, d_model, nout,  n_head, d_k=64, d_v=64, dropout=0.1, d_inner=2048):
+    def __init__(self, foc_type, att_type, d_model, d_out,  n_head, d_k=64, d_v=64, dropout=0.1, d_inner=2048):
 
         super(GLAT_basic, self).__init__()
 
         self.slf_attn = GraphAtt_Mutlihead_Basic(
-            n_head, d_model, d_k, d_v, foc_type, dropout=dropout)
-        self.pos_ffn = PositionwiseFeedForward(d_model, d_inner, dropout=dropout)
+            n_head, d_model, d_out, d_k, d_v, foc_type, dropout=dropout)
+        self.pos_ffn = PositionwiseFeedForward(d_out, d_inner, dropout=dropout)
 
     def forward(self, enc_input, adj, non_pad_mask=None, slf_attn_mask=None):
 
@@ -336,6 +350,12 @@ class GLAT(nn.Module):
             self.GLAT_G = GLAT_basic("global", "do_product", fea_dim, nout, nheads, dropout=dropout)
             self.GLAT_L = GLAT_basic("local",  "do_product", fea_dim, nout, nheads, dropout=dropout)
             self.fc = nn.Linear(2 * int(nout), int(nout))
+        elif type == 3:
+            self.GLAT_G = GLAT_basic("global", "do_product", fea_dim, nout, nheads, dropout=dropout)
+            self.GLAT_L_sub_pred = GLAT_basic("local",  "do_product", fea_dim, int(nout/2), int(nheads/2), dropout=dropout)
+            self.GLAT_L_obj_pred = GLAT_basic("local",  "do_product", fea_dim, int(nout/2), int(nheads/2), dropout=dropout)
+            self.fc = nn.Linear(2 * int(nout), int(nout))
+
         else:
             raise("wrong model type")
 
@@ -353,6 +373,19 @@ class GLAT(nn.Module):
             x_l = self.GLAT_L(x, adj, non_pad_mask=non_pad_mask, slf_attn_mask=slf_attn_mask)
             x = torch.cat([x_g, x_l], dim=-1) # output b, n, 2*dim
             x = self.fc(x)
+        elif self.type == 3:
+            x_g = self.GLAT_G(x, adj, non_pad_mask=non_pad_mask, slf_attn_mask=slf_attn_mask) # output b, n, dim
+
+            adj_s_p = copy.deepcopy(adj)
+            adj_o_p = copy.deepcopy(adj)
+            adj_s_p[adj == 2] = 0
+            adj_o_p[adj == 1] = 0
+
+            x_l_s_p = self.GLAT_L_sub_pred(x, adj_s_p, non_pad_mask=non_pad_mask, slf_attn_mask=slf_attn_mask)
+            x_l_o_p = self.GLAT_L_obj_pred(x, adj_o_p, non_pad_mask=non_pad_mask, slf_attn_mask=slf_attn_mask)
+            x = torch.cat([x_g, x_l_s_p, x_l_o_p], dim=-1) # output b, n, 2*dim
+            x = self.fc(x)
+
         return x
 
 

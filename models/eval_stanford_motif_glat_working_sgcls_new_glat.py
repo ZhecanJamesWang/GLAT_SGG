@@ -1,5 +1,7 @@
 
-from dataloaders.visual_genome import VGDataLoader, VG, build_graph_structure
+from dataloaders.visual_genome_new_glat import VGDataLoader, VG, build_graph_structure
+# from dataloaders.visual_genome import VGDataLoader, VG, build_graph_structure
+
 import numpy as np
 import torch
 
@@ -12,14 +14,14 @@ import dill as pkl
 import os
 # from lib.glat_logit import GLATNET
 from lib.glat import GLATNET
+from lib.glat_new_glat import GLATNET
 from torch.autograd import Variable
 import pdb
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
 conf = ModelConfig()
-
-conf.glat_on = True
+conf.glat_on = False
 conf.temp_model = 1
 
 if conf.model_s_m == 'motifnet':
@@ -97,7 +99,8 @@ model = GLATNET(vocab_num=[52, 153],
                 dropout=0.1,
                 nheads=8,
                 blank=152,
-                types=[2] * 6)
+                # types=[2] * 6)
+                types=[3] * 6)
 
 detector.cuda()
 ckpt = torch.load(conf.ckpt)
@@ -117,9 +120,10 @@ if conf.model_s_m == 'stanford':
 
     # stanford predcls finetune glat
     # ckpt_glat = torch.load('/home/haoxuan/code/KERN/checkpoints/stanford_glat_predcls/stanford_glat-21.tar')
+    # ckpt_glat = torch.load('/home/tangtangwzc/KERN/checkpoints/stanford_glat_sgcls_2020_0224_0308/motifnet_glat-25.tar')
 
-    # stanford sgcls finetune glat
-    ckpt_glat = torch.load('/home/tangtangwzc/KERN/checkpoints/stanford_glat_sgcls_2020_0224_0308/motifnet_glat-25.tar')
+    # stanford sgdet new finetune new glat weight
+    ckpt_glat = torch.load('/home/haoxuan/code/KERN/checkpoints/train_glat_stanford_sgdet_v31/stanford-21.tar')
 
 elif conf.model_s_m == 'motifnet':
     # ckpt_glat = torch.load('/home/haoxuan/code/KERN/checkpoints/motifnet_glat/motifnet_glat-25.tar')
@@ -141,9 +145,15 @@ elif conf.model_s_m == 'motifnet':
 
     # # # new finetune predcls motif new glat weight
     # ckpt_glat = torch.load('/home/haoxuan/code/KERN/checkpoints/train_glat_motif_predcls_v3/motifnet-29.tar')
+    # ckpt_glat = torch.load('/home/haoxuan/code/KERN/checkpoints/train_glat_motif_predcls_v31/motifnet-6.tar')
 
     # # # new finetune sgcls motif new glat weight
-    ckpt_glat = torch.load('/home/haoxuan/code/KERN/checkpoints/train_glat_motif_sgcls_v3/motifnet-30.tar')
+    # ckpt_glat = torch.load('/home/haoxuan/code/KERN/checkpoints/train_glat_motif_sgcls_v3/motifnet-30.tar')
+    ckpt_glat = torch.load('/home/haoxuan/code/KERN/checkpoints/train_glat_motif_sgcls_v31/motifnet-13.tar')
+
+    # # # new finetune sgdet motif new glat weight
+    # ckpt_glat = torch.load("checkpoints/train_glat_motif_sgdet_v31/motifnet-13.tar")
+
 
 # # ---------------pretrained model mask ratio 0.5
 # ckpt_glat = torch.load('/home/tangtangwzc/Common_sense/models/2019-11-03-17-51_2_2_2_2_2_2_concat_no_init_mask/best_test_node_mask_predicate_acc.pth')
@@ -297,6 +307,39 @@ def my_collate(total_data):
 
     return input_classes, adjs_con, adjs_lbl, node_types, node_logits, node_logits_dists, ent_dists
     # return input_classes, adjs_con, adjs_lbl, node_types
+
+
+# def my_collate(total_data):
+#     blank_idx = 152
+#     max_length = 0
+#     sample_num = len(total_data['node_class'])
+#     for i in range(sample_num):
+#         max_length = max(max_length, total_data['node_class'][i].size(0))
+#
+#     input_classes = []
+#     adjs = []
+#     node_types = []
+#     for i in range(sample_num):
+#         input_class = total_data['node_class'][i]
+#         adj = total_data['adj'][i]
+#         node_type = total_data['node_type'][i]
+#         pad_input_class = tensor2variable(blank_idx * torch.ones(max_length - input_class.size(0)).long().cuda())
+#         input_classes.append(torch.cat((input_class, pad_input_class), 0).unsqueeze(0))
+#         # input_classes.append(torch.cat((input_class, blank_idx*torch.ones(max_length-input_class.size(0)).long().cuda()), 0).unsqueeze(0))
+#         new_adj = torch.cat((adj, torch.zeros(max_length-adj.size(0), adj.size(1)).long().cuda()), 0)
+#         if max_length != new_adj.size(1):
+#             new_adj = torch.cat((new_adj, torch.zeros(new_adj.size(0), max_length-new_adj.size(1)).long().cuda()), 1)
+#         adjs.append(new_adj.unsqueeze(0))
+#         # pdb.set_trace()
+#         node_types.append(torch.cat((node_type, 2 * torch.ones(max_length-node_type.size(0)).long().cuda()), 0).unsqueeze(0))
+#
+#     input_classes = torch.cat(input_classes, 0)
+#     adjs = torch.cat(adjs, 0)
+#     adjs_lbl = adjs
+#     adjs_con = torch.clamp(adjs, 0, 1)
+#     node_types = torch.cat(node_types, 0)
+#
+#     return input_classes, adjs_con, adjs_lbl, node_types
 
 
 def soft_merge7(logit_base, logit_glat, node_type):
@@ -793,8 +836,12 @@ def glat_wrapper(total_data, useless_entity_id):
         node_type = node_type.data
     if torch.is_tensor(adjs_con):
         adj_con = Variable(adjs_con)
+    if torch.is_tensor(adjs_lbl):
+        adj_lbl = Variable(adjs_lbl)
 
-    pred_label, pred_connect = model(input_class, adj_con, node_type)
+    # pred_label, pred_connect = model(input_class, adj_con, node_type)
+    pred_label, pred_connect = model(input_class, adj_lbl, node_type)
+
     # pred_label, pred_connect = model(input_class, adj_con, node_type, node_logit_dists)
     # pred_label, pred_connect = model(input_class, adj_con, node_type, node_logit)
 
@@ -897,12 +944,7 @@ def glat_postprocess(pred_entry, if_predicting=False):
         extra_entry['rel_scores'] = pred_label_predicate_logit_glat[:, :-1]
         extra_entry['pred_rel_inds'] = pred_entry['pred_rel_inds']
         extra_entry['obj_scores'] = softmax_1(pred_label_entities).max(1)[0]
-
-        # sgdet need to add 1
-        if conf.mode == "sgdet":
-            extra_entry['pred_classes'] = softmax_1(pred_label_entities).max(1)[1] + 1
-        else:
-            extra_entry['pred_classes'] = softmax_1(pred_label_entities).max(1)[1]
+        extra_entry['pred_classes'] = softmax_1(pred_label_entities).max(1)[1]
 
         extra_entry['pred_label_predicate_logit_base'] = pred_label_predicate_logit_base
         extra_entry['pred_label_entities_logit_base'] = pred_label_entities_logit_base
@@ -912,6 +954,7 @@ def glat_postprocess(pred_entry, if_predicting=False):
 
         extra_entry['pred_label_predicate_logit_fusion'] = pred_label_predicate
         extra_entry['pred_label_entities_logit_fusion'] = pred_label_entities
+
         # # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
     if conf.glat_on:
@@ -931,12 +974,6 @@ def glat_postprocess(pred_entry, if_predicting=False):
             # For bug0 <<<<<<<<<<<<
 
             pred_entry['pred_classes'] = pred_label_entities.max(1)[1]
-
-            # if conf.mode == "sgdet":
-            #     extra_entry['pred_classes'] = softmax_1(pred_label_entities).max(1)[1] + 1
-            # else:
-            #     extra_entry['pred_classes'] = softmax_1(pred_label_entities).max(1)[1]
-
         # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     if not conf.glat_on:
         # vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv

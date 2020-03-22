@@ -4,6 +4,12 @@ from scipy import stats
 import matplotlib.pyplot as plt
 plt.style.use('seaborn-white')
 
+
+print("mean recall triplet")
+print("\n")
+
+
+
 # infile = open("train_triplet_freq",'rb')
 # infile = open("train_triplet_freq_20200302", 'rb')
 infile = open("train_triplet_freq_0303_1724", 'rb')
@@ -30,7 +36,7 @@ sorted_list = sorted(zip(x, y), key=lambda pair: pair[1])
 #     pickle.dump(y, f)
 
 max_v = np.max(y)
-split = 8
+split = 4
 unit = int(float(max_v)/split)
 
 print("max_v: ", max_v)
@@ -41,9 +47,9 @@ for spl in range(split):
 bins.append(max_v)
 
 
-# bins = [0, max_v]
+bins = [0, max_v]
 # bins = [1, 10, 100, max_v]
-bins = [1, 3, 9, 27, 81, 243, max_v]
+# bins = [1, 3, 9, 27, 81, 243, max_v]
 
 print(bins)
 
@@ -83,17 +89,19 @@ infile.close()
 # files = ["caches/kern_sgcls_2020_0303_1151.pkl_dict_pred_list_total", "caches/kern_sgcls_2020_0303_1153.pkl_dict_pred_list_total"]
 # files = ['caches/kern_sgcls_2020_0303_1543.pkl_dict_pred_list_total', "caches/kern_sgcls_2020_0303_1153.pkl_dict_pred_list_total"]
 files = ['caches/kern_sgcls_2020_0307_1603.pkl_dict_pred_list_total', "caches/kern_sgcls_2020_0303_1153.pkl_dict_pred_list_total"]
+
 # motif
 # file = "cache/motif_predcls_2020_0229_2140_dict_pred_list_total"
 # file = "cache/motif_predcls_2020_0229_2204_dict_pred_list_total"
 
 # files = ["cache/motif_predcls_2020_0303_0404_dict_pred_list_total", "cache/motif_predcls_2020_0303_0403_dict_pred_list_total"]
-
+#
 # stanford
 # files = ["cache/eval_stanford_glat_sgcls_2020_0303_1220_dict_pred_list_total", "cache/eval_stanford_glat_sgcls_2020_0303_1227_dict_pred_list_total"]
 
 # debiasd kern
 # files = ["caches/kern_sgcls_2020_0303_1540.pkl_dict_pred_list_total", "caches/kern_sgcls_2020_0303_1543.pkl_dict_pred_list_total", "caches/kern_sgcls_2020_0303_1153.pkl_dict_pred_list_total"]
+
 
 # counter = 0
 for file in files:
@@ -105,21 +113,22 @@ for file in files:
     # counter = 0
 
     for bin, triplets in triplet_bin.items():
-        bin_recall_num = 0
+        # bin_recall_num = 0
         bin_recall_den = 0
+        bin_recall = []
         bin_con_triplet_freq = 0
         for triplet in triplets:
             key = tuple(triplet[0])
             if key in dict_pred_list_total:
                 res = dict_pred_list_total[key]
-                bin_recall_num += res[1]
+                bin_recall.append(float(res[1])/res[0])
                 bin_recall_den += res[0]
             bin_con_triplet_freq += train_triplet_freq[key]
             # counter += 1
 
         # print("\n")
         print("bin {}".format(bin))
-        print(float(bin_recall_num)/bin_recall_den)
+        print(np.mean(bin_recall))
 
         stats += ("bin {}".format(bin) + "\n")
         stats += ("# of triplet: {}, triplet_occur train: {} \n".format(len(triplets), bin_con_triplet_freq))

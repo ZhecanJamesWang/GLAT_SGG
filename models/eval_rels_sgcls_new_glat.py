@@ -1,4 +1,5 @@
-from dataloaders.visual_genome import VGDataLoader, VG, build_graph_structure
+from dataloaders.visual_genome_new_glat import VGDataLoader, VG, build_graph_structure
+# from dataloaders.visual_genome import VGDataLoader, VG, build_graph_structure
 import numpy as np
 import torch
 
@@ -12,14 +13,14 @@ import os
 # from lib.kern_model import KERN
 from lib.kern_model_sgcls import KERN
 
-from lib.glat import GLATNET
+from lib.glat_new_glat import GLATNET
+# from lib.glat import GLATNET
 from torch.autograd import Variable
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "1"
-
+os.environ["CUDA_VISIBLE_DEVICES"] = "2"
 conf = ModelConfig()
-
 conf.glat_on = True
+
 conf.temp_model = 1
 
 train, val, test = VG.splits(num_val_im=conf.val_size, filter_duplicate_rels=True,
@@ -63,7 +64,8 @@ model = GLATNET(vocab_num=[52, 153],
                 dropout=0.1,
                 nheads=8,
                 blank=152,
-                types=[2]*6)
+                types=[3] * 6)
+                # types=[2]*6)
 
 detector.cuda()
 ckpt = torch.load(conf.ckpt)
@@ -95,15 +97,29 @@ optimistic_restore(detector, ckpt['state_dict'])
 # ckpt_glat = torch.load('/home/tangtangwzc/KERN/saved_models/2019-11-20-23-59/with_constrant_mean__R@100.pth')
 
 if conf.glat_on:
-    # # kern finetune sgcls kern old glat weight
-    path = '/home/tangtangwzc/KERN/checkpoints/kern_glat_sgcls_2020_0223_2320/motifnet_glat-18.tar'
+    # # kern finetune sgcls
+    # path = '/home/tangtangwzc/KERN/checkpoints/kern_glat_sgcls_2020_0223_2320/motifnet_glat-18.tar'
 
     # # # new finetune sgcls kern new glat weight
     # path = '/home/haoxuan/code/KERN/checkpoints/train_glat_kern_sgcls_v3/kern-24.tar'
+    # path = ('/home/haoxuan/code/KERN/checkpoints/train_glat_kern_sgcls_v31/kern-12.tar')
+
+    # # # new finetune predcls kern new glat weight
+    # path = ('/home/haoxuan/code/KERN/checkpoints/train_glat_kern_predcls_v31/kern-16.tar')
+
+    # # # new finetune sgdet kern new glat weight
+    # path = 'checkpoints/train_glat_kern_sgdet_v31/kern-14.tar'
 
     # # # new finetune sgcls debiased kern new glat weight
     # path = ('/home/haoxuan/code/KERN/checkpoints/train_glat_kern_debiasedv1_sgcls_v3/kern-23.tar')
-    # path = ('checkpoints/train_glat_kern_debiasedv1_sgcls_v31/kern-13.tar')
+    path = ('checkpoints/train_glat_kern_debiasedv1_sgcls_v31/kern-13.tar')
+
+    # # # new finetune sgdet debiased kern 1 new glat weight
+    # path = ("/home/haoxuan/code/KERN/checkpoints/train_glat_kern_debiasedv1_sgdet_epoch1_v31/kern-10.tar")
+
+    # # # # new finetune predcls debiased kern new glat weight
+    # path = ('/home/haoxuan/code/KERN/checkpoints/train_glat_kern_debiasedv1_predcls_v31/kern-17.tar')
+
 
     # =========================
     # ckpt_glat = torch.load('/home/haoxuan/code/KERN/checkpoints/motifnet_glat/motifnet_glat-25.tar')
@@ -310,6 +326,39 @@ def my_collate(total_data):
     # return input_classes, adjs_con, adjs_lbl, node_types
 
 
+# def my_collate(total_data):
+#     blank_idx = 152
+#     max_length = 0
+#     sample_num = len(total_data['node_class'])
+#     for i in range(sample_num):
+#         max_length = max(max_length, total_data['node_class'][i].size(0))
+#
+#     input_classes = []
+#     adjs = []
+#     node_types = []
+#     for i in range(sample_num):
+#         input_class = total_data['node_class'][i]
+#         adj = total_data['adj'][i]
+#         node_type = total_data['node_type'][i]
+#         pad_input_class = tensor2variable(blank_idx * torch.ones(max_length - input_class.size(0)).long().cuda())
+#         input_classes.append(torch.cat((input_class, pad_input_class), 0).unsqueeze(0))
+#         # input_classes.append(torch.cat((input_class, blank_idx*torch.ones(max_length-input_class.size(0)).long().cuda()), 0).unsqueeze(0))
+#         new_adj = torch.cat((adj, torch.zeros(max_length-adj.size(0), adj.size(1)).long().cuda()), 0)
+#         if max_length != new_adj.size(1):
+#             new_adj = torch.cat((new_adj, torch.zeros(new_adj.size(0), max_length-new_adj.size(1)).long().cuda()), 1)
+#         adjs.append(new_adj.unsqueeze(0))
+#         # pdb.set_trace()
+#         node_types.append(torch.cat((node_type, 2 * torch.ones(max_length-node_type.size(0)).long().cuda()), 0).unsqueeze(0))
+#
+#     input_classes = torch.cat(input_classes, 0)
+#     adjs = torch.cat(adjs, 0)
+#     adjs_lbl = adjs
+#     adjs_con = torch.clamp(adjs, 0, 1)
+#     node_types = torch.cat(node_types, 0)
+#
+#     return input_classes, adjs_con, adjs_lbl, node_types
+
+
 def soft_merge3(logit_base, logit_glat, node_type, type, temp_model):
 
     if type == 0:
@@ -424,8 +473,9 @@ def rearrange_useless(ent_dists, pred_label_entities, useless_entity_id, node_ty
     return ent_dists, pred_label_entities
 
 
-def glat_wrapper(total_data, useless_entity_id):
+def glat_wrapper(total_data, useless_entity_id, mode):
     # Batch size assumed to be 1
+    # input_class, adjs_con, adjs_lbl, node_type = my_collate(total_data)
     # input_class, adjs_con, adjs_lbl, node_type, node_logit = my_collate(total_data)
     # input_class, adjs_con, adjs_lbl, node_type, node_logit, node_logit_dists = my_collate(total_data)
     input_class, adjs_con, adjs_lbl, node_type, node_logit, node_logit_dists, ent_dists = my_collate(total_data)
@@ -438,8 +488,12 @@ def glat_wrapper(total_data, useless_entity_id):
         node_type = node_type.data
     if torch.is_tensor(adjs_con):
         adj_con = Variable(adjs_con)
+    if torch.is_tensor(adjs_lbl):
+        adj_lbl = Variable(adjs_lbl)
 
-    pred_label, pred_connect = model(input_class, adj_con, node_type)
+    # pred_label, pred_connect = model(input_class, adj_con, node_type)
+    pred_label, pred_connect = model(input_class, adj_lbl, node_type)
+
     # pred_label, pred_connect = model(input_class, adj_con, node_type, node_logit_dists)
     # pred_label, pred_connect = model(input_class, adj_con, node_type, node_logit)
 
@@ -458,6 +512,7 @@ def glat_wrapper(total_data, useless_entity_id):
     logit_base_predicate = node_logit_dists.squeeze(0)[index].view(-1, 52)
     logit_base_predicate_one_hot = torch.max(logit_base_predicate[:, 1:-1], dim=1)[1]
     # ========================
+
     logit_glat_entities = pred_label_entities_glat[:, :-2]
     logit_glat_entities_one_hot = torch.max(logit_glat_entities[:, 1:], dim=1)[1]
     logit_base_entities_one_hot = torch.max(ent_dists[:, 1:], dim=1)[1]
@@ -521,12 +576,12 @@ def glat_postprocess(pred_entry, if_predicting=False):
     # total_data = build_graph_structure(pred_entry, ind_to_classes, ind_to_predicates, if_predicting=if_predicting)
 
     # For SGCLS
-    if conf.mode == "sgcls" or conf.mode == "sgdet":
-        total_data, useless_entity_id = build_graph_structure(pred_entry, ind_to_classes, ind_to_predicates,  conf.mode, if_predicting=if_predicting, sgclsdet=True)
-    else:
-        total_data = build_graph_structure(pred_entry, ind_to_classes, ind_to_predicates,  conf.mode,
-                                           if_predicting=if_predicting)
-        useless_entity_id = []
+    # if conf.mode == "sgcls" or conf.mode == "sgdet":
+    total_data, useless_entity_id = build_graph_structure(pred_entry, ind_to_classes, ind_to_predicates,  conf.mode, if_predicting=if_predicting, sgclsdet=True)
+    # else:
+    #     total_data = build_graph_structure(pred_entry, ind_to_classes, ind_to_predicates,  conf.mode,
+    #                                        if_predicting=if_predicting)
+    #     useless_entity_id = []
 
     if len(useless_entity_id) != 0:
         print("len(useless_entity_id): ", len(useless_entity_id))
@@ -534,7 +589,7 @@ def glat_postprocess(pred_entry, if_predicting=False):
 
     if conf.glat_on:
         # vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
-        pred_label_predicate, pred_label_entities, comparison_one_hot, change_list, pred_label_predicate_logit_glat, pred_label_entities_logit_glat,  pred_label_predicate_logit_base, pred_label_entities_logit_base = glat_wrapper(total_data, useless_entity_id)
+        pred_label_predicate, pred_label_entities, comparison_one_hot, change_list, pred_label_predicate_logit_glat, pred_label_entities_logit_glat,  pred_label_predicate_logit_base, pred_label_entities_logit_base = glat_wrapper(total_data, useless_entity_id, conf.mode)
         # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
     extra_entry = {}
@@ -554,7 +609,9 @@ def glat_postprocess(pred_entry, if_predicting=False):
 
         extra_entry['pred_label_predicate_logit_fusion'] = pred_label_predicate
         extra_entry['pred_label_entities_logit_fusion'] = pred_label_entities
+
         # # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
     if conf.glat_on:
         # vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 

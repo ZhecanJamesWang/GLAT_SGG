@@ -23,7 +23,6 @@ from tqdm import tqdm
 import pickle
 from torch.autograd import Variable
 
-
 class VG(Dataset):
     def __init__(self, mode, roidb_file=VG_SGG_FN, dict_file=VG_SGG_DICT_FN,
                  image_file=IM_DATA_FN, filter_empty_rels=True, num_im=-1, num_val_im=5000,
@@ -431,10 +430,8 @@ class VGDataLoader(torch.utils.data.DataLoader):
             **kwargs,
         )
         return train_load, val_load
-
 def build_graph_structure(entries, index2name_object, index2name_predicate, mode, if_predicting=False, sgclsdet=False):
-# def build_graph_structure(entries, index2name_object, index2name_predicate, if_predicting=False):
-
+# def build_graph_structure(entries, index2name_object, index2name_predicate, if_predicting=False, sgclsdet=False):
     # Input: pred_relations(Tensor) pred_classes(Variable)
     # Output: adj(Tensor) node_class(Variable) nodes_type(Tensor)
     total_data = {}
@@ -448,13 +445,22 @@ def build_graph_structure(entries, index2name_object, index2name_predicate, mode
 
     total_data['ent_dists'] = []
 
+    # adding vis fea >>>>>>>
+    total_data['entity_visfea'] = []
+    total_data['rel_visfea'] = []
+
     entries_minibatch = {}
     entries_minibatch['pred_relations'] = []
     entries_minibatch['pred_classes'] = []
+
     entries_minibatch['rel_scores'] = []
     entries_minibatch['rel_dists'] = []
 
     entries_minibatch['ent_dists'] = []
+
+    # adding vis fea >>>>>>>
+    # entries_minibatch['entity_visfea'] = []
+    # entries_minibatch['rel_visfea'] = []
 
     # For SGCLS
     useless_entity_id = []
@@ -464,15 +470,16 @@ def build_graph_structure(entries, index2name_object, index2name_predicate, mode
         # pdb.set_trace()
         # entries_minibatch['pred_relations'].append(entries['pred_relations'][:, 1:])
         # entries_minibatch['pred_classes'].append(entries['pred_classes'])
-
         for i in range(entries['pred_relations'][:, 0].max()+1):
             rel_idx_cur_img = (entries['pred_relations'][:, 0] == i).view(-1, 1).expand(-1, 4)
             entries_minibatch['pred_relations'].append(entries['pred_relations'][rel_idx_cur_img].view(-1, 4)[:, 1:])
             entity_idx_cur_img = entries_minibatch['pred_relations'][i][:, :2]
             entries_minibatch['pred_classes'].append(entries['pred_classes'][entity_idx_cur_img.min():entity_idx_cur_img.max()+1])
-            # pdb.set_trace()
 
-            # ToDo: add for ent_dists
+            # adding vis fea >>>>>>>
+            # pdb.set_trace()
+            # entries_minibatch['entity_visfea'].append(entries['entity_visfea'][entity_idx_cur_img.min():entity_idx_cur_img.max()+1])
+            # entries_minibatch['rel_visfea'].append(entries['rel_visfea'][(entries['pred_relations'][:, 0] == i).view(-1, 1).expand(-1, 4096)].view(-1, 4096))
 
             # For SGCLS
             end_id = entity_idx_cur_img.min()
@@ -483,9 +490,10 @@ def build_graph_structure(entries, index2name_object, index2name_predicate, mode
             if i == entries['pred_relations'][:, 0].max() and start_id != entries['pred_classes'].size(0):
                 useless_entity_id += list(range(start_id, entries['pred_classes'].size(0)))
 
-
+            # pdb.set_trace()
             entries_minibatch['pred_relations'][i][:, :2] = entries_minibatch['pred_relations'][i][:, :2] - entries_minibatch['pred_relations'][i][:, :2].min()
 
+            # print('go through 460 in visual_genome.py')
             # pdb.set_trace()
     else:
         entries_minibatch['pred_relations'].append(entries['pred_relations'])
@@ -494,8 +502,12 @@ def build_graph_structure(entries, index2name_object, index2name_predicate, mode
         entries_minibatch['rel_dists'].append(entries['rel_dists'])
         entries_minibatch['ent_dists'].append(entries['ent_dists'])
 
-        if mode == "sgcls" or mode == "sgdet":
-            entries_minibatch['ent_dists'].append(entries['ent_dists'])
+        # adding vis fea >>>>>>>
+        # entries_minibatch['entity_visfea'].append(entries['entity_visfea'])
+        # entries_minibatch['rel_visfea'].append(entries['rel_visfea'])
+
+        # if mode == "sgcls" or mode == "sgdet":
+        entries_minibatch['ent_dists'].append(entries['ent_dists'])
 
     for i in range(len(entries_minibatch['pred_classes'])):
         # if if_predicting:
@@ -515,16 +527,14 @@ def build_graph_structure(entries, index2name_object, index2name_predicate, mode
         entity_num = return_classes.size(0)
         total_node_num = entity_num + return_relations.size(0)
         # pdb.set_trace()
-
         nodes_class = torch.cat((return_classes, Variable(return_relations[:, -1])), dim=0)
+        # pdb.set_trace()
 
         nodes_logit = torch.cat((Variable(torch.zeros(return_classes.size()[0], return_rel_scores.size()[1]).cuda()), return_rel_scores))
         nodes_logit_dists = torch.cat((Variable(torch.zeros(return_classes.size()[0], return_rel_dists.size()[1]).cuda()), return_rel_dists))
 
         ent_dists = torch.cat((return_ent_dists, Variable(torch.zeros(return_rel_dists.size()[0], return_ent_dists.size()[1]).cuda())))
-        # ent_dists = torch.cat((return_ent_dists, torch.zeros(return_rel_dists.size()[0], return_ent_dists.size()[1]).cuda()))
 
-        # pdb.set_trace()
         nodes_type = torch.ones_like(return_classes).data
         nodes_type = torch.cat((nodes_type, torch.zeros_like(return_relations[:,0])), dim=0)
         adj = torch.zeros(total_node_num, total_node_num).type_as(return_relations)
@@ -532,27 +542,32 @@ def build_graph_structure(entries, index2name_object, index2name_predicate, mode
         # print('position', i)
         # print('------adj size', adj.size(), '------relation size',return_relations.size(), )
         # nodes_name = [] + [index2name_object[i] for i in return_classes.tolist()]
-
         for j, relation in enumerate(return_relations.tolist()):
             # nodes_name.append(index2name_predicate[relation[-1]])
             try:
                 adj[relation[0]][entity_num+j] = 1
+                adj[entity_num+j][relation[0]] = 1
             except Exception as e:
                 print(e)
-                pass
-                # pdb.set_trace()
+                pdb.set_trace()
             # print('position', )
             adj[entity_num+j][relation[1]] = 2
+            adj[relation[1]][entity_num+j] = 2
         total_data['adj'].append(adj)
         # total_data['node_name'].append(nodes_name)
         total_data['node_class'].append(nodes_class)
         total_data['node_type'].append(nodes_type)
+
         total_data['node_logit'].append(nodes_logit)
         total_data['node_logit_dists'].append(nodes_logit_dists)
         total_data['ent_dists'].append(ent_dists)
 
-        if mode == "sgcls" or mode == "sgdet":
-            total_data['ent_dists'] = entries['ent_dists']
+        # if mode == "sgcls" or mode == "sgdet":
+        total_data['ent_dists'] = entries['ent_dists']
+
+        # adding vis fea >>>>>>>
+        # total_data['entity_visfea'].append(entries_minibatch['entity_visfea'][i])
+        # total_data['rel_visfea'].append(entries_minibatch['rel_visfea'][i])
 
         # total_node_num = len(return_classes) + return_relations.shape[0]
         # nodes_class = [] + list(return_classes)
@@ -572,9 +587,6 @@ def build_graph_structure(entries, index2name_object, index2name_predicate, mode
         # # total_data['img_id'].append(entry['image_id'])
         # total_data['node_type'].append(np.asarray(nodes_type))
         # pdb.set_trace()
-
-    # return total_data
-
     if not sgclsdet:
         return total_data
     else:
@@ -641,48 +653,54 @@ if __name__=='__main__':
                               use_proposals=conf.use_proposals,
                               filter_non_overlap=conf.mode == 'sgdet')
     train_entities_list = []
-    train_num = 20000
-    val_num = 1000
-    test_num = 5000
+
+    # train_num = 20000
+    # val_num = 1000
+    # test_num = 5000
+
+    train_num = "full"
+    val_num = "full"
+    test_num = "full"
 
     if train_num == 'full':
         train_num = len(train)
         val_num = len(val)
         test_num = len(test)
 
+    print('number of train, val, test', train_num, val_num, test_num)
+    save_root = '/home/haoxuan/code/KERN/data/'
+
     for i in tqdm(range(train_num)):
         train_entities_list.append(train.__getitem__(i))
+    train_data = build_graph_structure(train_entities_list, train.ind_to_classes, train.ind_to_predicates)
+    filename = os.path.join(save_root, 'train_VG_kern_{}_left.pkl'.format('_'.join([str(train_num), str(val_num), str(test_num)])))
+    with open(filename, 'wb') as f:
+        pickle.dump(train_data, f)
+
+    # pdb.set_trace()
 
     val_entities_list = []
     for i in tqdm(range(val_num)):
         val_entities_list.append(val.__getitem__(i))
+    val_data = build_graph_structure(val_entities_list, val.ind_to_classes, val.ind_to_predicates)
+    filename = os.path.join(save_root, 'eval_VG_kern_{}_left.pkl'.format('_'.join([str(train_num), str(val_num), str(test_num)])))
+    with open(filename, 'wb') as f:
+        pickle.dump(val_data, f)
 
     test_entities_list = []
     for i in tqdm(range(test_num)):
         test_entities_list.append(test.__getitem__(i))
-
-    train_data = build_graph_structure(train_entities_list, train.ind_to_classes, train.ind_to_predicates)
-    val_data = build_graph_structure(val_entities_list, val.ind_to_classes, val.ind_to_predicates)
     test_data = build_graph_structure(test_entities_list, test.ind_to_classes, test.ind_to_predicates)
-
-    save_root = '/home/haoxuan/code/KERN/data/'
-
-    filename = os.path.join(save_root, 'train_VG_kern_{}.pkl'.format('_'.join([str(train_num), str(val_num), str(test_num)])))
-    with open(filename, 'wb') as f:
-        pickle.dump(train_data, f)
-
-    filename = os.path.join(save_root, 'eval_VG_kern_{}.pkl'.format('_'.join([str(train_num), str(val_num), str(test_num)])))
-    with open(filename, 'wb') as f:
-        pickle.dump(val_data, f)
-
-    filename = os.path.join(save_root, 'test_VG_kern_{}.pkl'.format('_'.join([str(train_num), str(val_num), str(test_num)])))
+    filename = os.path.join(save_root, 'test_VG_kern_{}_left.pkl'.format('_'.join([str(train_num), str(val_num), str(test_num)])))
     with open(filename, 'wb') as f:
         pickle.dump(test_data, f)
 
-    filename = os.path.join(save_root, 'ind_to_classes_{}.pkl'.format('_'.join([str(train_num), str(val_num), str(test_num)])))
+
+
+    filename = os.path.join(save_root, 'ind_to_classes_{}_left.pkl'.format('_'.join([str(train_num), str(val_num), str(test_num)])))
     with open(filename, 'wb') as f:
         pickle.dump(train.ind_to_classes, f)
 
-    filename = os.path.join(save_root, 'ind_to_predicates_{}.pkl'.format('_'.join([str(train_num), str(val_num), str(test_num)])))
+    filename = os.path.join(save_root, 'ind_to_predicates_{}_left.pkl'.format('_'.join([str(train_num), str(val_num), str(test_num)])))
     with open(filename, 'wb') as f:
         pickle.dump(train.ind_to_predicates, f)
