@@ -1,5 +1,5 @@
-# KERN_GLAT
-At this repository, we build our Global-Local-Transformer model on top of a selection of base scene grap generator models including KERN, Neural Motif, Stanford, etc to improve scene graph generation by leveraging Visual Commonsense.
+# Caution: This reposity is still under development mode and not cleanly documented yet. We only recommed you to use it as a reference.
+At this repository, we build our Global-Local-Transformer model on top of a selection of base scene grap generator models including KERN, Neural Motif, Stanford, etc to improve scene graph generation by leveraging Visual Commonsense
 
 The corresponding paper was accepted at ECCV 2020
  arXiv preprint arXiv:2006.09623 (2020).
