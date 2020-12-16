@@ -6,6 +6,8 @@ The corresponding paper was accepted at ECCV 2020
  arXiv preprint arXiv:2006.09623 (2020).
 Alireza Zareian*, Zhecan Wang*, Haoxuan You*, Shih-Fu Chang, "Learning Visual Commonsense for Robust Scene Graph Generation", ECCV, 2020. (* co-first authors) [[manuscript](https://arxiv.org/abs/2006.09623)] 
 
+Pretraining and independent finetuning of GLAT could refer to another repository(https://github.com/ZhecanJamesWang/GLAT_Visual_Commonsense)
+
 # Reference to Base Scene Graph Generators
 
 ## Knowledge-Embedded Routing Network  for Scene Graph Generation
